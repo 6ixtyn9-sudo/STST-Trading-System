@@ -1,12 +1,20 @@
+
 {
-  "date": "2026-03-24",
-  "phase": "research_machine_stabilization_plus_persistence_transition",
-  "current_run": {
+  "date": "2026-03-25",
+  "phase": "research_machine_stabilization_plus_persistence_hunt_execution",
+  "prior_completed_run": {
     "name": "EDGE_CLARITY_V1",
     "jobs_total": 416,
-    "current_progress_idx": 102,
     "runner": "RUN_experimentMatrix_resumableContinue",
-    "status": "active_with_timeout_recovery"
+    "status": "completed",
+    "result": "no_oos_pass"
+  },
+  "current_run": {
+    "name": "PERSISTENCE_HUNT_V1",
+    "runner": "RUN_experimentMatrix_resumableContinue",
+    "launch_path": "RUN_experimentMatrix_resumableStart",
+    "variant_mode": "PERSISTENCE_HUNT",
+    "status": "active"
   },
   "history_status": {
     "symbols_ready": 14,
@@ -17,11 +25,27 @@
   },
   "research_signal": {
     "base_longs": "weak",
-    "inverted_mirrors": "less_bad_and_more_promising",
+    "strongest_frontier": [
+      "LOOSE_MOMO_LONG | INVERTED_MIRROR",
+      "FAKEOUT_SHORT"
+    ],
     "main_failure_modes": [
       "oos_trade_count_too_small",
-      "oos_sharpe_negative",
+      "oos_sharpe_weak",
       "drawdown_duration_too_long"
+    ]
+  },
+  "persistence_hunt": {
+    "lever": "universe_segmentation",
+    "families": [
+      "LOOSE_MOMO_LONG | INVERTED_MIRROR",
+      "FAKEOUT_SHORT"
+    ],
+    "segments": [
+      "MAJORS_ONLY",
+      "BTC_ONLY",
+      "ETH_ONLY",
+      "MAJORS_EX_BTC_ETH"
     ]
   },
   "architecture": {
@@ -36,5 +60,16 @@
     "m9": "research_audit",
     "m10": "memory_council"
   },
-  "main_bottleneck": "persistent_project_memory"
+  "runtime_status": {
+    "resumable_runner": true,
+    "rescue_trigger_enabled": true,
+    "supabase_experiment_logging": true,
+    "supabase_diag_blob_persistence": true,
+    "top_level_autostart_removed": true,
+    "m9_runtime_integrity_confirmed": true
+  },
+  "main_bottleneck": "persistent_project_memory_and_unproven_edge_persistence"
 }
+```
+
+Sleep well. When you’re back, we’ll interpret the persistence hunt results cleanly and decide the next lever instead of guessing.
