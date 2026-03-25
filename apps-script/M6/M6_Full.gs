@@ -1843,18 +1843,16 @@ function RUN__expBuildJobs_(opts) {
     ov = deepCopy_(ov);
 
     ov.DQS_Gate_V2 = intClamp_(ov.DQS_Gate_V2, 10, 60);
-    ov.V2_Retest_Window_Candles = intClamp_(ov.V2_Retest_Window_Candles, 4, 12);
+    ov.V2_Retest_Window_Candles = intClamp_(ov.V2_Retest_Window_Candles, 3, 12);
     ov.V2_Retest_Max_Deviation_ATR = clamp_(ov.V2_Retest_Max_Deviation_ATR, 0.50, 1.50);
     ov.Volume_Multiplier_Threshold = clamp_(ov.Volume_Multiplier_Threshold, 0.80, 1.50);
     ov.RSI_Overbought_Long = intClamp_(ov.RSI_Overbought_Long, 50, 90);
-    ov.V2_Confirmation_Body_Min_Frac = clamp_(ov.V2_Confirmation_Body_Min_Frac, 0.10, 0.60);
+    ov.V2_Confirmation_Body_Min_Frac = clamp_(ov.V2_Confirmation_Body_Min_Frac, 0.00, 0.60);
     ov.V2_Breakout_Buffer_ATR = clamp_(ov.V2_Breakout_Buffer_ATR, 0.00, 0.20);
 
     ov.Invert_All_Signals = !!ov.Invert_All_Signals;
     ov.V2_Long_Only = !!ov.V2_Long_Only;
 
-    // Critical conflict fix:
-    // If signals are inverted, they become short-biased, so long-only cannot remain true.
     if (ov.Invert_All_Signals === true && ov.V2_Long_Only === true) {
       ov.V2_Long_Only = false;
     }
@@ -1864,7 +1862,6 @@ function RUN__expBuildJobs_(opts) {
 
   function stableKey_(ov) {
     ov = normalizeOv_(ov);
-
     return [
       String(ov.Strategy_Profile || ''),
       String(ov.Universe_Mode || ''),
@@ -1894,39 +1891,16 @@ function RUN__expBuildJobs_(opts) {
     });
   }
 
-  function expandMirrorSet_(label, baseOv) {
-    var out = [];
-
-    out.push({
-      label: label,
-      ov: normalizeOv_(baseOv)
-    });
-
-    if (invertProfiles) {
-      var inv = deepCopy_(baseOv);
-      inv.Invert_All_Signals = !inv.Invert_All_Signals;
-
-      // Normalize handles the conflict fix.
-      inv = normalizeOv_(inv);
-
-      out.push({
-        label: label + ' | INVERTED_MIRROR',
-        ov: inv
-      });
-    }
-
-    return out;
-  }
-
-  function buildProfileBase_(profileName) {
+  function buildProfileBase_(profileName, uniMode) {
     var p = String(profileName || '').trim().toUpperCase();
+    var u = String(uniMode || universeMode).trim().toUpperCase();
 
     if (p === 'BREAKOUT_LONG') {
       return {
         label: 'BREAKOUT_LONG',
         ov: {
           Strategy_Profile: 'BREAKOUT_LONG',
-          Universe_Mode: universeMode,
+          Universe_Mode: u,
           DQS_Gate_V2: 25,
           V2_Retest_Window_Candles: 6,
           V2_Retest_Max_Deviation_ATR: 0.75,
@@ -1945,7 +1919,7 @@ function RUN__expBuildJobs_(opts) {
         label: 'TREND_PULLBACK_LONG',
         ov: {
           Strategy_Profile: 'TREND_PULLBACK_LONG',
-          Universe_Mode: universeMode,
+          Universe_Mode: u,
           DQS_Gate_V2: 22,
           V2_Retest_Window_Candles: 8,
           V2_Retest_Max_Deviation_ATR: 1.00,
@@ -1964,7 +1938,7 @@ function RUN__expBuildJobs_(opts) {
         label: 'LOOSE_MOMO_LONG',
         ov: {
           Strategy_Profile: 'LOOSE_MOMO_LONG',
-          Universe_Mode: universeMode,
+          Universe_Mode: u,
           DQS_Gate_V2: 18,
           V2_Retest_Window_Candles: 6,
           V2_Retest_Max_Deviation_ATR: 1.00,
@@ -1983,7 +1957,7 @@ function RUN__expBuildJobs_(opts) {
         label: 'FAKEOUT_SHORT',
         ov: {
           Strategy_Profile: 'FAKEOUT_SHORT',
-          Universe_Mode: universeMode,
+          Universe_Mode: u,
           DQS_Gate_V2: 20,
           V2_Retest_Window_Candles: 6,
           V2_Retest_Max_Deviation_ATR: 0.75,
@@ -2002,7 +1976,7 @@ function RUN__expBuildJobs_(opts) {
         label: 'EXHAUSTION_FADE_SHORT',
         ov: {
           Strategy_Profile: 'EXHAUSTION_FADE_SHORT',
-          Universe_Mode: universeMode,
+          Universe_Mode: u,
           DQS_Gate_V2: 18,
           V2_Retest_Window_Candles: 6,
           V2_Retest_Max_Deviation_ATR: 1.00,
@@ -2021,7 +1995,7 @@ function RUN__expBuildJobs_(opts) {
         label: 'BREAKDOWN_SHORT',
         ov: {
           Strategy_Profile: 'BREAKDOWN_SHORT',
-          Universe_Mode: universeMode,
+          Universe_Mode: u,
           DQS_Gate_V2: 25,
           V2_Retest_Window_Candles: 8,
           V2_Retest_Max_Deviation_ATR: 0.75,
@@ -2036,6 +2010,87 @@ function RUN__expBuildJobs_(opts) {
     }
 
     return null;
+  }
+
+  function emitPersistenceHunt_() {
+    var segments = [
+      'MAJORS_ONLY',
+      'BTC_ONLY',
+      'ETH_ONLY',
+      'MAJORS_EX_BTC_ETH'
+    ];
+
+    var looseMomoInvBase = {
+      Strategy_Profile: 'LOOSE_MOMO_LONG',
+      Universe_Mode: 'MAJORS_ONLY',
+      DQS_Gate_V2: 20,
+      V2_Retest_Window_Candles: 5,
+      V2_Retest_Max_Deviation_ATR: 0.97,
+      Volume_Multiplier_Threshold: 0.28,
+      RSI_Overbought_Long: 72,
+      V2_Confirmation_Body_Min_Frac: 0.01,
+      V2_Breakout_Buffer_ATR: 0.00,
+      Invert_All_Signals: true,
+      V2_Long_Only: false
+    };
+
+    var fakeoutShortBase = {
+      Strategy_Profile: 'FAKEOUT_SHORT',
+      Universe_Mode: 'MAJORS_ONLY',
+      DQS_Gate_V2: 23,
+      V2_Retest_Window_Candles: 6,
+      V2_Retest_Max_Deviation_ATR: 1.08,
+      Volume_Multiplier_Threshold: 0.30,
+      RSI_Overbought_Long: 70,
+      V2_Confirmation_Body_Min_Frac: 0.05,
+      V2_Breakout_Buffer_ATR: 0.00,
+      Invert_All_Signals: true,
+      V2_Long_Only: false
+    };
+
+    var looseVariants = [
+      { tag: 'R1', dqs: 0,  win: 0,  dev: 0.00, vol: 0.00, rsi: 0,  body: 0.00, buf: 0.00 },
+      { tag: 'R2', dqs: 2,  win: 0,  dev: -0.05, vol: 0.02, rsi: -2, body: 0.00, buf: 0.00 },
+      { tag: 'R3', dqs: -2, win: 1,  dev: 0.05, vol: -0.03, rsi: 2,  body: 0.00, buf: 0.00 },
+      { tag: 'R4', dqs: 0,  win: -1, dev: 0.00, vol: 0.05, rsi: -1, body: 0.00, buf: 0.01 }
+    ];
+
+    var fakeVariants = [
+      { tag: 'R1', dqs: 0,  win: 0,  dev: 0.00, vol: 0.00, rsi: 0,  body: 0.00, buf: 0.00 },
+      { tag: 'R2', dqs: 2,  win: 0,  dev: -0.08, vol: 0.04, rsi: -2, body: 0.00, buf: 0.00 },
+      { tag: 'R3', dqs: -2, win: 1,  dev: 0.08, vol: -0.02, rsi: 2,  body: 0.00, buf: 0.00 },
+      { tag: 'R4', dqs: 0,  win: -1, dev: 0.00, vol: 0.06, rsi: -1, body: 0.00, buf: 0.02 }
+    ];
+
+    function applyVariant_(baseOv, k) {
+      var ov = deepCopy_(baseOv);
+
+      ov.DQS_Gate_V2 = (+ov.DQS_Gate_V2 || 0) + (k.dqs || 0);
+      ov.V2_Retest_Window_Candles = (+ov.V2_Retest_Window_Candles || 6) + (k.win || 0);
+      ov.V2_Retest_Max_Deviation_ATR = (+ov.V2_Retest_Max_Deviation_ATR || 1.0) + (k.dev || 0);
+      ov.Volume_Multiplier_Threshold = (+ov.Volume_Multiplier_Threshold || 1.0) + (k.vol || 0);
+      ov.V2_Confirmation_Body_Min_Frac = (+ov.V2_Confirmation_Body_Min_Frac || 0.25) + (k.body || 0);
+      ov.RSI_Overbought_Long = (+ov.RSI_Overbought_Long || 65) + (k.rsi || 0);
+      ov.V2_Breakout_Buffer_ATR = (+ov.V2_Breakout_Buffer_ATR || 0.0) + (k.buf || 0);
+
+      return normalizeOv_(ov);
+    }
+
+    for (var s = 0; s < segments.length; s++) {
+      var seg = segments[s];
+
+      for (var i = 0; i < looseVariants.length; i++) {
+        var lov = applyVariant_(looseMomoInvBase, looseVariants[i]);
+        lov.Universe_Mode = seg;
+        pushJob_('LOOSE_MOMO_LONG | INVERTED_MIRROR | ' + looseVariants[i].tag, 'PERSISTENCE_HUNT', lov);
+      }
+
+      for (var j = 0; j < fakeVariants.length; j++) {
+        var fov = applyVariant_(fakeoutShortBase, fakeVariants[j]);
+        fov.Universe_Mode = seg;
+        pushJob_('FAKEOUT_SHORT | ' + fakeVariants[j].tag, 'PERSISTENCE_HUNT', fov);
+      }
+    }
   }
 
   function buildStandardVariants_() {
@@ -2309,11 +2364,32 @@ function RUN__expBuildJobs_(opts) {
     }
   }
 
+  if (variantMode === 'PERSISTENCE_HUNT') {
+    emitPersistenceHunt_();
+    return jobs;
+  }
+
   for (var p = 0; p < profiles.length; p++) {
-    var built = buildProfileBase_(profiles[p]);
+    var built = buildProfileBase_(profiles[p], universeMode);
     if (!built) continue;
 
-    var mirrorSet = expandMirrorSet_(built.label, built.ov);
+    var mirrorSet = [];
+
+    mirrorSet.push({
+      label: built.label,
+      ov: normalizeOv_(built.ov)
+    });
+
+    if (invertProfiles) {
+      var inv = deepCopy_(built.ov);
+      inv.Invert_All_Signals = !inv.Invert_All_Signals;
+      inv = normalizeOv_(inv);
+
+      mirrorSet.push({
+        label: built.label + ' | INVERTED_MIRROR',
+        ov: inv
+      });
+    }
 
     for (var m = 0; m < mirrorSet.length; m++) {
       var label = mirrorSet[m].label;
@@ -2683,48 +2759,7 @@ function RUN_logLargePropertiesNow() {
 
 
 
-function RUN_logExperimentMatrixStatus() {
-  var state = RUN__expLoadState_();
-  if (!state) {
-    Logger.log('[EXP] No experiment matrix state.');
-    return { active: false };
-  }
 
-  var total = (state.jobs && state.jobs.length) ? state.jobs.length : 0;
-  var idx = state.idx || 0;
-  var remaining = Math.max(0, total - idx);
-  var currentJob = (state.jobs && state.jobs[idx]) ? state.jobs[idx] : null;
-
-  Logger.log('[EXP] ═══════════════════════════════════════');
-  Logger.log('[EXP] Matrix status');
-  Logger.log('[EXP] idx=' + idx + '/' + total);
-  Logger.log('[EXP] remaining=' + remaining);
-  Logger.log('[EXP] startedAt=' + String(state.startedAt || ''));
-  Logger.log('[EXP] expandVariants=' + (!!(state.opts && state.opts.expandVariants)));
-  Logger.log('[EXP] name=' + String((state.opts && state.opts.name) || ''));
-  Logger.log('[EXP] universeMode=' + String((state.opts && state.opts.universeMode) || ''));
-
-  if (currentJob) {
-    Logger.log('[EXP] currentRunName=' + String(currentJob.runName || ''));
-    Logger.log('[EXP] currentMode=' + String(currentJob.mode || ''));
-    Logger.log('[EXP] currentAttempts=' + String(currentJob.attempts || 0));
-    Logger.log('[EXP] currentLastStartedAt=' + String(currentJob.lastStartedAt || ''));
-  } else {
-    Logger.log('[EXP] currentRunName=(none)');
-  }
-
-  Logger.log('[EXP] ═══════════════════════════════════════');
-
-  return {
-    active: idx < total,
-    idx: idx,
-    total: total,
-    remaining: remaining,
-    startedAt: state.startedAt || '',
-    opts: state.opts || {},
-    currentJob: currentJob || null
-  };
-}
 
 
 
@@ -3113,9 +3148,32 @@ function RUN__expRunOneJob_(job) {
     dqsSummary = {
       version: 'M9_DQS_SUMMARY_MISSING',
       backtest_id: btId,
-      note: 'M9 did not emit dqs_summary. Did you apply the M9 patches?'
+      note: 'M9 did not emit dqs_summary.'
     };
   }
+
+  var fullDiagBlob = {
+    backtest_id: btId,
+    run_name: job.runName,
+    mode: job.mode,
+    captured_at: new Date().toISOString(),
+    config_snapshot: {
+      strategy_profile: ov.Strategy_Profile,
+      universe_mode: ov.Universe_Mode,
+      dqs_gate_v2: ov.DQS_Gate_V2,
+      retest_window_candles: ov.V2_Retest_Window_Candles,
+      retest_max_deviation_atr: ov.V2_Retest_Max_Deviation_ATR,
+      volume_multiplier_threshold: ov.Volume_Multiplier_Threshold,
+      rsi_overbought_long: ov.RSI_Overbought_Long,
+      confirmation_body_min_frac: ov.V2_Confirmation_Body_Min_Frac,
+      breakout_buffer_atr: ov.V2_Breakout_Buffer_ATR,
+      invert_all_signals: ov.Invert_All_Signals,
+      v2_long_only: ov.V2_Long_Only
+    },
+    bt_result: btResult || {},
+    dqs_summary: dqsSummary,
+    oos_fail_reasons_json: reasonsArr || []
+  };
 
   try {
     var supabaseBody = {
@@ -3125,6 +3183,7 @@ function RUN__expRunOneJob_(job) {
       universe_mode: ov.Universe_Mode,
       backtest_id: btId,
       config_snapshot: {
+        strategy_profile: ov.Strategy_Profile,
         dqs_gate_v2: ov.DQS_Gate_V2,
         retest_window_candles: ov.V2_Retest_Window_Candles,
         retest_max_deviation_atr: ov.V2_Retest_Max_Deviation_ATR,
@@ -3148,7 +3207,8 @@ function RUN__expRunOneJob_(job) {
       confirmed_queued: d.confirmedQueued || 0,
       rejected_dqs_after_confirm: d.rejectedDqsAfterConfirm || 0,
       pending_filled: d.pendingFilled || 0,
-      dqs_summary: dqsSummary
+      dqs_summary: dqsSummary,
+      diag_blob: fullDiagBlob
     };
 
     M10__sbFetchJson_('post', '/rest/v1/experiment_logs', supabaseBody);
@@ -3225,14 +3285,10 @@ function RUN__assertExperimentJobCountSafe_(jobs, maxJobs) {
 }
 
 
-function START_EDGE_CLARITY_EXPERIMENT() {
-  RUN_experimentMatrix_resumableStart({
-    name: 'EDGE_CLARITY_V1',
-    universeMode: 'MAJORS_ONLY',
-    expandVariants: true,
-    variantMode: 'RESEARCH',
-    invertProfiles: true,
-    maxJobs: 500
-  });
-}
+RUN_experimentMatrix_resumableStart({
+  name: 'PERSISTENCE_HUNT_V1',
+  variantMode: 'PERSISTENCE_HUNT',
+  maxJobs: 100
+});
+
 
