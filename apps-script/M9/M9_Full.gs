@@ -3066,6 +3066,51 @@ function M9_runBacktestMetricsFromLogs() {
   return btId;
 }
 
+
+function RUN__setBacktestDiagFull_(btId, obj) {
+  btId = String(btId || '').trim();
+  if (!btId) return null;
+
+  var body = {
+    diag_blob: obj || {}
+  };
+
+  try {
+    var rows = M10__sbFetchJson_(
+      'patch',
+      '/rest/v1/experiment_logs?backtest_id=eq.' + encodeURIComponent(btId),
+      body
+    );
+    Logger.log('[RUN][DIAG] Supabase diag_blob upserted for btId=' + btId);
+    return rows;
+  } catch (e) {
+    Logger.log('[RUN][DIAG][WARN] Could not push diag_blob to Supabase for btId=' + btId + ': ' + e.message);
+    return null;
+  }
+}
+
+
+function RUN__getBacktestDiagFull_(btId) {
+  btId = String(btId || '').trim();
+  if (!btId) return {};
+
+  try {
+    var rows = M10__sbFetchJson_(
+      'get',
+      '/rest/v1/experiment_logs?backtest_id=eq.' + encodeURIComponent(btId) +
+      '&select=diag_blob&order=created_at.desc&limit=1'
+    );
+
+    if (rows && rows.length && rows[0] && rows[0].diag_blob) {
+      return rows[0].diag_blob;
+    }
+  } catch (e) {
+    Logger.log('[RUN][DIAG][WARN] Could not fetch diag_blob from Supabase for btId=' + btId + ': ' + e.message);
+  }
+
+  return {};
+}
+
 /* =========================
  * Sensitivity sweep (SIM)
  * ========================= */
@@ -3583,12 +3628,16 @@ function M9__isEligibleSymbol_(sym, universeMode) {
   var s = String(sym).toUpperCase();
   var mode = String(universeMode || 'ALL').toUpperCase();
 
-  var isMajor =
-    s.indexOf('BTC') !== -1 ||
-    s.indexOf('ETH') !== -1 ||
-    s.indexOf('SOL') !== -1 ||
-    s.indexOf('XRP') !== -1;
+  var isBTC = (s.indexOf('BTC') !== -1);
+  var isETH = (s.indexOf('ETH') !== -1);
+  var isSOL = (s.indexOf('SOL') !== -1);
+  var isXRP = (s.indexOf('XRP') !== -1);
 
+  var isMajor = isBTC || isETH || isSOL || isXRP;
+
+  if (mode === 'BTC_ONLY') return isBTC;
+  if (mode === 'ETH_ONLY') return isETH;
+  if (mode === 'MAJORS_EX_BTC_ETH') return isMajor && !isBTC && !isETH;
   if (mode === 'MAJORS_ONLY') return isMajor;
   if (mode === 'LIQUID_MINORS') return !isMajor;
 
