@@ -1717,6 +1717,10 @@ function RUN__expTriggerTag_() {
   return 'RUN_experimentMatrix_resumableContinue';
 }
 
+function RUN__expRescueTriggerTag_() {
+  return 'RUN_experimentMatrix_rescueContinue';
+}
+
 function RUN__expSaveState_(state) {
   RUN__getProps_().setProperty(RUN__expStateKey_(), JSON.stringify(state || {}));
 }
@@ -1727,6 +1731,7 @@ function RUN__expLoadState_() {
   try {
     return JSON.parse(raw);
   } catch (e) {
+    Logger.log('[EXP][WARN] Could not parse experiment state JSON: ' + e.message);
     return null;
   }
 }
@@ -1744,6 +1749,17 @@ function RUN__expDeleteContinueTriggers_() {
   }
 }
 
+
+function RUN__expDeleteRescueTriggers_() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === RUN__expRescueTriggerTag_()) {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+}
+
+
 function RUN__expEnsureContinueTrigger_() {
   RUN__expDeleteContinueTriggers_();
   ScriptApp.newTrigger(RUN__expTriggerTag_())
@@ -1751,6 +1767,35 @@ function RUN__expEnsureContinueTrigger_() {
     .after(60 * 1000)
     .create();
 }
+
+
+function RUN__expEnsureRescueTrigger_() {
+  RUN__expDeleteRescueTriggers_();
+  ScriptApp.newTrigger(RUN__expRescueTriggerTag_())
+    .timeBased()
+    .after(7 * 60 * 1000)
+    .create();
+}
+
+
+function RUN__expClearAllTriggers_() {
+  RUN__expDeleteContinueTriggers_();
+  RUN__expDeleteRescueTriggers_();
+}
+
+
+function RUN__expInitStateFields_(state) {
+  if (!state) return state;
+  if (state.idx === undefined || state.idx === null) state.idx = 0;
+  if (state.lastCompletedIdx === undefined) state.lastCompletedIdx = -1;
+  if (state.lastCompletedAt === undefined) state.lastCompletedAt = '';
+  if (state.activeJobIdx === undefined) state.activeJobIdx = -1;
+  if (state.activeJobStartedAt === undefined) state.activeJobStartedAt = '';
+  if (state.status === undefined) state.status = 'RUNNING';
+  if (!state.jobs) state.jobs = [];
+  return state;
+}
+
 
 function RUN__expBuildJobs_(opts) {
   opts = opts || {};
@@ -2314,6 +2359,159 @@ function TRG_deleteBrokenTriggersNow() {
 }
 
 
+function MAIN_scheduledCycle() {
+  Logger.log('[MAIN] ═══════════════════════════════════════');
+  Logger.log('[MAIN] MAIN_scheduledCycle starting');
+  Logger.log('[MAIN] ═══════════════════════════════════════');
+
+  try {
+    if (typeof M1_ksRequireOff === 'function') {
+      try {
+        M1_ksRequireOff();
+      } catch (ksErr) {
+        Logger.log('[MAIN] Kill switch active. Scheduled cycle aborted: ' + ksErr.message);
+        return;
+      }
+    }
+
+    if (typeof M2_fetchTopKCandlesIncremental === 'function') {
+      try {
+        M2_fetchTopKCandlesIncremental();
+      } catch (e2) {
+        Logger.log('[MAIN][WARN] M2_fetchTopKCandlesIncremental failed: ' + e2.message);
+      }
+    }
+
+    if (typeof M6_runExecutionCycle === 'function') {
+      try {
+        M6_runExecutionCycle();
+      } catch (e6) {
+        Logger.log('[MAIN][WARN] M6_runExecutionCycle failed: ' + e6.message);
+      }
+    }
+
+  } catch (e) {
+    Logger.log('[MAIN][FATAL] MAIN_scheduledCycle failed: ' + e.message);
+    if (e && e.stack) Logger.log('[MAIN][STACK] ' + e.stack);
+  }
+
+  Logger.log('[MAIN] MAIN_scheduledCycle complete');
+}
+
+
+
+function MAIN_dailyMaintenance() {
+  Logger.log('[MAIN] ═══════════════════════════════════════');
+  Logger.log('[MAIN] MAIN_dailyMaintenance starting');
+  Logger.log('[MAIN] ═══════════════════════════════════════');
+
+  try {
+    if (typeof M2_pollAndLogFundingSettlements === 'function') {
+      try {
+        M2_pollAndLogFundingSettlements();
+      } catch (e1) {
+        Logger.log('[MAIN][WARN] M2_pollAndLogFundingSettlements failed: ' + e1.message);
+      }
+    }
+
+    if (typeof M10_createPendingCouncilDeliberationNow === 'function') {
+      try {
+        M10_createPendingCouncilDeliberationNow();
+      } catch (e2) {
+        Logger.log('[MAIN][WARN] M10_createPendingCouncilDeliberationNow failed: ' + e2.message);
+      }
+    }
+
+  } catch (e) {
+    Logger.log('[MAIN][FATAL] MAIN_dailyMaintenance failed: ' + e.message);
+    if (e && e.stack) Logger.log('[MAIN][STACK] ' + e.stack);
+  }
+
+  Logger.log('[MAIN] MAIN_dailyMaintenance complete');
+}
+
+
+function TRG_listAllNow() {
+  var triggers = ScriptApp.getProjectTriggers();
+  var out = [];
+
+  for (var i = 0; i < triggers.length; i++) {
+    var t = triggers[i];
+    var row = {
+      handler: '',
+      eventType: '',
+      source: ''
+    };
+
+    try { row.handler = t.getHandlerFunction(); } catch (e1) {}
+    try { row.eventType = String(t.getEventType()); } catch (e2) {}
+    try { row.source = String(t.getTriggerSource()); } catch (e3) {}
+
+    Logger.log('[TRG] handler=' + row.handler + ' eventType=' + row.eventType + ' source=' + row.source);
+    out.push(row);
+  }
+
+  Logger.log('[TRG] Total triggers=' + out.length);
+  return out;
+}
+
+
+
+function RUN_logExperimentMatrixStatus() {
+  var state = RUN__expLoadState_();
+  if (!state) {
+    Logger.log('[EXP] No experiment matrix state.');
+    return { active: false };
+  }
+
+  state = RUN__expInitStateFields_(state);
+
+  var total = (state.jobs && state.jobs.length) ? state.jobs.length : 0;
+  var idx = state.idx || 0;
+  var remaining = Math.max(0, total - idx);
+  var currentJob = (state.jobs && state.jobs[idx]) ? state.jobs[idx] : null;
+
+  Logger.log('[EXP] ═══════════════════════════════════════');
+  Logger.log('[EXP] Matrix status');
+  Logger.log('[EXP] idx=' + idx + '/' + total);
+  Logger.log('[EXP] remaining=' + remaining);
+  Logger.log('[EXP] startedAt=' + String(state.startedAt || ''));
+  Logger.log('[EXP] status=' + String(state.status || ''));
+  Logger.log('[EXP] lastCompletedIdx=' + String(state.lastCompletedIdx));
+  Logger.log('[EXP] lastCompletedAt=' + String(state.lastCompletedAt || ''));
+  Logger.log('[EXP] activeJobIdx=' + String(state.activeJobIdx));
+  Logger.log('[EXP] activeJobStartedAt=' + String(state.activeJobStartedAt || ''));
+  Logger.log('[EXP] expandVariants=' + (!!(state.opts && state.opts.expandVariants)));
+  Logger.log('[EXP] name=' + String((state.opts && state.opts.name) || ''));
+  Logger.log('[EXP] universeMode=' + String((state.opts && state.opts.universeMode) || ''));
+
+  if (currentJob) {
+    Logger.log('[EXP] currentRunName=' + String(currentJob.runName || ''));
+    Logger.log('[EXP] currentMode=' + String(currentJob.mode || ''));
+    Logger.log('[EXP] currentAttempts=' + String(currentJob.attempts || 0));
+    Logger.log('[EXP] currentLastStartedAt=' + String(currentJob.lastStartedAt || ''));
+  } else {
+    Logger.log('[EXP] currentRunName=(none)');
+  }
+
+  Logger.log('[EXP] ═══════════════════════════════════════');
+
+  return {
+    active: idx < total,
+    idx: idx,
+    total: total,
+    remaining: remaining,
+    startedAt: state.startedAt || '',
+    status: state.status || '',
+    lastCompletedIdx: state.lastCompletedIdx,
+    lastCompletedAt: state.lastCompletedAt || '',
+    activeJobIdx: state.activeJobIdx,
+    activeJobStartedAt: state.activeJobStartedAt || '',
+    opts: state.opts || {},
+    currentJob: currentJob || null
+  };
+}
+
 
 
 function RUN_resetExperimentsSheetNow() {
@@ -2385,26 +2583,24 @@ function RUN__dqsHasJobs_() { return false; }
 
 function RUN_experimentMatrix_resumableCancel() {
   var lock = LockService.getDocumentLock();
-
   if (!lock.tryLock(3000)) {
     Logger.log('[EXP] Cancel could not acquire lock quickly. Proceeding with cleanup without lock.');
   }
 
   try {
-    RUN__expDeleteContinueTriggers_();
+    RUN__expClearAllTriggers_();
     try { RUN__dqsDeleteTriggers_(); } catch (e1) {}
-
-    RUN__expDeleteState_();
-    try { RUN__dqsDeleteQueue_(); } catch (e2) {}
-
-    RUN_restoreAllOverridesNow();
-    SpreadsheetApp.flush();
-
-    Logger.log('[EXP] Resumable experiment canceled. State deleted, triggers removed, overrides restored.');
-    return { status: 'CANCELED' };
   } finally {
     try { lock.releaseLock(); } catch (e) {}
   }
+
+  RUN__expDeleteState_();
+  try { RUN__dqsDeleteQueue_(); } catch (e2) {}
+  RUN_restoreAllOverridesNow();
+  SpreadsheetApp.flush();
+
+  Logger.log('[EXP] Resumable experiment canceled. State deleted, triggers removed, overrides restored.');
+  return { status: 'CANCELED' };
 }
 
 
@@ -2418,13 +2614,12 @@ function RUN_experimentMatrix_resumableStart(opts) {
   }
 
   try {
-    RUN__expDeleteContinueTriggers_();
+    RUN__expClearAllTriggers_();
     try { RUN__dqsDeleteTriggers_(); } catch (e0) {}
 
     var props = RUN__getProps_();
     var jobs = RUN__expBuildJobs_(opts);
     var maxJobs = (opts.maxJobs !== undefined && opts.maxJobs !== null) ? opts.maxJobs : 120;
-
     RUN__assertExperimentJobCountSafe_(jobs, maxJobs);
 
     var state = {
@@ -2434,7 +2629,12 @@ function RUN_experimentMatrix_resumableStart(opts) {
       startedAt: new Date().toISOString(),
       oldM9: props.getProperty('M9_CFG_OVERRIDE'),
       oldM4: props.getProperty('M4_CFG_OVERRIDE'),
-      oldM6: props.getProperty('M6_CFG_OVERRIDE')
+      oldM6: props.getProperty('M6_CFG_OVERRIDE'),
+      lastCompletedIdx: -1,
+      lastCompletedAt: '',
+      activeJobIdx: -1,
+      activeJobStartedAt: '',
+      status: 'RUNNING'
     };
 
     RUN__expSaveState_(state);
@@ -2534,13 +2734,10 @@ function RUN_forceStopAllResearchPipelinesNow() {
   Logger.log('[RUN] Force-stopping all research pipelines');
   Logger.log('[RUN] ═══════════════════════════════════════');
 
-  // Do not rely on lock acquisition for hard stop.
-  try { RUN__expDeleteContinueTriggers_(); } catch (e1) {}
+  try { RUN__expClearAllTriggers_(); } catch (e1) {}
   try { RUN__dqsDeleteTriggers_(); } catch (e2) {}
-
   try { RUN__expDeleteState_(); } catch (e3) {}
   try { RUN__dqsDeleteQueue_(); } catch (e4) {}
-
   try { RUN_restoreAllOverridesNow(); } catch (e5) {}
 
   SpreadsheetApp.flush();
@@ -2640,14 +2837,17 @@ function RUN__getDqsSummary_(btId) {
 function RUN_experimentMatrix_resumableContinue() {
   var lock = LockService.getDocumentLock();
   if (!lock.tryLock(5000)) {
-    Logger.log('[EXP] Could not acquire document lock. Rescheduling experiment continuation.');
+    Logger.log('[EXP] Could not acquire document lock. Rescheduling normal continuation.');
     RUN__expEnsureContinueTrigger_();
     return { status: 'LOCKED' };
   }
 
   try {
     var state = RUN__expLoadState_();
-    if (!state) throw new Error('No resumable experiment state found. Run RUN_experimentMatrix_resumableStart(...) first.');
+    if (!state) {
+      throw new Error('No resumable experiment state found. Run RUN_experimentMatrix_resumableStart(...) first.');
+    }
+    state = RUN__expInitStateFields_(state);
 
     var props = RUN__getProps_();
     var jobsPerInvocation = 1;
@@ -2655,26 +2855,54 @@ function RUN_experimentMatrix_resumableContinue() {
 
     while (state.idx < state.jobs.length && ran < jobsPerInvocation) {
       var job = state.jobs[state.idx];
-
-      if (job) {
-        job.attempts = (job.attempts || 0) + 1;
-        job.lastStartedAt = new Date().toISOString();
+      if (!job) {
+        Logger.log('[EXP][WARN] Missing job object at idx=' + state.idx + '. Skipping.');
+        state.lastCompletedIdx = state.idx;
+        state.lastCompletedAt = new Date().toISOString();
+        state.idx++;
+        RUN__expSaveState_(state);
+        continue;
       }
+
+      job.attempts = (job.attempts || 0) + 1;
+      job.lastStartedAt = new Date().toISOString();
+
+      state.activeJobIdx = state.idx;
+      state.activeJobStartedAt = job.lastStartedAt;
+      state.status = 'RUNNING';
 
       RUN__expSaveState_(state);
       SpreadsheetApp.flush();
 
+      // Dead-man rescue trigger: if we timeout before we schedule next step,
+      // this rescue invocation will check whether the job actually completed.
+      RUN__expEnsureRescueTrigger_();
+
+      Logger.log('[EXP] Starting job idx=' + state.idx + '/' + state.jobs.length +
+        ' attempts=' + job.attempts +
+        ' runName=' + String(job.runName || ''));
+
       RUN__expRunOneJob_(job);
 
+      // If we get here, heavy work completed successfully.
+      state.lastCompletedIdx = state.idx;
+      state.lastCompletedAt = new Date().toISOString();
       state.idx++;
+      state.activeJobIdx = -1;
+      state.activeJobStartedAt = '';
       ran++;
 
       RUN__expSaveState_(state);
+      SpreadsheetApp.flush();
+
+      // Clear rescue since this job completed.
+      RUN__expDeleteRescueTriggers_();
     }
 
     if (state.idx < state.jobs.length) {
       RUN__expEnsureContinueTrigger_();
-      Logger.log('[EXP] Pausing at idx=' + state.idx + '/' + state.jobs.length + ' — continuation trigger scheduled.');
+      Logger.log('[EXP] Pausing at idx=' + state.idx + '/' + state.jobs.length +
+        ' — normal continuation trigger scheduled.');
       return { status: 'PAUSED', idx: state.idx, total: state.jobs.length };
     }
 
@@ -2688,14 +2916,116 @@ function RUN_experimentMatrix_resumableContinue() {
     else props.setProperty('M6_CFG_OVERRIDE', state.oldM6);
 
     RUN_clearOverrideCaches();
+    state.status = 'DONE';
+    RUN__expSaveState_(state);
+
     RUN__expDeleteState_();
-    RUN__expDeleteContinueTriggers_();
+    RUN__expClearAllTriggers_();
     SpreadsheetApp.flush();
 
     Logger.log('[EXP] Resumable experiment complete.');
     return { status: 'DONE', idx: state.jobs.length, total: state.jobs.length };
+
   } finally {
     try { lock.releaseLock(); } catch (e3) {}
+  }
+}
+
+
+
+function RUN_experimentMatrix_rescueContinue() {
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(5000)) {
+    Logger.log('[EXP][RESCUE] Could not acquire lock. Re-arming rescue trigger.');
+    RUN__expEnsureRescueTrigger_();
+    return { status: 'LOCKED' };
+  }
+
+  try {
+    var state = RUN__expLoadState_();
+    if (!state) {
+      Logger.log('[EXP][RESCUE] No active experiment state found. Clearing rescue triggers.');
+      RUN__expDeleteRescueTriggers_();
+      return { status: 'NO_STATE' };
+    }
+    state = RUN__expInitStateFields_(state);
+
+    // If already done, nothing to rescue.
+    if (state.idx >= state.jobs.length) {
+      Logger.log('[EXP][RESCUE] State already complete. Clearing rescue triggers.');
+      RUN__expClearAllTriggers_();
+      return { status: 'DONE_ALREADY' };
+    }
+
+    // If no active job is marked, just ensure normal continuation exists.
+    if (state.activeJobIdx === -1) {
+      Logger.log('[EXP][RESCUE] No active job marked. Scheduling normal continuation.');
+      RUN__expDeleteRescueTriggers_();
+      RUN__expEnsureContinueTrigger_();
+      return { status: 'NO_ACTIVE_JOB' };
+    }
+
+    // If last completed idx caught up to active job, then the job actually finished.
+    if (state.lastCompletedIdx >= state.activeJobIdx) {
+      Logger.log('[EXP][RESCUE] Active job already completed (idx=' + state.activeJobIdx + '). Scheduling normal continuation.');
+      state.activeJobIdx = -1;
+      state.activeJobStartedAt = '';
+      RUN__expSaveState_(state);
+      RUN__expDeleteRescueTriggers_();
+      if (state.idx < state.jobs.length) RUN__expEnsureContinueTrigger_();
+      return { status: 'ALREADY_COMPLETED', idx: state.idx, total: state.jobs.length };
+    }
+
+    var idx = state.activeJobIdx;
+    var job = state.jobs[idx];
+
+    if (!job) {
+      Logger.log('[EXP][RESCUE][WARN] Missing job at activeJobIdx=' + idx + '. Skipping.');
+      state.lastCompletedIdx = idx;
+      state.lastCompletedAt = new Date().toISOString();
+      state.idx = idx + 1;
+      state.activeJobIdx = -1;
+      state.activeJobStartedAt = '';
+      RUN__expSaveState_(state);
+      RUN__expDeleteRescueTriggers_();
+      if (state.idx < state.jobs.length) RUN__expEnsureContinueTrigger_();
+      return { status: 'SKIPPED_MISSING_JOB', idx: state.idx, total: state.jobs.length };
+    }
+
+    var attempts = job.attempts || 0;
+    if (attempts >= 3) {
+      Logger.log('[EXP][RESCUE][FAIL] Job idx=' + idx + ' exceeded retry limit. Skipping permanently.');
+      job.failedPermanently = true;
+      job.failedReason = 'Exceeded rescue retry limit';
+      job.lastFailedAt = new Date().toISOString();
+
+      state.lastCompletedIdx = idx;
+      state.lastCompletedAt = new Date().toISOString();
+      state.idx = idx + 1;
+      state.activeJobIdx = -1;
+      state.activeJobStartedAt = '';
+      RUN__expSaveState_(state);
+
+      RUN__expDeleteRescueTriggers_();
+      if (state.idx < state.jobs.length) RUN__expEnsureContinueTrigger_();
+
+      return { status: 'SKIPPED_AFTER_RETRIES', idx: state.idx, total: state.jobs.length };
+    }
+
+    Logger.log('[EXP][RESCUE] Retrying stale job idx=' + idx +
+      ' attempts=' + attempts +
+      ' runName=' + String(job.runName || ''));
+
+    // Clear active markers and let the normal continuation rerun the same idx.
+    state.activeJobIdx = -1;
+    state.activeJobStartedAt = '';
+    RUN__expSaveState_(state);
+
+    RUN__expDeleteRescueTriggers_();
+    return RUN_experimentMatrix_resumableContinue();
+
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
   }
 }
 
