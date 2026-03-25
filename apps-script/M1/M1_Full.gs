@@ -859,10 +859,20 @@ function M1_schInstallFromConfig() {
   var mainHandler = M1_cfgGetStr('Handler_Main_Cycle');
   var dailyHandler = M1_cfgGetStr('Handler_Daily_Maintenance');
 
-  // Clear to prevent duplicates
+  function assertHandlerExists_(handlerName, label) {
+    if (!handlerName || !String(handlerName).trim()) {
+      throw new Error('[M1] ' + label + ' is blank in CONFIG.');
+    }
+    if (typeof this[handlerName] !== 'function') {
+      throw new Error('[M1] ' + label + ' "' + handlerName + '" does not exist as a script function.');
+    }
+  }
+
+  assertHandlerExists_.call(this, mainHandler, 'Handler_Main_Cycle');
+  assertHandlerExists_.call(this, dailyHandler, 'Handler_Daily_Maintenance');
+
   M1_schClearAll();
 
-  // Install signal cycle triggers
   for (var i = 0; i < times.length; i++) {
     var parts = times[i].split(':');
     var hh = parseInt(parts[0], 10);
@@ -883,7 +893,6 @@ function M1_schInstallFromConfig() {
     Logger.log('[M1_Scheduler] Created trigger: ' + mainHandler + ' at ' + times[i] + ' ' + tz);
   }
 
-  // Install daily maintenance at 00:30
   ScriptApp.newTrigger(dailyHandler)
     .timeBased()
     .atHour(0)
@@ -899,6 +908,43 @@ function M1_schInstallFromConfig() {
     dailyCount: 1,
     timezone: tz
   };
+}
+
+
+
+function M1_diagConfiguredHandlersNow() {
+  var results = [];
+  var mainHandler = '';
+  var dailyHandler = '';
+
+  try {
+    mainHandler = M1_cfgGetStr('Handler_Main_Cycle');
+  } catch (e1) {
+    Logger.log('[M1][HANDLER DIAG] Could not read Handler_Main_Cycle: ' + e1.message);
+  }
+
+  try {
+    dailyHandler = M1_cfgGetStr('Handler_Daily_Maintenance');
+  } catch (e2) {
+    Logger.log('[M1][HANDLER DIAG] Could not read Handler_Daily_Maintenance: ' + e2.message);
+  }
+
+  function inspect_(label, handlerName) {
+    var exists = !!handlerName && (typeof this[handlerName] === 'function');
+    Logger.log('[M1][HANDLER DIAG] ' + label +
+      ' handler=' + handlerName +
+      ' exists=' + exists);
+    results.push({
+      label: label,
+      handler: handlerName,
+      exists: exists
+    });
+  }
+
+  inspect_.call(this, 'MAIN', mainHandler);
+  inspect_.call(this, 'DAILY', dailyHandler);
+
+  return results;
 }
 
 /* ============================================================================
