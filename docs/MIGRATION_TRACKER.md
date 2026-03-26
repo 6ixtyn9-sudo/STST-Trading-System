@@ -21,6 +21,7 @@ to:
 - Sheets as dashboard/control surface
 - Apps Script as current control plane
 - later Python for heavy compute and live services
+- machine-readable contracts for bounded AI/bot work
 
 ---
 
@@ -34,14 +35,18 @@ to:
 - canonical history is materially deeper than before
 - governance state exists
 - large research runs are active
+- curated cohort universe resolution is now working inside M9
+- active run continuation is proven in unattended operation
 
 ### Not yet true enough
 - code is not fully housed in GitHub
-- docs are not yet complete
+- docs are not yet complete everywhere
 - project state still lives too much in chats
 - module registry is not yet formally stored everywhere it should be
-- dataset states are not yet always explicit
+- dataset states are not yet always explicit enough
 - Document Properties still carry too much temporary importance
+- long-history storage still leans too heavily on Sheets
+- machine-readable worker contracts do not yet exist
 - Python migration plan is understood, but not yet staged concretely
 
 ---
@@ -55,6 +60,8 @@ to:
 5. Keep AI advisory, bounded, and fail-closed.
 6. Treat Apps Script as current control plane, not forever backbone.
 7. Move meaning into docs and memory tables, not chats.
+8. Treat historical data architecture as a first-class migration concern.
+9. Prefer contracts over vague automation.
 
 ---
 
@@ -78,8 +85,8 @@ In progress
 - [x] Add MODULE_REGISTRY
 - [x] Add DECISIONS
 - [x] Add DATASETS
-- [ ] Add MIGRATION_TRACKER
-- [ ] Add COUNCIL_ROLES
+- [x] Add MIGRATION_TRACKER
+- [x] Add COUNCIL_ROLES
 - [ ] Add RUNBOOKS
 - [ ] Mirror module source files into repo folders
 - [ ] Add SQL schema files
@@ -156,6 +163,8 @@ Early
 - [ ] record scope changes explicitly
 - [ ] record source changes explicitly
 - [ ] record deeper-history expansions explicitly
+- [ ] record stale-series cleanup explicitly
+- [ ] separate dataset identity from cohort identity where needed
 
 ### Success condition
 Every important experiment can be tied to a clearly identified dataset state.
@@ -179,6 +188,7 @@ Partial
 - [ ] clarify presidential override flow
 - [ ] ensure hard policy remains fail-closed
 - [ ] keep M1 supremacy explicit in docs
+- [ ] define machine-readable council role contracts
 
 ### Success condition
 Council behavior is documented, bounded, and persistently auditable.
@@ -211,24 +221,75 @@ Python migration happens by layer, not by panic rewrite.
 
 ---
 
+## Workstream G — Historical Data / Storage Migration
+
+### Goal
+Reduce dependence on Google Sheets as the primary historical warehouse.
+
+### Status
+Now strategically important
+
+### Why this matters
+Current run interpretation is now clearly affected by:
+- uneven symbol freshness
+- stale series
+- limited OOS trade count
+- workbook-based historical storage limitations
+
+### Tasks
+- [ ] define canonical historical storage policy
+- [ ] define what stays rebuildable vs warehouse-backed
+- [ ] design Supabase history tables for candle storage / retrieval
+- [ ] define dataset-versioning logic for historical expansions
+- [ ] decide whether Sheets remains a derived/control surface only
+- [ ] document how M2 should evolve once Supabase becomes historical backbone
+
+### Success condition
+Historical research quality is no longer constrained primarily by Sheets.
+
+---
+
+## Workstream H — Worker Contract Formalization
+
+### Goal
+Move from descriptive AI roles toward machine-readable bounded worker contracts.
+
+### Status
+Emerging priority
+
+### Tasks
+- [ ] define worker contract schema
+- [ ] define authority fields
+- [ ] define artifact IO fields
+- [ ] define trigger/invocation rules
+- [ ] map existing worker roles into contract form
+- [ ] define which contracts are advisory only vs operationally callable
+
+### Success condition
+AI/bot labor is governed by explicit contracts rather than chat interpretation alone.
+
+---
+
 ## Immediate Priorities
 
 ### Now
 - keep active experiment run stable
-- finish docs
-- finish project-brain tables
-- insert first memory rows
+- continue documenting architecture reality
+- capture current findings durably
+- avoid destabilizing the active runner
 
 ### This week
-- mirror code into GitHub
-- create project snapshots habit
-- reduce memory dependence on chat
-- preserve experiment observations durably
+- clean dead trigger noise
+- audit missing-document dependency
+- continue code/docs mirroring into GitHub
+- define Supabase historical data migration outline
+- begin worker contract schema drafting
 
 ### Later
 - deepen datasets further if needed
 - formalize dataset tagging
 - plan Python migration in concrete slices
+- expand machine-readable contract infrastructure
 
 ---
 
@@ -237,7 +298,8 @@ Python migration happens by layer, not by panic rewrite.
 - full Python rewrite now
 - replacing robust modules just because they are large
 - giant PDF uploads as primary continuity mechanism
-- overbuilding AI features before persistence is clean
+- overbuilding AI features before persistence and contracts are cleaner
+- destabilizing active research for cosmetic cleanup
 
 ---
 
@@ -246,9 +308,12 @@ Python migration happens by layer, not by panic rewrite.
 The biggest risk is not missing code.
 
 The biggest risk is:
-**knowledge fragmentation across chats, Sheets, properties, and human memory.**
+**knowledge and state fragmentation across chats, Sheets, properties, runtime, and human memory.**
 
-This migration tracker exists to reduce that risk.
+A closely related risk is:
+**historical data quality/storage becoming the limiting factor on research truth.**
+
+This tracker exists to reduce both risks.
 
 ---
 
@@ -262,5 +327,7 @@ If persistence is solved properly, the project gains:
 - less drift
 - less re-explanation tax
 - stronger future migration path
+- cleaner bounded automation
+- fairer empirical evaluation through better data architecture
 
 That is the whole point of this migration.
