@@ -4,7 +4,7 @@ This file records important architectural and operational decisions for the $T$T
 
 ---
 
-## 2026-03-24 — Persistence becomes top priority
+## 2026-03-26 — Persistence becomes top priority
 
 **Area:** architecture / project continuity  
 **Status:** active
@@ -274,6 +274,128 @@ Across the active matrix, repeated rows suggest:
 ### Consequence
 This is not a deployment conclusion.
 It is a research direction that should be preserved as a durable observation.
+
+---
+
+## 2026-03-26 — Curated cohort universe resolution replaces crude fake segmentation as the preferred persistence framework
+
+**Area:** research architecture / M9 runtime integrity  
+**Status:** active
+
+### Decision
+The preferred persistence-testing framework is now **curated cohort universe selection**, not crude symbol-name segmentation.
+
+### Why
+The actual M9 backtest resolver was audited and found to be using crude string-based segmentation logic such as BTC/ETH/SOL/XRP substring matching.
+
+That meant older “segmentation” runs were directionally useful, but not true curated universe tests.
+
+The resolver path has now been upgraded to support real cohort-aware modes such as:
+- `HARD_FILTER_ALL`
+- `TOP_K`
+- `TOP_SPS_CORE`
+- `TOP_SPS_WITH_DOGE`
+- `PERP_CORE`
+- `SPOT_CORE`
+- `CUSTOM`
+
+### Consequence
+Future persistence work should interpret curated cohort runs as more meaningful than the earlier fake-name-bucket segmentation framework.
+
+---
+
+## 2026-03-26 — `PERSISTENCE_HUNT_V2` becomes the active narrow persistence run
+
+**Area:** research execution  
+**Status:** active
+
+### Decision
+The active persistence run is now `PERSISTENCE_HUNT_V2`, not `PERSISTENCE_HUNT_V1`.
+
+### Why
+`PERSISTENCE_HUNT_V2` has:
+- corrected family targeting
+- corrected universe selection architecture
+- stronger suppression-focused parameter neighborhood
+- real curated cohort comparison
+- 240-job scope with better interpretability
+
+### Consequence
+Current live persistence interpretation should be based primarily on `PERSISTENCE_HUNT_V2`.
+
+Older persistence runs remain useful historically, but are no longer the cleanest research baseline.
+
+---
+
+## 2026-03-26 — Runner persistence is now treated as operationally proven
+
+**Area:** runtime integrity / execution architecture  
+**Status:** active
+
+### Decision
+The resumable experiment runner is now treated as operationally proven enough for unattended continuation.
+
+### Why
+During the active `PERSISTENCE_HUNT_V2` run:
+- the run continued while the operator laptop was closed
+- continuation triggers kept progressing
+- rescue/continuation behavior recovered through speed bumps
+- the machine showed practical persistence rather than merely theoretical resumability
+
+### Consequence
+Timeouts remain a platform constraint, but the runner itself is now considered materially more trustworthy than before.
+
+---
+
+## 2026-03-26 — `TOP_SPS_WITH_DOGE` is currently the strongest persistence cohort
+
+**Area:** research interpretation  
+**Status:** provisional / active observation
+
+### Decision
+Current research memory should record that `TOP_SPS_WITH_DOGE` is currently the strongest operating cohort in `PERSISTENCE_HUNT_V2`.
+
+### Why
+Observed run results show:
+- stronger trade counts than `TOP_SPS_CORE`
+- narrower near-miss failure structures
+- multiple rows failing only on:
+  - `MaxDD_Days`
+  - `Sharpe`
+
+This is the strongest empirical frontier observed so far in the active run.
+
+### Consequence
+Post-run follow-up design should give special attention to:
+- `TOP_SPS_WITH_DOGE`
+- `LMI`
+- nearby parameter regions that preserve trade count while still suppressing weak setups
+
+---
+
+## 2026-03-26 — Machine-readable contracts are emerging as the likely foundation for bounded bot labor
+
+**Area:** AI architecture / orchestration  
+**Status:** active direction
+
+### Decision
+The next maturity step for AI inside the system should be **machine-readable worker contracts**.
+
+### Why
+The project has outgrown:
+- vague assistant usage
+- chat-memory dependence
+- prose-only role definitions
+
+Bounded workers need:
+- explicit scope
+- input contracts
+- output contracts
+- authority limits
+- durable artifact expectations
+
+### Consequence
+Future worker/council/runtime-support design should move toward machine-readable contracts rather than loose descriptive role notes alone.
 
 ---
 
