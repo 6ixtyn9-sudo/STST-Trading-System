@@ -17,6 +17,14 @@ The $T$T system is a modular trading architecture built around distinct layers o
 
 The system is intentionally modular so that each layer can evolve without collapsing the whole machine.
 
+It is now better understood as:
+
+- a live operational machine
+- a research machine
+- a governance-constrained system
+- a memory-bearing system in transition
+- an architecture moving from implicit human continuity toward explicit persistent continuity
+
 ---
 
 ## Constitutional View
@@ -51,12 +59,24 @@ Responsibilities:
 - hard filters
 - universe construction
 - candle fetching
-- canonical DATA_CLEAN maintenance
+- canonical `DATA_CLEAN` maintenance
 - funding log updates
 - history sufficiency gating
 - bootstrap / resumable bootstrap
 
 M2 is the source of canonical market history for the rest of the system.
+
+### Important current architectural note
+M2 is no longer just a fetch layer.  
+It is also the substrate for meaningful universe construction through:
+
+- hard-filter pass state
+- top-K/SPS state
+- symbol readiness
+- product-type awareness
+- instrument survivorship
+
+This matters because later modules now increasingly depend on **curated cohort selection**, not crude name buckets.
 
 ---
 
@@ -71,9 +91,9 @@ Responsibilities:
 - market regime
 
 Outputs:
-- INDICATORS
-- LEVELS
-- REGIME
+- `INDICATORS`
+- `LEVELS`
+- `REGIME`
 
 M3 is an analysis layer, not a decision layer.
 
@@ -92,7 +112,7 @@ Responsibilities:
 - signal diagnostics
 
 Outputs:
-- SIGNALS rows, especially CONFIRMED candidates
+- `SIGNALS` rows, especially `CONFIRMED` candidates
 
 M4 says:
 “this setup exists and is worth consideration.”
@@ -110,10 +130,10 @@ Responsibilities:
 - funding/carry estimates
 - exposure checks
 - hard rejection rules
-- APPROVED / rejected risk rows
+- `APPROVED` / rejected risk rows
 
 Outputs:
-- RISK_CALC rows
+- `RISK_CALC` rows
 
 M5 is the lawful bridge between signals and execution.
 
@@ -130,8 +150,8 @@ Responsibilities:
 - live API execution in LIVE mode
 
 Outputs:
-- ORDERS
-- POSITIONS
+- `ORDERS`
+- `POSITIONS`
 
 M6 should remain deterministic and obedient.
 
@@ -191,12 +211,31 @@ Responsibilities:
 - tax export
 
 Outputs:
-- BACKTEST_RESULTS
+- `BACKTEST_RESULTS`
 - diagnostics
-- dqs_summary
+- `dqs_summary`
 - empirical pass/fail state
 
 M9 decides whether strategy claims have empirical support.
+
+### Important current architectural note
+M9 was found to contain the actual backtest universe resolver path.
+
+That resolver has now been upgraded from crude symbol-name segmentation toward curated cohort support.
+
+This is a major architecture correction because it means persistence tests are now being run on more defensible universe definitions.
+
+### Current M9 universe capabilities
+M9 now supports real cohort-aware selection such as:
+- `HARD_FILTER_ALL`
+- `TOP_K`
+- `TOP_SPS_CORE`
+- `TOP_SPS_WITH_DOGE`
+- `PERP_CORE`
+- `SPOT_CORE`
+- `CUSTOM`
+
+This is a significant improvement over the old string-matching segmentation logic.
 
 ---
 
@@ -215,6 +254,15 @@ Responsibilities:
 
 M10 is not supreme authority and not execution truth.
 It is a memory and orchestration bridge.
+
+### Important current architectural note
+M10 should increasingly be thought of as a durable artifact bridge, not just a helper layer.
+
+Its long-term role is to reduce the amount of meaning that exists only in:
+- chat
+- PDFs
+- human recollection
+- temporary property blobs
 
 ---
 
@@ -240,6 +288,8 @@ Current operating surface:
 - visible state
 - current orchestration
 - current dashboard
+- active runner state
+- live operational control plane
 
 ### Supabase
 Persistent structured memory:
@@ -247,6 +297,8 @@ Persistent structured memory:
 - diagnostics
 - council deliberations
 - project brain tables
+- future dataset / run / decision registries
+- future historical storage support
 
 ### GitHub
 Persistent code and meaning:
@@ -256,6 +308,7 @@ Persistent code and meaning:
 - migration tracker
 - decisions
 - prompts
+- project state snapshots
 
 ---
 
@@ -272,6 +325,27 @@ This means:
 - execution should never outrank governance
 - AI should never outrank hard rules
 - memory should never outrank constitution
+- orchestration should never outrank empirical truth
+- no council process should silently bypass hard policy
+
+---
+
+## Current Strategic Read of the Architecture
+
+The machine is now at a stage where the critical architecture problems are less about “missing modules” and more about:
+
+- durable memory
+- artifact continuity
+- better data/storage architecture
+- reduction of implicit human context
+- machine-readable contracts for bounded AI/bot labor
+
+The architecture is increasingly moving from:
+- implicit continuity
+to:
+- explicit continuity
+
+That transition is now a first-class concern.
 
 ---
 
@@ -281,8 +355,23 @@ The likely migration path is:
 
 1. keep Sheets + Apps Script as current control plane
 2. move project memory and meaning into GitHub + Supabase
-3. later migrate heavy data/research workloads toward Python
-4. eventually move live execution infrastructure to Python/services
-5. retain Sheets as a control/dashboard surface if useful
+3. move historical data storage away from Sheets toward Supabase-backed canonical persistence
+4. later migrate heavy data/research workloads toward Python
+5. eventually move live execution infrastructure to Python/services
+6. retain Sheets as a control/dashboard surface if useful
 
 This architecture is evolutionary, not rewrite-first.
+
+---
+
+## Present Architectural Priority
+
+The current architectural priority is not to rewrite everything.
+
+It is to make the existing machine:
+
+- remember itself durably
+- select universes more truthfully
+- log and compare research more cleanly
+- reduce runtime ambiguity
+- prepare for larger-scale history and fairer persistence evaluation
