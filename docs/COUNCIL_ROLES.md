@@ -38,6 +38,24 @@ The council is a structured advisory layer.
 
 ---
 
+## Current Practical Position
+
+The council is still early-stage.
+
+It should currently be treated as:
+- a structured advisory layer
+- a persistent review layer
+- a bounded critique mechanism
+- a memory-bearing deliberation layer
+
+It should **not** currently be treated as:
+- autonomous deployment authority
+- direct execution authority
+- constitutional override
+- empirical override
+
+---
+
 ## Core Council Roles
 
 ---
@@ -231,6 +249,21 @@ Future prompts should be stored in:
 
 ---
 
+## Machine-Readable Direction
+
+The council should eventually move toward machine-readable role contracts, including:
+- role ID
+- allowed inputs
+- output schema
+- invocation trigger
+- authority limits
+- storage location for votes
+- fail-closed defaults when inputs are incomplete
+
+This is not fully implemented yet, but it is the intended next discipline step.
+
+---
+
 ## Future Direction
 
 The council may later evolve into a stronger review layer, but only if:
@@ -238,6 +271,7 @@ The council may later evolve into a stronger review layer, but only if:
 - governance is explicit
 - evidence is queryable
 - constitutional constraints remain intact
+- council IO contracts are machine-readable and auditable
 
 Until then, it remains:
 **bounded, advisory, persistent, and subordinate.**
