@@ -15,6 +15,9 @@ This file exists so the system has a durable strategy taxonomy:
 - what they need to see
 - how inversion changes interpretation
 
+A strategy family is not just a label.  
+It is a market hypothesis.
+
 ---
 
 ## Master Table
@@ -77,7 +80,7 @@ These families assume:
 - some inverted continuation families
 
 ### Core belief
-The first move is bait.
+The first move is bait.  
 The second move is the trade.
 
 ### Typical requirements
@@ -102,7 +105,7 @@ These families assume:
 - future `EXHAUSTION_FADE_LONG`
 
 ### Core belief
-Continuation quality is deteriorating.
+Continuation quality is deteriorating.  
 Mean reversion or reversal becomes more likely.
 
 ### Typical requirements
@@ -118,7 +121,7 @@ The move is strong and early, not exhausted, and keeps running.
 
 ## 4. Inversion-Derived Proxy Families
 
-These are not always “native” families.
+These are not always “native” families.  
 They are often research tools.
 
 ### Includes
@@ -127,7 +130,7 @@ They are often research tools.
 - `LOOSE_MOMO_LONG | INVERTED_MIRROR`
 
 ### Core belief
-The original family may still be identifying something real,
+The original family may still be identifying something real,  
 but the monetizable direction may be opposite.
 
 ### Why this matters
@@ -165,7 +168,7 @@ This is a potential future subfamily idea.
 ### Example
 A failed breakdown reclaims support with unusually strong momentum and volume.
 
-That is not just a fakeout.
+That is not just a fakeout.  
 It is a fakeout with momentum-quality confirmation.
 
 This could eventually become:
@@ -187,11 +190,19 @@ As of the current experiment era:
 - Several inverted mirrors look relatively stronger.
 - `FAKEOUT_SHORT` emerging as a less-bad native short family is especially interesting.
 
+### Current strongest practical frontier
+The strongest active family cluster remains:
+- `LOOSE_MOMO_LONG | INVERTED_MIRROR`
+- `FAKEOUT_SHORT`
+
 ### Strategic implication
 The system may be discovering that:
 - continuation logic is often getting trapped
 - failure-pattern or reversal-pattern logic may be closer to truth
 - some inversions are revealing hidden fakeout behavior
+
+### Important current caution
+This is still a research pattern, not deployment proof.
 
 ---
 
@@ -215,7 +226,7 @@ Design narrower family-specific reruns.
 
 ## Rule
 
-A strategy family is not just a name.
+A strategy family is not just a name.  
 It is a market hypothesis.
 
 This document exists so those hypotheses are explicit.
