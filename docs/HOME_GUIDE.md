@@ -10,6 +10,13 @@ The project no longer relies on chat sessions as its primary memory.
 
 This repository and its linked Supabase database are the durable home of the system.
 
+The current direction is:
+- GitHub for code and meaning
+- Supabase for structured/queryable memory
+- Sheets for operational surface
+- Apps Script for current control plane
+- future machine-readable contracts for bounded bot labor
+
 ---
 
 ## What lives where
@@ -38,6 +45,7 @@ Supabase is the home for:
 - project snapshots
 - active todos
 - future chunked project knowledge
+- future expanded historical data storage
 
 If something is structured/queryable memory, it should live there.
 
@@ -51,6 +59,8 @@ Sheets remain the operational surface for:
 - current Apps Script runtime integration
 
 Sheets are the control room, not the permanent archive.
+
+Sheets are also no longer an ideal long-history warehouse for the scale of research now being run.
 
 ---
 
@@ -120,6 +130,11 @@ Future migration staging area
 - update `docs/MODULE_REGISTRY.md`
 - update `module_registry`
 
+### For AI worker evolution
+- update `docs/AI_WORKER_JOBS.md`
+- eventually define machine-readable worker contract files
+- keep worker scope/authority explicit
+
 ---
 
 ## Important Reminder
@@ -131,6 +146,20 @@ The goal is:
 - less drift
 - less re-explanation
 - stronger future migration
+- clearer runtime discipline
+- cleaner artifact ownership
 
 Perfection can come later.
 Persistence comes first.
+
+---
+
+## Current Strategic Note
+
+The machine is already real.
+
+The most important current home-building work is now:
+- reducing chat dependence
+- reducing Sheets dependence for historical storage
+- making project memory durable
+- making worker/bot labor bounded through clearer contracts
