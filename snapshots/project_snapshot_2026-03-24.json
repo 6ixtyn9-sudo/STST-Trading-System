@@ -1,27 +1,29 @@
-
 {
-  "date": "2026-03-25",
-  "phase": "research_machine_stabilization_plus_persistence_hunt_execution",
+  "date": "2026-03-26",
+  "phase": "research_machine_stabilization_plus_curated_persistence_hunt_execution",
   "prior_completed_run": {
     "name": "EDGE_CLARITY_V1",
     "jobs_total": 416,
     "runner": "RUN_experimentMatrix_resumableContinue",
     "status": "completed",
-    "result": "no_oos_pass"
+    "result": "no_oos_pass",
+    "caveat": "used weaker family targeting and older crude segmentation framework"
   },
   "current_run": {
-    "name": "PERSISTENCE_HUNT_V1",
+    "name": "PERSISTENCE_HUNT_V2",
     "runner": "RUN_experimentMatrix_resumableContinue",
     "launch_path": "RUN_experimentMatrix_resumableStart",
-    "variant_mode": "PERSISTENCE_HUNT",
+    "variant_mode": "PERSISTENCE_HUNT_V2",
+    "jobs_total": 240,
     "status": "active"
   },
   "history_status": {
-    "symbols_ready": 14,
-    "rows_4h": 9251,
-    "rows_1d": 1542,
+    "symbols_ready_observed": 14,
+    "rows_4h_typical": 9250,
+    "rows_1d_typical": 1543,
     "start": "2021-12-31",
-    "end": "2026-03-21"
+    "end_best_symbols": "2026-03-26",
+    "note": "symbol freshness is uneven; some series are stale or partially lagged"
   },
   "research_signal": {
     "base_longs": "weak",
@@ -29,23 +31,25 @@
       "LOOSE_MOMO_LONG | INVERTED_MIRROR",
       "FAKEOUT_SHORT"
     ],
+    "current_best_cohort": "TOP_SPS_WITH_DOGE",
     "main_failure_modes": [
-      "oos_trade_count_too_small",
       "oos_sharpe_weak",
-      "drawdown_duration_too_long"
+      "drawdown_duration_too_long",
+      "sometimes_oos_trade_count_too_small"
     ]
   },
   "persistence_hunt": {
-    "lever": "universe_segmentation",
+    "lever": "curated_cohort_universe_selection_plus_quality_suppression",
     "families": [
       "LOOSE_MOMO_LONG | INVERTED_MIRROR",
       "FAKEOUT_SHORT"
     ],
-    "segments": [
-      "MAJORS_ONLY",
-      "BTC_ONLY",
-      "ETH_ONLY",
-      "MAJORS_EX_BTC_ETH"
+    "cohorts": [
+      "TOP_SPS_CORE",
+      "TOP_SPS_WITH_DOGE",
+      "HARD_FILTER_ALL",
+      "PERP_CORE",
+      "SPOT_CORE"
     ]
   },
   "architecture": {
@@ -66,10 +70,13 @@
     "supabase_experiment_logging": true,
     "supabase_diag_blob_persistence": true,
     "top_level_autostart_removed": true,
-    "m9_runtime_integrity_confirmed": true
+    "m9_runtime_integrity_confirmed": true,
+    "unattended_run_progress_confirmed": true,
+    "known_runtime_noise": [
+      "dead_IGN_onOpen_trigger",
+      "missing_document_dependency_observed_once"
+    ]
   },
-  "main_bottleneck": "persistent_project_memory_and_unproven_edge_persistence"
+  "major_architecture_finding": "curated_cohort_universe_resolution_replaced_crude_name_based_segmentation_as_the_preferred_persistence_framework",
+  "main_bottleneck": "persistent_project_memory_plus_data_storage_quality_plus_unproven_final_edge_persistence"
 }
-```
-
-Sleep well. When you’re back, we’ll interpret the persistence hunt results cleanly and decide the next lever instead of guessing.
