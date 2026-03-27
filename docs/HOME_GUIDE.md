@@ -45,7 +45,8 @@ Supabase is the home for:
 - project snapshots
 - active todos
 - future chunked project knowledge
-- future expanded historical data storage
+- canonical market history
+- dataset coverage summaries
 
 If something is structured/queryable memory, it should live there.
 
@@ -60,7 +61,7 @@ Sheets remain the operational surface for:
 
 Sheets are the control room, not the permanent archive.
 
-Sheets are also no longer an ideal long-history warehouse for the scale of research now being run.
+Sheets are no longer the preferred canonical warehouse for active historical research truth.
 
 ---
 
@@ -70,8 +71,19 @@ Apps Script remains the current control plane:
 - wrappers
 - triggers
 - current module runtime
+- active research runner
 
 It is part of the house, but not the entire house.
+
+---
+
+### Python / Colab
+Python / Colab is now the active workbench for:
+- historical data rebuild
+- external market data ingestion
+- canonical dataset seeding into Supabase
+
+This is a workbench layer, not the canonical memory home.
 
 ---
 
@@ -104,7 +116,7 @@ Project state snapshots
 Council role prompts
 
 ### `/python`
-Future migration staging area
+Migration staging and external data rebuild work
 
 ---
 
@@ -163,6 +175,7 @@ The most important current home-building work is now:
 - reducing Sheets dependence for historical storage
 - making project memory durable
 - making worker/bot labor bounded through clearer contracts
+- keeping the fresh Supabase-backed dataset as the active canonical research substrate during V3 execution
 
 ---
 
@@ -172,7 +185,7 @@ The active research machine now has a real fresh-data bridge:
 
 - Python / Colab performs historical rebuild work
 - Supabase stores canonical market history
-- Apps Script reads canonical history from Supabase for current fresh-data research paths
+- Apps Script reads canonical history from Supabase for the active fresh-data research path
 - Sheets remain the dashboard/control surface
 
 This is the first materially real reduction in dependence on workbook-only historical storage.
