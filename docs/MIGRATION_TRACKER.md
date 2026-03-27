@@ -32,22 +32,23 @@ to:
 - resumable experiment matrix works
 - Supabase experiment logging works
 - council deliberation scaffolding works
-- canonical history is materially deeper than before
 - governance state exists
-- large research runs are active
-- curated cohort universe resolution is now working inside M9
 - active run continuation is proven in unattended operation
+- fresh canonical candles now exist in Supabase
+- Apps Script can read canonical history from Supabase
+- M2 canonical history gate can use the Supabase-backed dataset
+- M9 actual 4H backtest loader can use the Supabase-backed dataset
+- active V3 run is using the fresh Supabase-backed canonical dataset
 
 ### Not yet true enough
 - code is not fully housed in GitHub
 - docs are not yet complete everywhere
 - project state still lives too much in chats
 - module registry is not yet formally stored everywhere it should be
-- dataset states are not yet always explicit enough
-- Document Properties still carry too much temporary importance
-- long-history storage still leans too heavily on Sheets
+- richer OOS reporting is not yet surfaced cleanly
 - machine-readable worker contracts do not yet exist
-- Python migration plan is understood, but not yet staged concretely
+- deeper 4H history may still be desirable
+- Python migration plan is understood, but not yet staged concretely as primary runtime
 
 ---
 
@@ -87,7 +88,7 @@ In progress
 - [x] Add DATASETS
 - [x] Add MIGRATION_TRACKER
 - [x] Add COUNCIL_ROLES
-- [ ] Add RUNBOOKS
+- [x] Add RUNBOOKS
 - [ ] Mirror module source files into repo folders
 - [ ] Add SQL schema files
 - [ ] Add snapshot JSONs if useful
@@ -103,7 +104,7 @@ All meaningful code and docs have a canonical GitHub home.
 Make Supabase the structured memory home for project state.
 
 ### Status
-In progress
+In progress / materially advanced
 
 ### Tasks
 - [x] experiment_logs table
@@ -115,6 +116,8 @@ In progress
 - [x] create project_snapshots table
 - [x] create active_todos table
 - [x] create project_chunks table
+- [x] create canonical candle storage tables
+- [x] create dataset coverage tables
 - [ ] insert complete module rows
 - [ ] insert key decisions
 - [ ] insert current dataset state
@@ -132,14 +135,14 @@ Project continuity can be reconstructed from Supabase without needing dead chats
 Reduce dependence on Document Properties and ambiguous reporting.
 
 ### Status
-Partial
+Partial / improved
 
 ### Tasks
 - [ ] reduce reliance on `M9_DIAG_*` property blobs
-- [ ] ensure DQS summary is always externally persisted
+- [x] ensure DQS summary is externally persisted
 - [ ] clarify ALL vs OOS metrics in reporting
-- [ ] version important experiment contexts
-- [ ] log dataset ID alongside experiment rows
+- [x] version important experiment contexts via dataset identity
+- [ ] log dataset ID alongside all major experiment surfaces consistently
 - [ ] create reproducibility notes for major runs
 
 ### Success condition
@@ -153,18 +156,17 @@ Research history is durable, queryable, and interpretable without guessing.
 Treat datasets as named assets.
 
 ### Status
-Early
+Active
 
 ### Tasks
 - [x] establish DATASETS doc
-- [x] insert first dataset_registry row
-- [ ] define dataset naming convention
-- [ ] tag major runs with dataset ID
-- [ ] record scope changes explicitly
-- [ ] record source changes explicitly
-- [ ] record deeper-history expansions explicitly
-- [ ] record stale-series cleanup explicitly
-- [ ] separate dataset identity from cohort identity where needed
+- [x] insert dataset_registry rows
+- [x] define active fresh dataset identity
+- [x] separate legacy and fresh dataset contexts
+- [x] remove ZAR from canonical research/live universe
+- [ ] record future deeper-history expansions explicitly
+- [ ] record future 4H augmentation explicitly
+- [ ] tag all major runs consistently with dataset ID
 
 ### Success condition
 Every important experiment can be tied to a clearly identified dataset state.
@@ -210,7 +212,7 @@ Future-planned
 4. M10 service orchestration if needed
 
 ### Tasks
-- [ ] create `python/README.md`
+- [x] create `python/README.md`
 - [ ] define migration phases
 - [ ] identify first service candidates
 - [ ] define data contracts between old/new layers
@@ -227,25 +229,30 @@ Python migration happens by layer, not by panic rewrite.
 Reduce dependence on Google Sheets as the primary historical warehouse.
 
 ### Status
-Now strategically important
+Active / phase 1 materially achieved
 
 ### Why this matters
-Current run interpretation is now clearly affected by:
+Historical research interpretation was being distorted by:
 - uneven symbol freshness
 - stale series
-- limited OOS trade count
 - workbook-based historical storage limitations
+- hidden dataset ambiguity
 
-### Tasks
-- [ ] define canonical historical storage policy
-- [ ] define what stays rebuildable vs warehouse-backed
-- [ ] design Supabase history tables for candle storage / retrieval
-- [ ] define dataset-versioning logic for historical expansions
-- [ ] decide whether Sheets remains a derived/control surface only
-- [ ] document how M2 should evolve once Supabase becomes historical backbone
+### Achieved
+- fresh canonical candles stored in Supabase
+- active USDT-only spot/perp dataset established
+- Apps Script bridge to canonical history works
+- M9 actual backtest load path uses the active Supabase-backed dataset
+- V3 launched on fresh canonical dataset
+
+### Remaining tasks
+- define phase-2 deeper 4H augmentation if needed
+- reduce remaining workbook dependence in downstream paths
+- enrich historical retrieval governance and versioning
+- clarify what remains warehouse-backed vs rebuildable long term
 
 ### Success condition
-Historical research quality is no longer constrained primarily by Sheets.
+Historical research quality is no longer constrained primarily by Sheets, and future deeper-history augmentation is explicit rather than hidden.
 
 ---
 
@@ -273,23 +280,21 @@ AI/bot labor is governed by explicit contracts rather than chat interpretation a
 ## Immediate Priorities
 
 ### Now
-- keep active experiment run stable
-- continue documenting architecture reality
-- capture current findings durably
+- keep active `PERSISTENCE_HUNT_V3` stable
+- monitor fresh-data V3 behavior
+- preserve comparability
 - avoid destabilizing the active runner
 
 ### This week
-- clean dead trigger noise
-- audit missing-document dependency
+- capture V3 findings durably
+- enrich OOS reporting visibility after run or safe pause
 - continue code/docs mirroring into GitHub
-- define Supabase historical data migration outline
-- begin worker contract schema drafting
+- prepare post-run pruning plan for legacy bootstrap and stale source logic
 
 ### Later
-- deepen datasets further if needed
-- formalize dataset tagging
-- plan Python migration in concrete slices
-- expand machine-readable contract infrastructure
+- deepen 4H history if needed
+- formalize worker contracts
+- continue migration toward cleaner service boundaries
 
 ---
 
@@ -305,15 +310,12 @@ AI/bot labor is governed by explicit contracts rather than chat interpretation a
 
 ## Current Biggest Risk
 
-The biggest risk is not missing code.
+The biggest risk is no longer simple code absence.
 
-The biggest risk is:
-**knowledge and state fragmentation across chats, Sheets, properties, runtime, and human memory.**
-
-A closely related risk is:
-**historical data quality/storage becoming the limiting factor on research truth.**
-
-This tracker exists to reduce both risks.
+The biggest risks are now:
+- knowledge and state fragmentation across chats, Sheets, properties, runtime, and human memory
+- richer OOS visibility lagging behind the quality of current experiments
+- deeper 4H history becoming the next limiting factor on final persistence truth
 
 ---
 
@@ -321,13 +323,12 @@ This tracker exists to reduce both risks.
 
 The machine is already real.
 
-If persistence is solved properly, the project gains:
+Now that the fresh-data path is working, the project gains:
 - continuity
-- compounding understanding
-- less drift
-- less re-explanation tax
-- stronger future migration path
-- cleaner bounded automation
-- fairer empirical evaluation through better data architecture
+- cleaner comparability
+- less stale-data distortion
+- stronger empirical trust
+- better foundation for later pruning and migration
+- a much fairer chance to evaluate whether V3 truly improves persistence
 
-That is the whole point of this migration.
+That is the point of this migration.
