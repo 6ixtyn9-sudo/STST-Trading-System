@@ -10,103 +10,113 @@
  * - M9-owned sheets (BACKTEST_RESULTS, ARCHIVE) self-heal via backup+rebuild on schema drift
  * - SIM TP1/RR bug fixed via M9__tp1PriceFromRR_ (no silent zero-trade due to RR_Minimum)
  */
-var M9_CONST = {
-  VERSION: '3.2.5',
 
-  SHEETS: {
-    // Upstream (read-only)
-    CONFIG: 'CONFIG',
-    DATA_CLEAN: 'DATA_CLEAN',
-    POSITIONS: 'POSITIONS',
-    ORDERS: 'ORDERS',
-    FUNDING_LOG: 'FUNDING_LOG',
-    COLLATERAL: 'COLLATERAL',
-    REGIME: 'REGIME',       // optional (SIM)
-    SIGNALS: 'SIGNALS',     // optional (LOGS)
-    RISK_CALC: 'RISK_CALC', // optional (LOGS)
+var __M9G__ = (typeof globalThis !== 'undefined') ? globalThis : this;
 
-    // M9-owned (write)
-    BACKTEST_RESULTS: 'BACKTEST_RESULTS',
-    ARCHIVE: 'ARCHIVE'
-  },
+if (!__M9G__.M9_CONST) {
+  __M9G__.M9_CONST = {
+    VERSION: '3.2.5',
 
-  HEADERS: {
-    BACKTEST_RESULTS: [
-      'Backtest_ID','Start_Date','End_Date','Total_Trades','Long_Trades','Short_Trades',
-      'Win_Rate_Total','Win_Rate_Long','Win_Rate_Short','Avg_Win_Loss_Ratio','Profit_Factor',
-      'Expectancy_R','Max_Drawdown_Pct','Max_Drawdown_Duration_Days','Sharpe_Ratio',
-      'Liquidation_Events_Pct','Liquidation_Events_Count','Avg_Funding_Cost_Per_Trade',
-      'Avg_Borrow_Cost_Per_Trade','Carry_Cost_Pct_Gross_Profit','Effective_Leverage_Avg',
-      'DQS_Winners_Avg','DQS_Losers_Avg','R_Multiple_Premium','R_Multiple_High',
-      'R_Multiple_Standard','Win_Rate_RiskOn','Win_Rate_Neutral'
-    ],
-    ARCHIVE: [
-      'Date_Opened','Date_Closed','Asset','Direction','Qty',
-      'Entry_ZAR','Exit_ZAR','Fees_ZAR','Funding_Paid_ZAR',
-      'Funding_Received_ZAR','Borrow_Cost_ZAR','Net_PnL_ZAR',
-      'Holding_Days','FX_Rate_At_Open','FX_Rate_At_Close','Event_Type'
-    ]
-  },
+    SHEETS: {
+      // Upstream (read-only)
+      CONFIG: 'CONFIG',
+      DATA_CLEAN: 'DATA_CLEAN',
+      POSITIONS: 'POSITIONS',
+      ORDERS: 'ORDERS',
+      FUNDING_LOG: 'FUNDING_LOG',
+      COLLATERAL: 'COLLATERAL',
+      REGIME: 'REGIME',       // optional (SIM)
+      SIGNALS: 'SIGNALS',     // optional (LOGS)
+      RISK_CALC: 'RISK_CALC', // optional (LOGS)
 
-  TAX_EVENT: {
-    TRADE_CLOSE: 'TRADE_CLOSE',
-    CORE_PARTIAL_CLOSE: 'CORE_PARTIAL_CLOSE',
-    RUNNER_PARTIAL_CLOSE: 'RUNNER_PARTIAL_CLOSE',
-    FUNDING_SETTLEMENT: 'FUNDING_SETTLEMENT',
-    COLLATERAL_CONVERSION: 'COLLATERAL_CONVERSION'
-  },
+      // M9-owned (write)
+      BACKTEST_RESULTS: 'BACKTEST_RESULTS',
+      ARCHIVE: 'ARCHIVE'
+    },
 
-  BACKTEST: {
-    IN_SAMPLE_PCT: 0.60,
-    MIN_MONTHS: 12,
-    RISK_FREE_ANNUAL: 0.05,
+    HEADERS: {
+      BACKTEST_RESULTS: [
+        'Backtest_ID','Start_Date','End_Date','Total_Trades','Long_Trades','Short_Trades',
+        'Win_Rate_Total','Win_Rate_Long','Win_Rate_Short','Avg_Win_Loss_Ratio','Profit_Factor',
+        'Expectancy_R','Max_Drawdown_Pct','Max_Drawdown_Duration_Days','Sharpe_Ratio',
+        'Liquidation_Events_Pct','Liquidation_Events_Count','Avg_Funding_Cost_Per_Trade',
+        'Avg_Borrow_Cost_Per_Trade','Carry_Cost_Pct_Gross_Profit','Effective_Leverage_Avg',
+        'DQS_Winners_Avg','DQS_Losers_Avg','R_Multiple_Premium','R_Multiple_High',
+        'R_Multiple_Standard','Win_Rate_RiskOn','Win_Rate_Neutral'
+      ],
+      ARCHIVE: [
+        'Date_Opened','Date_Closed','Asset','Direction','Qty',
+        'Entry_ZAR','Exit_ZAR','Fees_ZAR','Funding_Paid_ZAR',
+        'Funding_Received_ZAR','Borrow_Cost_ZAR','Net_PnL_ZAR',
+        'Holding_Days','FX_Rate_At_Open','FX_Rate_At_Close','Event_Type'
+      ]
+    },
 
-    // Conservative fallback drags (SIM)
-    FUNDING_AVG_EST_PER_8H_PCT: 0.00003,
-    BORROW_AVG_EST_PER_DAY_PCT: 0.0005,
+    TAX_EVENT: {
+      TRADE_CLOSE: 'TRADE_CLOSE',
+      CORE_PARTIAL_CLOSE: 'CORE_PARTIAL_CLOSE',
+      RUNNER_PARTIAL_CLOSE: 'RUNNER_PARTIAL_CLOSE',
+      FUNDING_SETTLEMENT: 'FUNDING_SETTLEMENT',
+      COLLATERAL_CONVERSION: 'COLLATERAL_CONVERSION'
+    },
 
-    // Liquidation proxy (SIM)
-    LIQ_PROXY_MM_MULT: 1.1,
-    LIQ_BUFFER_R: 3.0,
+    BACKTEST: {
+      IN_SAMPLE_PCT: 0.60,
+      MIN_MONTHS: 12,
+      RISK_FREE_ANNUAL: 0.05,
 
-    MAX_CONCURRENT_LEVERAGED: 1
-  },
+      // Conservative fallback drags (SIM)
+      FUNDING_AVG_EST_PER_8H_PCT: 0.00003,
+      BORROW_AVG_EST_PER_DAY_PCT: 0.0005,
 
-  THRESH_OOS: {
-    MIN_TRADES: 50,
-    WIN_RATE_LONG: 0.40,
-    WIN_RATE_SHORT: 0.35,
-    AVG_WIN_LOSS: 2.5,
-    PROFIT_FACTOR: 1.5,
-    EXPECTANCY_R: 0.50,
-    MAX_DD_PCT: 0.20,
-    MAX_DD_DAYS: 45,
-    SHARPE: 1.0,
-    LIQ_EVENTS_PCT: 0.05
-  }
-};
+      // Liquidation proxy (SIM)
+      LIQ_PROXY_MM_MULT: 1.1,
+      LIQ_BUFFER_R: 3.0,
 
-var M9_COL = {
-  BACKTEST_RESULTS: {
-    Backtest_ID: 0, Start_Date: 1, End_Date: 2, Total_Trades: 3,
-    Long_Trades: 4, Short_Trades: 5, Win_Rate_Total: 6, Win_Rate_Long: 7,
-    Win_Rate_Short: 8, Avg_Win_Loss_Ratio: 9, Profit_Factor: 10, Expectancy_R: 11,
-    Max_Drawdown_Pct: 12, Max_Drawdown_Duration_Days: 13, Sharpe_Ratio: 14,
-    Liquidation_Events_Pct: 15, Liquidation_Events_Count: 16,
-    Avg_Funding_Cost_Per_Trade: 17, Avg_Borrow_Cost_Per_Trade: 18,
-    Carry_Cost_Pct_Gross_Profit: 19, Effective_Leverage_Avg: 20,
-    DQS_Winners_Avg: 21, DQS_Losers_Avg: 22, R_Multiple_Premium: 23,
-    R_Multiple_High: 24, R_Multiple_Standard: 25, Win_Rate_RiskOn: 26,
-    Win_Rate_Neutral: 27
-  },
+      MAX_CONCURRENT_LEVERAGED: 1
+    },
 
-  ARCHIVE: {
-    Date_Opened: 0, Date_Closed: 1, Asset: 2, Direction: 3, Qty: 4,
-    Entry_ZAR: 5, Exit_ZAR: 6, Fees_ZAR: 7, Funding_Paid_ZAR: 8,
-    Funding_Received_ZAR: 9, Borrow_Cost_ZAR: 10, Net_PnL_ZAR: 11,
-    Holding_Days: 12, FX_Rate_At_Open: 13, FX_Rate_At_Close: 14, Event_Type: 15
-  }
-};
+    THRESH_OOS: {
+      MIN_TRADES: 50,
+      WIN_RATE_LONG: 0.40,
+      WIN_RATE_SHORT: 0.35,
+      AVG_WIN_LOSS: 2.5,
+      PROFIT_FACTOR: 1.5,
+      EXPECTANCY_R: 0.50,
+      MAX_DD_PCT: 0.20,
+      MAX_DD_DAYS: 45,
+      SHARPE: 1.0,
+      LIQ_EVENTS_PCT: 0.05
+    }
+  };
+}
+
+if (!__M9G__.M9_COL) {
+  __M9G__.M9_COL = {
+    BACKTEST_RESULTS: {
+      Backtest_ID: 0, Start_Date: 1, End_Date: 2, Total_Trades: 3,
+      Long_Trades: 4, Short_Trades: 5, Win_Rate_Total: 6, Win_Rate_Long: 7,
+      Win_Rate_Short: 8, Avg_Win_Loss_Ratio: 9, Profit_Factor: 10, Expectancy_R: 11,
+      Max_Drawdown_Pct: 12, Max_Drawdown_Duration_Days: 13, Sharpe_Ratio: 14,
+      Liquidation_Events_Pct: 15, Liquidation_Events_Count: 16,
+      Avg_Funding_Cost_Per_Trade: 17, Avg_Borrow_Cost_Per_Trade: 18,
+      Carry_Cost_Pct_Gross_Profit: 19, Effective_Leverage_Avg: 20,
+      DQS_Winners_Avg: 21, DQS_Losers_Avg: 22, R_Multiple_Premium: 23,
+      R_Multiple_High: 24, R_Multiple_Standard: 25, Win_Rate_RiskOn: 26,
+      Win_Rate_Neutral: 27
+    },
+
+    ARCHIVE: {
+      Date_Opened: 0, Date_Closed: 1, Asset: 2, Direction: 3, Qty: 4,
+      Entry_ZAR: 5, Exit_ZAR: 6, Fees_ZAR: 7, Funding_Paid_ZAR: 8,
+      Funding_Received_ZAR: 9, Borrow_Cost_ZAR: 10, Net_PnL_ZAR: 11,
+      Holding_Days: 12, FX_Rate_At_Open: 13, FX_Rate_At_Close: 14, Event_Type: 15
+    }
+  };
+}
+
+var M9_CONST = __M9G__.M9_CONST;
+var M9_COL = __M9G__.M9_COL;
 
 /* =========================================================
  * MODULE 9 — Utilities (ES5-only)
@@ -568,20 +578,17 @@ function M9_runBacktestAuto() {
 function M9__btLoadSimParams_(cfg) {
   var p = {};
 
-  // Raw tracer for critical knobs
   M9__cfgLogRaw_(cfg, 'Invert_All_Signals', 'FALSE');
   M9__cfgLogRaw_(cfg, 'V2_Long_Only', 'TRUE');
   M9__cfgLogRaw_(cfg, 'DQS_Gate_V2', '45');
   M9__cfgLogRaw_(cfg, 'Leverage_Mode', 'FIXED_1X');
   M9__cfgLogRaw_(cfg, 'Max_Leverage', '1');
 
-  // Time / account
   p.tz = M9__cfgStr_(cfg, 'Timezone', 'Africa/Johannesburg');
   p.riskPct = M9__cfgNum_(cfg, 'Risk_Per_Trade_Pct', 0.02);
   p.maxConcurrentPos = Math.max(1, M9__cfgNum_(cfg, 'Max_Concurrent_Positions', 3));
   p.maxMarginUsedPct = M9__cfgNum_(cfg, 'Max_Margin_Used_Pct', 1.00);
 
-  // Core market structure params
   p.lookbackN = Math.max(15, M9__cfgNum_(cfg,
     'Resistance_Lookback_N',
     M9__cfgNum_(cfg, 'Breakout_Lookback_Candles', 30)
@@ -621,7 +628,6 @@ function M9__btLoadSimParams_(cfg) {
     M9__cfgNum_(cfg, 'Cooldown_Period_Candles', 12)
   ));
 
-  // Execution assumptions
   p.feeTaker = M9__cfgNum_(cfg,
     'Taker_Fee_Pct',
     M9__cfgNum_(cfg, 'Fee_Taker_Pct', 0.001)
@@ -642,7 +648,6 @@ function M9__btLoadSimParams_(cfg) {
     M9_CONST.BACKTEST.BORROW_AVG_EST_PER_DAY_PCT
   );
 
-  // Liquidation / protection
   p.forceLiqEnabled = M9__cfgBool_(cfg, 'Backtest_Force_Liquidation_Enabled', true);
   p.marginFractionFloorPct = M9__cfgNum_(cfg, 'MarginFraction_Floor_Pct', 300);
   p.liqProxyMmMult = M9__cfgNum_(cfg,
@@ -654,13 +659,29 @@ function M9__btLoadSimParams_(cfg) {
     M9_CONST.BACKTEST.LIQ_BUFFER_R
   );
 
-  // Strategy flags
   p.invertAllSignals = M9__cfgBool_(cfg, 'Invert_All_Signals', false);
   p.v2LongOnly = M9__cfgBool_(cfg, 'V2_Long_Only', true);
   p.v2RiskOnOnly = M9__cfgBool_(cfg, 'V2_Risk_On_Only', true);
   p.universeMode = String(M9__cfgStr_(cfg, 'Universe_Mode', 'MAJORS_ONLY')).toUpperCase();
 
-  // V2 filters / thresholds
+  p.Symbol_Allowlist = [];
+  try {
+    var rawAllow = cfg['Symbol_Allowlist'];
+    if (rawAllow !== undefined && rawAllow !== null && rawAllow !== '') {
+      if (Object.prototype.toString.call(rawAllow) === '[object Array]') {
+        p.Symbol_Allowlist = rawAllow;
+      } else {
+        var parsedAllow = JSON.parse(String(rawAllow));
+        if (Object.prototype.toString.call(parsedAllow) === '[object Array]') {
+          p.Symbol_Allowlist = parsedAllow;
+        }
+      }
+    }
+  } catch (eAllow) {
+    Logger.log('[M9] WARN Symbol_Allowlist parse failed: ' + eAllow);
+    p.Symbol_Allowlist = [];
+  }
+
   p.dqsGateV2 = M9__cfgNum_(cfg, 'DQS_Gate_V2', 45);
   p.dqsMin = M9__cfgNum_(cfg, 'DQS_Minimum', 40);
 
@@ -669,12 +690,9 @@ function M9__btLoadSimParams_(cfg) {
   p.v2RetestMaxDeviationAtr = M9__cfgNum_(cfg, 'V2_Retest_Max_Deviation_ATR', 0.50);
   p.v2ConfirmationBodyMinFrac = M9__cfgNum_(cfg, 'V2_Confirmation_Body_Min_Frac', 0.40);
 
-  // Position lifecycle
   p.breakevenMoveR = M9__cfgNum_(cfg, 'Breakeven_Move_R', 1.0);
 
-  // Leverage policy
   p.leverageMode = String(M9__cfgStr_(cfg, 'Leverage_Mode', 'FIXED_1X')).toUpperCase();
-
   if (p.leverageMode === 'FIXED_1X') {
     p.maxLev = 1;
     p.maxLevSlot = 0;
@@ -686,7 +704,23 @@ function M9__btLoadSimParams_(cfg) {
     ));
   }
 
-  // Legacy compatibility fields kept inert where needed
+  // ===== V3 payoff overlay params =====
+  p.payoffOverlayMode = String(M9__cfgStr_(cfg, 'Payoff_Overlay_Mode', 'CONTROL')).toUpperCase();
+  p.progressDeadlineBars = Math.max(1, Math.round(M9__cfgNum_(cfg, 'Progress_Deadline_Bars', 12)));
+  p.progressMinR = M9__cfgNum_(cfg, 'Progress_Min_R', 0.35);
+  p.maxHoldBars = Math.max(2, Math.round(M9__cfgNum_(cfg, 'Max_Hold_Bars', 28)));
+
+  p.fullExitOnTp1 = M9__cfgBool_(cfg, 'Full_Exit_On_TP1', false);
+
+  p.tailClampEnabled = M9__cfgBool_(cfg, 'Tail_Clamp_Enabled', false);
+  p.tailClampTriggerR = M9__cfgNum_(cfg, 'Tail_Clamp_Trigger_R', 0.75);
+  p.tailClampStopR = M9__cfgNum_(cfg, 'Tail_Clamp_Stop_R', 0.00);
+
+  // Phase 2 placeholder
+  p.centerExitEnabled = M9__cfgBool_(cfg, 'Center_Exit_Enabled', false);
+  p.centerExitMode = String(M9__cfgStr_(cfg, 'Center_Exit_Mode', 'NONE')).toUpperCase();
+  p.centerExitBufferAtr = M9__cfgNum_(cfg, 'Center_Exit_Buffer_ATR', 0.10);
+
   p.corePct = 1.0;
   p.runnerPct = 0.0;
   p.longTrailStartR = 999999;
@@ -696,7 +730,6 @@ function M9__btLoadSimParams_(cfg) {
   p.runnerTimeoutCandles = 999999;
   p.relPerfLookback = 42;
 
-  // Hard guard: impossible mode combination
   if (p.invertAllSignals && p.v2LongOnly) {
     throw new Error(
       '[M9] FATAL CONFIG CONFLICT:\n' +
@@ -706,7 +739,7 @@ function M9__btLoadSimParams_(cfg) {
   }
 
   Logger.log(
-    '[M9][V2 PARAM CLEAN] ' +
+    '[M9][V2/V3 PARAM CLEAN] ' +
     'invertAllSignals=' + p.invertAllSignals +
     ' v2LongOnly=' + p.v2LongOnly +
     ' dqsGateV2=' + p.dqsGateV2.toFixed(1) +
@@ -714,7 +747,17 @@ function M9__btLoadSimParams_(cfg) {
     ' leverageMode=' + p.leverageMode +
     ' maxLev=' + p.maxLev +
     ' breakevenMoveR=' + p.breakevenMoveR.toFixed(2) +
-    ' volMult=' + p.volMult.toFixed(2)
+    ' volMult=' + p.volMult.toFixed(2) +
+    ' payoffOverlayMode=' + p.payoffOverlayMode +
+    ' progressDeadlineBars=' + p.progressDeadlineBars +
+    ' progressMinR=' + p.progressMinR +
+    ' maxHoldBars=' + p.maxHoldBars +
+    ' fullExitOnTp1=' + p.fullExitOnTp1 +
+    ' tailClampEnabled=' + p.tailClampEnabled +
+    ' tailClampTriggerR=' + p.tailClampTriggerR +
+    ' tailClampStopR=' + p.tailClampStopR +
+    ' centerExitEnabled=' + p.centerExitEnabled +
+    ' centerExitMode=' + p.centerExitMode
   );
 
   return p;
@@ -755,6 +798,27 @@ function M9__btResolveDateRange_(cfg) {
 /** ---- Data Load / Prep ---- **/
 
 function M9__btLoadDataClean4h_(startMs, endMs) {
+  Logger.log('[M9][LOAD4H] ENTER M9__btLoadDataClean4h_ useSupabase=' + M9__useSupabaseBacktestHistory_());
+
+  if (M9__useSupabaseBacktestHistory_()) {
+    var datasetId = M9__activeDatasetId_();
+    Logger.log('[M9][LOAD4H] USING SUPABASE dataset=' + datasetId);
+
+    var sb = M9__btLoadDataClean4hFromSupabase_(startMs, endMs, datasetId);
+    var sbKeys = Object.keys(sb.bySym || {}).sort();
+
+    Logger.log('[M9][LOAD4H] SUPABASE symbols=' + JSON.stringify(sbKeys));
+    Logger.log('[M9][LOAD4H] SUPABASE masterMs=' + (sb.masterMs ? sb.masterMs.length : 0));
+
+    if (!sb || !sb.bySym || sbKeys.length === 0) {
+      throw new Error('[M9][SB] No 4H candles found in Supabase for dataset ' + datasetId);
+    }
+
+    return sb;
+  }
+
+  Logger.log('[M9][LOAD4H] FALLING BACK TO SHEET DATA_CLEAN');
+
   var raw = M9__readAll_(M9_CONST.SHEETS.DATA_CLEAN);
   if (!raw || raw.length < 2) throw new Error('[M9] DATA_CLEAN empty.');
 
@@ -815,7 +879,38 @@ function M9__btLoadDataClean4h_(startMs, endMs) {
     masterMs.push(tms);
   }
 
+  var keys = Object.keys(bySym).sort();
+  Logger.log('[M9][LOAD4H] SHEET symbols=' + JSON.stringify(keys));
+  Logger.log('[M9][LOAD4H] SHEET masterMs=' + masterMs.length);
+
   return { bySym: bySym, masterMs: masterMs };
+}
+
+
+
+function RUN_M9_diagDirectLoad4hNow() {
+  var cfg = M9__cfgLoadMap_();
+  var dr = M9__btResolveDateRange_(cfg);
+
+  var dc = M9__btLoadDataClean4h_(dr.startMs, dr.endMs);
+  var syms = Object.keys(dc.bySym || {}).sort();
+
+  Logger.log('[RUN][M9][DIRECTLOAD] ═══════════════════════════════════════');
+  Logger.log('[RUN][M9][DIRECTLOAD] symbol count=' + syms.length);
+  Logger.log('[RUN][M9][DIRECTLOAD] syms=' + JSON.stringify(syms));
+
+  for (var i = 0; i < syms.length; i++) {
+    var s = syms[i];
+    var arr = dc.bySym[s] || [];
+    if (!arr.length) continue;
+    Logger.log('[RUN][M9][DIRECTLOAD] ' + s +
+      ' rows=' + arr.length +
+      ' first=' + new Date(arr[0].ms).toISOString() +
+      ' last=' + new Date(arr[arr.length - 1].ms).toISOString());
+  }
+
+  Logger.log('[RUN][M9][DIRECTLOAD] masterMs=' + (dc.masterMs ? dc.masterMs.length : 0));
+  Logger.log('[RUN][M9][DIRECTLOAD] ═══════════════════════════════════════');
 }
 
 function M9__btBuildSymbolList_(bySym) {
@@ -828,12 +923,241 @@ function M9__btBuildSymbolList_(bySym) {
   return syms;
 }
 
-function M9__btBuildEligibleSyms_(syms, universeMode) {
+function M9__btBuildEligibleSyms_(syms, universeMode, ov) {
+  var allowedMap = M9__resolveUniverseSymbolMap_(universeMode, ov);
   var eligible = [];
+
   for (var i = 0; i < syms.length; i++) {
-    if (M9__isEligibleSymbol_(syms[i], universeMode)) eligible.push(syms[i]);
+    var s = String(syms[i] || '').trim();
+    if (!s) continue;
+
+    if (allowedMap === null || allowedMap[s.toUpperCase()]) {
+      eligible.push(s);
+    }
   }
   return eligible;
+}
+
+function M9__resolveUniverseSymbolMap_(universeMode, ov) {
+  ov = ov || {};
+
+  var mode = String(universeMode || ov.Universe_Mode || 'ALL').trim().toUpperCase();
+
+  // Explicit custom allowlist support
+  if (mode === 'CUSTOM') {
+    return M9__symbolArrayToMap_(ov.Symbol_Allowlist || []);
+  }
+
+  // New canonical curated modes (USDT-only, no ZAR)
+  if (mode === 'HARD_FILTER_ALL') {
+    return M9__symbolArrayToMap_([
+      'BTC/USDT',
+      'BTC/USDTPERP',
+      'ETH/USDT',
+      'ETH/USDTPERP',
+      'SOL/USDT',
+      'SOL/USDTPERP',
+      'XRP/USDT',
+      'XRP/USDTPERP',
+      'DOGE/USDT',
+      'DOGE/USDTPERP'
+    ]);
+  }
+
+  if (mode === 'TOP_K') {
+    return M9__symbolArrayToMap_([
+      'BTC/USDT',
+      'BTC/USDTPERP',
+      'ETH/USDT',
+      'ETH/USDTPERP',
+      'SOL/USDT',
+      'SOL/USDTPERP',
+      'XRP/USDT',
+      'XRP/USDTPERP',
+      'DOGE/USDT',
+      'DOGE/USDTPERP'
+    ]);
+  }
+
+  if (mode === 'TOP_SPS_CORE') {
+    return M9__symbolArrayToMap_([
+      'BTC/USDT',
+      'BTC/USDTPERP',
+      'ETH/USDT',
+      'ETH/USDTPERP',
+      'SOL/USDT',
+      'SOL/USDTPERP',
+      'XRP/USDT',
+      'XRP/USDTPERP'
+    ]);
+  }
+
+  if (mode === 'TOP_SPS_WITH_DOGE') {
+    return M9__symbolArrayToMap_([
+      'BTC/USDT',
+      'BTC/USDTPERP',
+      'ETH/USDT',
+      'ETH/USDTPERP',
+      'SOL/USDT',
+      'SOL/USDTPERP',
+      'XRP/USDT',
+      'XRP/USDTPERP',
+      'DOGE/USDT',
+      'DOGE/USDTPERP'
+    ]);
+  }
+
+  if (mode === 'PERP_CORE') {
+    return M9__symbolArrayToMap_([
+      'BTC/USDTPERP',
+      'ETH/USDTPERP',
+      'SOL/USDTPERP',
+      'XRP/USDTPERP',
+      'DOGE/USDTPERP'
+    ]);
+  }
+
+  if (mode === 'SPOT_CORE') {
+    return M9__symbolArrayToMap_([
+      'BTC/USDT',
+      'ETH/USDT',
+      'SOL/USDT',
+      'XRP/USDT',
+      'DOGE/USDT'
+    ]);
+  }
+
+  if (mode === 'HARD_FILTER_SPOT') {
+    return M9__symbolArrayToMap_([
+      'BTC/USDT',
+      'ETH/USDT',
+      'SOL/USDT',
+      'XRP/USDT',
+      'DOGE/USDT'
+    ]);
+  }
+
+  if (mode === 'HARD_FILTER_PERP') {
+    return M9__symbolArrayToMap_([
+      'BTC/USDTPERP',
+      'ETH/USDTPERP',
+      'SOL/USDTPERP',
+      'XRP/USDTPERP',
+      'DOGE/USDTPERP'
+    ]);
+  }
+
+  // Legacy fallback preserved
+  return M9__resolveLegacyUniverseSymbolMap_(mode);
+}
+
+
+function M9__resolveLegacyUniverseSymbolMap_(mode) {
+  mode = String(mode || 'ALL').trim().toUpperCase();
+
+  if (mode === 'ALL') return null;
+
+  var hard = M2_getHardFilterPassSymbols();
+  var out = {};
+
+  for (var i = 0; i < hard.length; i++) {
+    var sym = String(hard[i] || '').trim();
+    if (!sym) continue;
+
+    var s = sym.toUpperCase();
+    var isBTC = (s.indexOf('BTC') !== -1);
+    var isETH = (s.indexOf('ETH') !== -1);
+    var isSOL = (s.indexOf('SOL') !== -1);
+    var isXRP = (s.indexOf('XRP') !== -1);
+
+    var isMajor = isBTC || isETH || isSOL || isXRP;
+
+    var ok = false;
+    if (mode === 'BTC_ONLY') ok = isBTC;
+    else if (mode === 'ETH_ONLY') ok = isETH;
+    else if (mode === 'MAJORS_EX_BTC_ETH') ok = isMajor && !isBTC && !isETH;
+    else if (mode === 'MAJORS_ONLY') ok = isMajor;
+    else if (mode === 'LIQUID_MINORS') ok = !isMajor;
+    else ok = true;
+
+    if (ok) out[s] = true;
+  }
+
+  return out;
+}
+
+function M9__symbolArrayToMap_(arr) {
+  var out = {};
+  arr = arr || [];
+  for (var i = 0; i < arr.length; i++) {
+    var s = String(arr[i] || '').trim().toUpperCase();
+    if (s) out[s] = true;
+  }
+  return out;
+}
+
+function M9__symbolObjArrayToMap_(arr) {
+  var out = {};
+  arr = arr || [];
+  for (var i = 0; i < arr.length; i++) {
+    var s = String((arr[i] && arr[i].sym) || '').trim().toUpperCase();
+    if (s) out[s] = true;
+  }
+  return out;
+}
+
+
+function M9__resolveLegacyUniverseSymbolMap_(mode) {
+  mode = String(mode || 'ALL').toUpperCase();
+
+  if (mode === 'ALL') return null;
+
+  var hard = M2_getHardFilterPassSymbols();
+  var out = {};
+
+  for (var i = 0; i < hard.length; i++) {
+    var sym = String(hard[i] || '').trim();
+    if (!sym) continue;
+
+    var s = sym.toUpperCase();
+    var isBTC = (s.indexOf('BTC') !== -1);
+    var isETH = (s.indexOf('ETH') !== -1);
+    var isSOL = (s.indexOf('SOL') !== -1);
+    var isXRP = (s.indexOf('XRP') !== -1);
+
+    var isMajor = isBTC || isETH || isSOL || isXRP;
+
+    var ok = false;
+    if (mode === 'BTC_ONLY') ok = isBTC;
+    else if (mode === 'ETH_ONLY') ok = isETH;
+    else if (mode === 'MAJORS_EX_BTC_ETH') ok = isMajor && !isBTC && !isETH;
+    else if (mode === 'MAJORS_ONLY') ok = isMajor;
+    else if (mode === 'LIQUID_MINORS') ok = !isMajor;
+
+    if (ok) out[s] = true;
+  }
+
+  return out;
+}
+
+function M9__symbolArrayToMap_(arr) {
+  var out = {};
+  arr = arr || [];
+  for (var i = 0; i < arr.length; i++) {
+    var s = String(arr[i] || '').trim().toUpperCase();
+    if (s) out[s] = true;
+  }
+  return out;
+}
+
+function M9__symbolObjArrayToMap_(arr) {
+  var out = {};
+  arr = arr || [];
+  for (var i = 0; i < arr.length; i++) {
+    var s = String((arr[i] && arr[i].sym) || '').trim().toUpperCase();
+    if (s) out[s] = true;
+  }
+  return out;
 }
 
 function M9__btUniqueSortedMs_(masterMs) {
@@ -1484,10 +1808,7 @@ function M9__btProcessPendingEntries_(ctx, nowMs, tIdx) {
       continue;
     }
 
-    var stop = (pe.dir === 'LONG')
-      ? (entry - stopDistPx)
-      : (entry + stopDistPx);
-
+    var stop = (pe.dir === 'LONG') ? (entry - stopDistPx) : (entry + stopDistPx);
     var rDistPx = Math.abs(entry - stop);
     if (!(isFinite(rDistPx) && rDistPx > 0)) {
       bump('rejectedRDist');
@@ -1529,26 +1850,22 @@ function M9__btProcessPendingEntries_(ctx, nowMs, tIdx) {
       continue;
     }
 
-    // 1x-safe exposure cap
     var notionalZar = Math.abs(entryZar * qty);
     if (!(isFinite(notionalZar) && notionalZar > 0)) {
       bump('rejectedQty');
       continue;
     }
 
-    // Hard cap: do not exceed available equity notionally in 1x mode
     if (lev <= 1 && notionalZar > ctx.equity) {
       qty = ctx.equity / entryZar;
       notionalZar = Math.abs(entryZar * qty);
       bump('qtyScaledByEquityCap');
     }
 
-    // Soft cap from margin-used rule if configured
     var maxMarginUsedPct = isFinite(p.maxMarginUsedPct) ? p.maxMarginUsedPct : 0;
     if (maxMarginUsedPct > 0) {
       var reqMarginZar = notionalZar / Math.max(1, lev);
       var maxMarginZar = ctx.equity * maxMarginUsedPct;
-
       if (reqMarginZar > maxMarginZar) {
         var scale = maxMarginZar / reqMarginZar;
         qty = qty * scale;
@@ -1562,7 +1879,6 @@ function M9__btProcessPendingEntries_(ctx, nowMs, tIdx) {
       continue;
     }
 
-    // Recompute after scaling
     notionalZar = Math.abs(entryZar * qty);
     if (!(isFinite(notionalZar) && notionalZar > 0)) {
       bump('rejectedQty');
@@ -1572,7 +1888,6 @@ function M9__btProcessPendingEntries_(ctx, nowMs, tIdx) {
     var feeEntry = notionalZar * p.feeTaker;
     if (!isFinite(feeEntry) || feeEntry < 0) feeEntry = 0;
 
-    // Prevent fee from instantly breaking accounting
     if (feeEntry > ctx.equity) {
       bump('rejectedFee');
       continue;
@@ -1584,37 +1899,46 @@ function M9__btProcessPendingEntries_(ctx, nowMs, tIdx) {
       sym: pe.sym,
       dir: pe.dir,
       entryMs: nowMs,
+      entryTIdx: tIdx,
       entry: entry,
       entryZar: entryZar,
       fxEntry: fxEntry,
-
       stop: stop,
+      initialStop: stop,
       rDistPx: rDistPx,
       rDistZar: rDistZar,
       tp1: tp1,
       tp2: tp1,
-
       lev: lev,
       grade: pe.grade,
       dqs: pe.dqs,
       regime: pe.regime,
-
       qty: qty,
       qtyCore: qty,
       qtyRunner: 0,
-
       coreOpen: true,
       runnerOpen: false,
-
       feesEntryZar: feeEntry,
       feesExitZar: 0,
       fundingZar: 0,
       borrowZar: 0,
       coreRealizedZar: 0,
       runnerRealizedZar: 0,
-
       mfeR: 0,
       maeR: 0,
+      overlayMode: String(p.payoffOverlayMode || 'CONTROL').toUpperCase(),
+      progressDeadlineBars: p.progressDeadlineBars,
+      progressMinR: p.progressMinR,
+      maxHoldBars: p.maxHoldBars,
+      fullExitOnTp1: !!p.fullExitOnTp1,
+      tailClampEnabled: !!p.tailClampEnabled,
+      tailClampTriggerR: p.tailClampTriggerR,
+      tailClampStopR: p.tailClampStopR,
+      centerExitEnabled: !!p.centerExitEnabled,
+      centerExitMode: String(p.centerExitMode || 'NONE').toUpperCase(),
+      centerExitBufferAtr: p.centerExitBufferAtr,
+      tailClamped: false,
+      timeExitArmed: true,
       exitMs: null,
       exitReason: ''
     });
@@ -1632,6 +1956,22 @@ function M9__btManageOpenPositions_(ctx, nowMs, tIdx) {
 
   function bump(k) {
     diag[k] = (diag[k] || 0) + 1;
+  }
+
+  function closeWholePos_(pos, exitPx, fxExit, nowMs, reason) {
+    var r = M9__btCloseLeg_(ctx, pos, exitPx, pos.qtyCore, fxExit);
+    pos.coreRealizedZar += r.realized;
+    pos.feesExitZar += r.fee;
+    ctx.equity += r.realized;
+    pos.coreOpen = false;
+    pos.exitMs = nowMs;
+    pos.exitReason = reason;
+    ctx.trades.push(M9__btFinalizeTrade_(pos, reason));
+    return r;
+  }
+
+  function deriveCenterExitPx_(pos, cd) {
+    return pos.tp2;
   }
 
   for (var i = 0; i < ctx.openPos.length; i++) {
@@ -1656,7 +1996,6 @@ function M9__btManageOpenPositions_(ctx, nowMs, tIdx) {
 
     M9__btApplyFundingBorrow_(ctx, pos, cd, tIdx);
 
-    // Update MFE / MAE
     if (pos.dir === 'LONG') {
       pos.mfeR = Math.max(pos.mfeR || 0, (cd.h - pos.entry) / (pos.rDistPx || 1));
       pos.maeR = Math.max(pos.maeR || 0, (pos.entry - cd.l) / (pos.rDistPx || 1));
@@ -1666,37 +2005,32 @@ function M9__btManageOpenPositions_(ctx, nowMs, tIdx) {
     }
 
     var qtyOpen = pos.coreOpen ? pos.qtyCore : 0;
-    if (!(qtyOpen > 0)) {
-      continue;
+    if (!(qtyOpen > 0)) continue;
+
+    if (pos.tailClampEnabled && !pos.tailClamped && isFinite(pos.tailClampTriggerR) && pos.mfeR >= pos.tailClampTriggerR) {
+      var clampStop;
+      if (pos.dir === 'LONG') {
+        clampStop = pos.entry + (pos.tailClampStopR * pos.rDistPx);
+        pos.stop = Math.max(pos.stop, clampStop);
+      } else {
+        clampStop = pos.entry - (pos.tailClampStopR * pos.rDistPx);
+        pos.stop = Math.min(pos.stop, clampStop);
+      }
+      pos.tailClamped = true;
+      bump('tailClampApplied');
     }
 
-    // Move stop to breakeven once price reaches configured R
     var beR = isFinite(p.breakevenMoveR) ? p.breakevenMoveR : 1.0;
     if (pos.mfeR >= beR) {
       if (pos.dir === 'LONG') pos.stop = Math.max(pos.stop, pos.entry);
       else pos.stop = Math.min(pos.stop, pos.entry);
     }
 
-    var stopHit = (pos.dir === 'LONG')
-      ? (cd.l <= pos.stop)
-      : (cd.h >= pos.stop);
+    var stopHit = (pos.dir === 'LONG') ? (cd.l <= pos.stop) : (cd.h >= pos.stop);
+    var tpHit = (pos.dir === 'LONG') ? (cd.h >= pos.tp2) : (cd.l <= pos.tp2);
 
-    var tpHit = (pos.dir === 'LONG')
-      ? (cd.h >= pos.tp2)
-      : (cd.l <= pos.tp2);
-
-    // If both TP and stop are touched in same candle,
-    // choose STOP first for conservative simulation.
     if (stopHit) {
-      var rStop = M9__btCloseLeg_(ctx, pos, pos.stop, pos.qtyCore, fxExit);
-      pos.coreRealizedZar += rStop.realized;
-      pos.feesExitZar += rStop.fee;
-      ctx.equity += rStop.realized;
-      pos.coreOpen = false;
-
-      pos.exitMs = nowMs;
-      pos.exitReason = 'STOP';
-      ctx.trades.push(M9__btFinalizeTrade_(pos, 'STOP'));
+      closeWholePos_(pos, pos.stop, fxExit, nowMs, 'STOP');
       if (!ctx.cooldown) ctx.cooldown = {};
       ctx.cooldown[pos.sym] = tIdx;
       bump('exitStop');
@@ -1704,16 +2038,45 @@ function M9__btManageOpenPositions_(ctx, nowMs, tIdx) {
     }
 
     if (tpHit) {
-      var rTp = M9__btCloseLeg_(ctx, pos, pos.tp2, pos.qtyCore, fxExit);
-      pos.coreRealizedZar += rTp.realized;
-      pos.feesExitZar += rTp.fee;
-      ctx.equity += rTp.realized;
-      pos.coreOpen = false;
+      if (pos.fullExitOnTp1 || !pos.centerExitEnabled) {
+        closeWholePos_(pos, pos.tp2, fxExit, nowMs, 'TP');
+        bump('exitTp');
+        continue;
+      }
+    }
 
-      pos.exitMs = nowMs;
-      pos.exitReason = 'TP';
-      ctx.trades.push(M9__btFinalizeTrade_(pos, 'TP'));
+    if (pos.centerExitEnabled) {
+      var centerPx = deriveCenterExitPx_(pos, cd);
+      var centerHit = false;
+      if (pos.dir === 'LONG') centerHit = (cd.h >= centerPx);
+      else centerHit = (cd.l <= centerPx);
+
+      if (centerHit) {
+        closeWholePos_(pos, centerPx, fxExit, nowMs, 'CENTER_EXIT');
+        bump('exitCenter');
+        continue;
+      }
+    } else if (tpHit) {
+      closeWholePos_(pos, pos.tp2, fxExit, nowMs, 'TP');
       bump('exitTp');
+      continue;
+    }
+
+    var barsHeld = (isFinite(pos.entryTIdx) ? (tIdx - pos.entryTIdx) : 0);
+
+    if (barsHeld >= pos.progressDeadlineBars && pos.mfeR < pos.progressMinR) {
+      closeWholePos_(pos, cd.c, fxExit, nowMs, 'PROGRESS_FAIL');
+      if (!ctx.cooldown) ctx.cooldown = {};
+      ctx.cooldown[pos.sym] = tIdx;
+      bump('exitProgressFail');
+      continue;
+    }
+
+    if (barsHeld >= pos.maxHoldBars) {
+      closeWholePos_(pos, cd.c, fxExit, nowMs, 'TIME_STOP');
+      if (!ctx.cooldown) ctx.cooldown = {};
+      ctx.cooldown[pos.sym] = tIdx;
+      bump('exitTimeStop');
       continue;
     }
 
@@ -2220,7 +2583,7 @@ function M9_runWalkForwardBacktest() {
   var bySym = dc.bySym;
 
   var syms = M9__btBuildSymbolList_(bySym);
-  var eligibleSyms = M9__btBuildEligibleSyms_(syms, p.universeMode);
+  var eligibleSyms = M9__btBuildEligibleSyms_(syms, p.universeMode, p);
 
   M9__assertTrue4HData_(bySym);
 
@@ -3622,26 +3985,13 @@ function M9_testRunAll() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-function M9__isEligibleSymbol_(sym, universeMode) {
+function M9__isEligibleSymbol_(sym, universeMode, ov) {
   if (!sym) return false;
 
-  var s = String(sym).toUpperCase();
-  var mode = String(universeMode || 'ALL').toUpperCase();
+  var allowedMap = M9__resolveUniverseSymbolMap_(universeMode, ov);
+  if (allowedMap === null) return true;
 
-  var isBTC = (s.indexOf('BTC') !== -1);
-  var isETH = (s.indexOf('ETH') !== -1);
-  var isSOL = (s.indexOf('SOL') !== -1);
-  var isXRP = (s.indexOf('XRP') !== -1);
-
-  var isMajor = isBTC || isETH || isSOL || isXRP;
-
-  if (mode === 'BTC_ONLY') return isBTC;
-  if (mode === 'ETH_ONLY') return isETH;
-  if (mode === 'MAJORS_EX_BTC_ETH') return isMajor && !isBTC && !isETH;
-  if (mode === 'MAJORS_ONLY') return isMajor;
-  if (mode === 'LIQUID_MINORS') return !isMajor;
-
-  return true;
+  return !!allowedMap[String(sym).trim().toUpperCase()];
 }
 
 
@@ -4239,52 +4589,38 @@ function RUN_backtestSafe() {
     if (typeof M2_logCanonicalHistoryStatus === 'function') {
       M2_logCanonicalHistoryStatus();
     }
+  } catch (e) {}
 
-    Logger.log('[RUN][DIAG] typeof M9_runWalkForwardBacktest=' + typeof M9_runWalkForwardBacktest);
-    Logger.log('[RUN][DIAG] typeof M9_CONST=' + typeof M9_CONST);
-    Logger.log('[RUN][DIAG] typeof M9_COL=' + typeof M9_COL);
+  RUN__ensureM9Globals_();
 
-    if (typeof M9_runWalkForwardBacktest !== 'function') {
-      throw new Error('M9_runWalkForwardBacktest is not defined');
-    }
+  Logger.log('[RUN][DIAG] typeof M9_runWalkForwardBacktest=' + typeof M9_runWalkForwardBacktest);
+  Logger.log('[RUN][DIAG] typeof M9_CONST=' + typeof M9_CONST);
+  Logger.log('[RUN][DIAG] typeof M9_COL=' + typeof M9_COL);
 
-    if (typeof M9_CONST === 'undefined' || !M9_CONST) {
-      throw new Error('M9_CONST is undefined');
-    }
-
-    if (!M9_CONST.SHEETS) {
-      throw new Error('M9_CONST.SHEETS is undefined');
-    }
-
-    if (!M9_CONST.HEADERS) {
-      throw new Error('M9_CONST.HEADERS is undefined');
-    }
-
-    if (typeof M9_COL === 'undefined' || !M9_COL) {
-      throw new Error('M9_COL is undefined');
-    }
-
-    var result = M9_runWalkForwardBacktest();
-    if (!result || !result.backtestId) {
-      throw new Error('Backtest result missing backtestId');
-    }
-
-    Logger.log('[RUN] Backtest completed successfully. Backtest_ID=' + result.backtestId);
-
-    try {
-      if (typeof M9_printBacktestDiag === 'function') {
-        M9_printBacktestDiag(result.backtestId);
-      }
-    } catch (diagErr) {
-      Logger.log('[RUN] Backtest diag print skipped: ' + diagErr.message);
-    }
-
-    return result;
-
-  } catch (e) {
-    Logger.log('[RUN] Backtest blocked/failed: ' + e.message);
-    throw e;
+  if (typeof M9_runWalkForwardBacktest !== 'function') {
+    throw new Error('M9_runWalkForwardBacktest is not defined');
   }
+  if (typeof M9_CONST === 'undefined' || !M9_CONST) {
+    throw new Error('M9_CONST is undefined');
+  }
+  if (!M9_CONST.SHEETS) {
+    throw new Error('M9_CONST.SHEETS is undefined');
+  }
+  if (!M9_CONST.HEADERS) {
+    throw new Error('M9_CONST.HEADERS is undefined');
+  }
+  if (typeof M9_COL === 'undefined' || !M9_COL) {
+    throw new Error('M9_COL is undefined');
+  }
+
+  var result = M9_runWalkForwardBacktest();
+
+  if (!result || !result.backtestId) {
+    throw new Error('Backtest result missing backtestId');
+  }
+
+  Logger.log('[RUN] Backtest completed successfully. Backtest_ID=' + result.backtestId);
+  return result;
 }
 
 
@@ -4296,16 +4632,46 @@ function RUN_backtestSafe() {
 function M9_printBacktestDiag(btId) {
   if (!btId) throw new Error('[M9] Missing btId.');
 
-  var props = null;
-  if (typeof M9__props_ === 'function') props = M9__props_();
-  else props = PropertiesService.getDocumentProperties();
+  btId = String(btId).trim();
 
-  var raw = props.getProperty('M9_DIAG_' + btId);
-  if (!raw) {
-    throw new Error('[M9] No diag blob found for ' + btId + ' (Document Properties M9_DIAG_' + btId + ').');
+  var blob = null;
+
+  // 1) Preferred path: Supabase diag_blob
+  try {
+    if (typeof M10__sbFetchJson_ === 'function') {
+      var rows = M10__sbFetchJson_(
+        'get',
+        '/rest/v1/experiment_logs?backtest_id=eq.' + encodeURIComponent(btId) +
+        '&select=diag_blob&order=created_at.desc&limit=1'
+      );
+
+      if (rows && rows.length && rows[0] && rows[0].diag_blob) {
+        blob = rows[0].diag_blob;
+      }
+    }
+  } catch (eSb) {
+    Logger.log('[M9 DIAG][WARN] Supabase diag_blob fetch failed for ' + btId + ': ' + eSb.message);
   }
 
-  var blob = JSON.parse(raw);
+  // 2) Fallback path: old Document Properties blob
+  if (!blob) {
+    try {
+      var props = null;
+      if (typeof M9__props_ === 'function') props = M9__props_();
+      else props = PropertiesService.getDocumentProperties();
+
+      var raw = props.getProperty('M9_DIAG_' + btId);
+      if (raw) {
+        blob = JSON.parse(raw);
+      }
+    } catch (eProps) {
+      Logger.log('[M9 DIAG][WARN] Document Properties diag fetch failed for ' + btId + ': ' + eProps.message);
+    }
+  }
+
+  if (!blob) {
+    throw new Error('[M9] No diag blob found for ' + btId + ' in Supabase or Document Properties.');
+  }
 
   var tz = 'Africa/Johannesburg';
   try {
@@ -4315,20 +4681,38 @@ function M9_printBacktestDiag(btId) {
     }
   } catch (eCfg) {}
 
-  var splitMs = blob.splitMs;
+  // Support both old and new blob shapes
+  var splitMs = blob.splitMs || (blob.bt_result && blob.bt_result.splitMs) || '';
   var splitStr = splitMs ? Utilities.formatDate(new Date(splitMs), tz, 'yyyy-MM-dd') : 'N/A';
 
-  var allTotal = (blob.all && blob.all.metrics) ? blob.all.metrics.total : '';
-  var oosTotal = (blob.oos && blob.oos.metrics) ? blob.oos.metrics.total : '';
+  var allTotal = '';
+  var oosTotal = '';
+
+  if (blob.all && blob.all.metrics) {
+    allTotal = blob.all.metrics.total || '';
+  } else if (blob.bt_result && blob.bt_result.all && blob.bt_result.all.metrics) {
+    allTotal = blob.bt_result.all.metrics.total || '';
+  }
+
+  if (blob.oos && blob.oos.metrics) {
+    oosTotal = blob.oos.metrics.total || '';
+  } else if (blob.bt_result && blob.bt_result.oos && blob.bt_result.oos.metrics) {
+    oosTotal = blob.bt_result.oos.metrics.total || '';
+  }
+
+  var diagV2 = blob.diagV2 || (blob.bt_result ? blob.bt_result.diagV2 : null);
+  var passFail = blob.passFail || (blob.bt_result ? blob.bt_result.passFail : null);
+  var mode = blob.mode || (blob.bt_result ? blob.bt_result.mode : '');
+  var version = blob.version || (blob.bt_result ? blob.bt_result.version : '');
 
   Logger.log('══════════════════════════════════════════════');
   Logger.log('[M9 DIAG] ' + btId);
-  Logger.log('Mode=' + (blob.mode || '') + ' Version=' + (blob.version || '') + ' TZ=' + tz);
+  Logger.log('Mode=' + (mode || '') + ' Version=' + (version || '') + ' TZ=' + tz);
   Logger.log('Split (OOS starts) = ' + splitStr + ' (ms=' + splitMs + ')');
   Logger.log('Trades: ALL=' + allTotal + ' | OOS=' + oosTotal);
 
-  if (blob.diagV2) {
-    var d = blob.diagV2;
+  if (diagV2) {
+    var d = diagV2;
     Logger.log(
       '[V2] eligible=' + (d.eligibleSymbols || 0) +
       ' skippedByRegime=' + (d.skippedByRegime || 0) +
@@ -4344,8 +4728,13 @@ function M9_printBacktestDiag(btId) {
     );
   }
 
-  if (blob.passFail) {
-    Logger.log('OOS PassFail passed=' + blob.passFail.passed + ' reasons=' + JSON.stringify(blob.passFail.reasons || []));
+  if (passFail) {
+    Logger.log('OOS PassFail passed=' + passFail.passed + ' reasons=' + JSON.stringify(passFail.reasons || []));
+  }
+
+  if (blob.error || (blob.bt_result && blob.bt_result.error)) {
+    var err = blob.error || blob.bt_result.error;
+    Logger.log('[M9 DIAG] ERROR=' + JSON.stringify(err));
   }
 
   Logger.log('══════════════════════════════════════════════');
@@ -4428,7 +4817,7 @@ function M9_diagDqsRejections() {
     var dc = M9__btLoadDataClean4h_(dr.startMs, dr.endMs);
     var bySym = dc.bySym;
     var syms = M9__btBuildSymbolList_(bySym);
-    var eligibleSyms = M9__btBuildEligibleSyms_(syms, p.universeMode);
+    var eligibleSyms = M9__btBuildEligibleSyms_(syms, p.universeMode, p);
     var master = M9__btUniqueSortedMs_(dc.masterMs);
 
     var seekObj = M9__btMakeSeekIdx_(bySym, syms);
@@ -5207,53 +5596,466 @@ function M9__dqsSumFinalize_(ctx) {
 
 
 function RUN_diagM9ConstNow() {
+  var g = (typeof globalThis !== 'undefined') ? globalThis : this;
+  var st = RUN__ensureM9Globals_();
+
   Logger.log('[RUN][M9 DIAG] ═══════════════════════════════════════');
   Logger.log('[RUN][M9 DIAG] Starting');
   Logger.log('[RUN][M9 DIAG] ═══════════════════════════════════════');
 
-  try {
-    Logger.log('[RUN][M9 DIAG] typeof M9_CONST = ' + typeof M9_CONST);
-  } catch (e0) {
-    Logger.log('[RUN][M9 DIAG] typeof M9_CONST failed: ' + e0.message);
-  }
+  Logger.log('[RUN][M9 DIAG] typeof M9_runWalkForwardBacktest = ' + typeof M9_runWalkForwardBacktest);
+  Logger.log('[RUN][M9 DIAG] typeof M9_CONST = ' + typeof M9_CONST);
+  Logger.log('[RUN][M9 DIAG] typeof M9_COL = ' + typeof M9_COL);
+  Logger.log('[RUN][M9 DIAG] typeof globalThis.M9_CONST = ' + typeof g.M9_CONST);
+  Logger.log('[RUN][M9 DIAG] typeof globalThis.M9_COL = ' + typeof g.M9_COL);
+
+  Logger.log('[RUN][M9 DIAG] ensure.hasFn = ' + st.hasFn);
+  Logger.log('[RUN][M9 DIAG] ensure.hasConstLocal = ' + st.hasConstLocal);
+  Logger.log('[RUN][M9 DIAG] ensure.hasColLocal = ' + st.hasColLocal);
+  Logger.log('[RUN][M9 DIAG] ensure.hasConstGlobal = ' + st.hasConstGlobal);
+  Logger.log('[RUN][M9 DIAG] ensure.hasColGlobal = ' + st.hasColGlobal);
 
   try {
-    Logger.log('[RUN][M9 DIAG] typeof M9_COL = ' + typeof M9_COL);
+    Logger.log('[RUN][M9 DIAG] M9_CONST.SHEETS = ' + JSON.stringify((typeof M9_CONST !== 'undefined' && M9_CONST) ? M9_CONST.SHEETS : null));
   } catch (e1) {
-    Logger.log('[RUN][M9 DIAG] typeof M9_COL failed: ' + e1.message);
+    Logger.log('[RUN][M9 DIAG] M9_CONST.SHEETS failed: ' + e1.message);
   }
 
   try {
-    Logger.log('[RUN][M9 DIAG] typeof M9_runWalkForwardBacktest = ' + typeof M9_runWalkForwardBacktest);
+    Logger.log('[RUN][M9 DIAG] M9_CONST.HEADERS keys = ' + Object.keys((typeof M9_CONST !== 'undefined' && M9_CONST && M9_CONST.HEADERS) ? M9_CONST.HEADERS : {}).join(', '));
   } catch (e2) {
-    Logger.log('[RUN][M9 DIAG] typeof M9_runWalkForwardBacktest failed: ' + e2.message);
+    Logger.log('[RUN][M9 DIAG] M9_CONST.HEADERS failed: ' + e2.message);
   }
 
   try {
-    Logger.log('[RUN][M9 DIAG] M9_CONST keys = ' + Object.keys(M9_CONST || {}).join(', '));
+    Logger.log('[RUN][M9 DIAG] M9_COL keys = ' + Object.keys((typeof M9_COL !== 'undefined' && M9_COL) ? M9_COL : {}).join(', '));
   } catch (e3) {
-    Logger.log('[RUN][M9 DIAG] M9_CONST keys failed: ' + e3.message);
-  }
-
-  try {
-    Logger.log('[RUN][M9 DIAG] M9_CONST.SHEETS = ' + JSON.stringify(M9_CONST.SHEETS));
-  } catch (e4) {
-    Logger.log('[RUN][M9 DIAG] M9_CONST.SHEETS failed: ' + e4.message);
-  }
-
-  try {
-    Logger.log('[RUN][M9 DIAG] M9_CONST.HEADERS keys = ' + Object.keys((M9_CONST && M9_CONST.HEADERS) || {}).join(', '));
-  } catch (e5) {
-    Logger.log('[RUN][M9 DIAG] M9_CONST.HEADERS failed: ' + e5.message);
-  }
-
-  try {
-    Logger.log('[RUN][M9 DIAG] M9_COL keys = ' + Object.keys(M9_COL || {}).join(', '));
-  } catch (e6) {
-    Logger.log('[RUN][M9 DIAG] M9_COL keys failed: ' + e6.message);
+    Logger.log('[RUN][M9 DIAG] M9_COL keys failed: ' + e3.message);
   }
 
   Logger.log('[RUN][M9 DIAG] ═══════════════════════════════════════');
   Logger.log('[RUN][M9 DIAG] Complete');
   Logger.log('[RUN][M9 DIAG] ═══════════════════════════════════════');
+}
+
+
+function RUN__assertM9Loaded_() {
+  var g = (typeof globalThis !== 'undefined') ? globalThis : this;
+  var st = RUN__ensureM9Globals_();
+
+  var ok =
+    st.hasFn &&
+    (st.hasConstLocal || st.hasConstGlobal) &&
+    (st.hasColLocal || st.hasColGlobal) &&
+    ((typeof M9_CONST !== 'undefined' && M9_CONST && M9_CONST.SHEETS && M9_CONST.HEADERS) ||
+     (typeof g.M9_CONST !== 'undefined' && g.M9_CONST && g.M9_CONST.SHEETS && g.M9_CONST.HEADERS)) &&
+    ((typeof M9_COL !== 'undefined' && M9_COL && M9_COL.BACKTEST_RESULTS) ||
+     (typeof g.M9_COL !== 'undefined' && g.M9_COL && g.M9_COL.BACKTEST_RESULTS));
+
+  if (!ok) {
+    throw new Error(
+      '[RUN] M9 not loaded correctly in this execution context.\n' +
+      'typeof M9_runWalkForwardBacktest=' + (typeof M9_runWalkForwardBacktest) + '\n' +
+      'typeof M9_CONST=' + (typeof M9_CONST) + '\n' +
+      'typeof M9_COL=' + (typeof M9_COL) + '\n' +
+      'typeof globalThis.M9_CONST=' + (typeof g.M9_CONST) + '\n' +
+      'typeof globalThis.M9_COL=' + (typeof g.M9_COL) + '\n' +
+      'Expected M9 function + constants + column maps in the same runtime.'
+    );
+  }
+}
+
+
+
+
+function AUDIT__UniverseResolutionSmokeTest() {
+  var fakeSyms = [
+    'BTC/ZAR',
+    'BTC/USDT',
+    'BTC/USDTPERP',
+    'ETH/USDT',
+    'XRP/ZAR',
+    'XRP/USDT',
+    'XRP/USDTPERP',
+    'SOL/ZAR',
+    'SOL/USDTPERP',
+    'DOGE/ZAR',
+    'DOGE/USDTPERP',
+    'BNB/ZAR'
+  ];
+
+  var tests = [
+    { label: 'MAJORS_ONLY', mode: 'MAJORS_ONLY', p: { universeMode: 'MAJORS_ONLY' } },
+    { label: 'HARD_FILTER_ALL', mode: 'HARD_FILTER_ALL', p: { universeMode: 'HARD_FILTER_ALL' } },
+    { label: 'TOP_K', mode: 'TOP_K', p: { universeMode: 'TOP_K' } },
+    { label: 'TOP_SPS_CORE', mode: 'TOP_SPS_CORE', p: { universeMode: 'TOP_SPS_CORE' } },
+    { label: 'TOP_SPS_WITH_DOGE', mode: 'TOP_SPS_WITH_DOGE', p: { universeMode: 'TOP_SPS_WITH_DOGE' } },
+    { label: 'PERP_CORE', mode: 'PERP_CORE', p: { universeMode: 'PERP_CORE' } },
+    { label: 'SPOT_CORE', mode: 'SPOT_CORE', p: { universeMode: 'SPOT_CORE' } },
+    {
+      label: 'CUSTOM',
+      mode: 'CUSTOM',
+      p: {
+        universeMode: 'CUSTOM',
+        Symbol_Allowlist: ['BTC/USDT', 'XRP/USDTPERP', 'DOGE/ZAR']
+      }
+    }
+  ];
+
+  var out = [];
+  for (var i = 0; i < tests.length; i++) {
+    var t = tests[i];
+    var eligible = M9__btBuildEligibleSyms_(fakeSyms, t.mode, t.p);
+    out.push('[' + t.label + '] ' + JSON.stringify(eligible));
+  }
+
+  Logger.log(out.join('\n'));
+  return out.join('\n');
+}
+
+
+
+/*
+══════════════════════════════════════════════════════════════
+M9_SupabaseBridge.gs
+Minimal bridge from Supabase canonical candles into M9 backtest loader shape.
+══════════════════════════════════════════════════════════════
+*/
+
+function M9__useSupabaseBacktestHistory_() {
+  try {
+    var sp = PropertiesService.getScriptProperties();
+    var v = sp.getProperty('USE_SUPABASE_BACKTEST_HISTORY') || 'TRUE';
+    v = String(v).trim().toUpperCase();
+    return (v === 'TRUE' || v === '1' || v === 'YES' || v === 'ON');
+  } catch (e1) {}
+  return true;
+}
+
+function M9__activeDatasetId_() {
+  try {
+    var sp = PropertiesService.getScriptProperties();
+    var v = sp.getProperty('ACTIVE_DATASET_ID') || '';
+    if (v) return String(v).trim();
+  } catch (e1) {}
+  return 'OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1';
+}
+
+function M9__baseSymbolToPerp_(sym) {
+  var s = String(sym || '').trim().toUpperCase();
+  if (!s) return s;
+  if (s.indexOf('/USDTPERP') !== -1) return s;
+  if (s.indexOf('/USDT') !== -1) return s.split('/')[0] + '/USDTPERP';
+  return s;
+}
+
+function M9__baseSymbolToSpot_(sym) {
+  var s = String(sym || '').trim().toUpperCase();
+  if (!s) return s;
+  if (s.indexOf('/USDT') !== -1 && s.indexOf('/USDTPERP') === -1) return s;
+  if (s.indexOf('/USDTPERP') !== -1) return s.split('/')[0] + '/USDT';
+  return s;
+}
+
+/**
+ * Pulls all 4H candles from Supabase coverage universe and builds
+ * the exact M9 loader shape: { bySym, masterMs }
+ */
+function M9__btLoadDataClean4hFromSupabase_(startMs, endMs, datasetId) {
+  datasetId = datasetId || M9__activeDatasetId_();
+
+  var hs = M2_sbGetCanonicalHistoryStatus_(datasetId);
+  if (!hs || !hs.rows || !hs.rows.length) {
+    throw new Error('[M9][SB] No coverage rows found for dataset ' + datasetId);
+  }
+
+  var bySym = {};
+  var masterMs = [];
+  var loadedPairs = {};
+
+  for (var i = 0; i < hs.rows.length; i++) {
+    var cov = hs.rows[i];
+    if (String(cov.timeframe || '') !== '4H') continue;
+    if (cov.is_ready !== true) continue;
+
+    var symbol = String(cov.symbol || '').trim();
+    var marketTypeRaw = String(cov.market_type || '').trim().toLowerCase();
+    if (!symbol) continue;
+
+    var pairKey = symbol + '||4H||' + marketTypeRaw;
+    if (loadedPairs[pairKey]) continue;
+    loadedPairs[pairKey] = true;
+
+    var sbRows = M2_sbFetchCandles_(datasetId, symbol, '4H', marketTypeRaw);
+    if (!sbRows || !sbRows.length) continue;
+
+    for (var j = 0; j < sbRows.length; j++) {
+      var r = sbRows[j];
+
+      var tms = new Date(r.ts).getTime();
+      if (!isFinite(tms) || tms < startMs || tms > endMs) continue;
+
+      var o = M9__safeNum_(r.open);
+      var h = M9__safeNum_(r.high);
+      var l = M9__safeNum_(r.low);
+      var c = M9__safeNum_(r.close);
+      var v = M9__safeNum_(r.volume);
+
+      if (!(o > 0 && h > 0 && l > 0 && c > 0)) continue;
+
+      if (!bySym[symbol]) bySym[symbol] = [];
+      bySym[symbol].push({
+        ms: tms,
+        o: o,
+        h: h,
+        l: l,
+        c: c,
+        v: v,
+        funding: null,
+        borrow: null,
+        fx: 1
+      });
+
+      masterMs.push(tms);
+    }
+  }
+
+  return { bySym: bySym, masterMs: masterMs };
+}
+
+function RUN_M9_verifySupabaseHistoryAndUniverseNow() {
+  var cfg = M9__cfgLoadMap_();
+  var p = M9__btLoadSimParams_(cfg);
+  var dr = M9__btResolveDateRange_(cfg);
+
+  var dc = M9__btLoadDataClean4h_(dr.startMs, dr.endMs);
+  var bySym = dc.bySym;
+  var syms = M9__btBuildSymbolList_(bySym);
+
+  Logger.log('[RUN][M9][VERIFY] ═══════════════════════════════════════');
+  Logger.log('[RUN][M9][VERIFY] dataset=' + M9__activeDatasetId_());
+  Logger.log('[RUN][M9][VERIFY] all loaded syms=' + JSON.stringify(syms));
+
+  var modes = [
+    'TOP_SPS_CORE',
+    'TOP_SPS_WITH_DOGE',
+    'PERP_CORE',
+    'SPOT_CORE',
+    'HARD_FILTER_ALL'
+  ];
+
+  for (var i = 0; i < modes.length; i++) {
+    var mode = modes[i];
+    var eligible = M9__btBuildEligibleSyms_(syms, mode, p);
+    Logger.log('[RUN][M9][VERIFY] mode=' + mode + ' eligible=' + JSON.stringify(eligible));
+  }
+
+  Logger.log('[RUN][M9][VERIFY] ═══════════════════════════════════════');
+}
+
+
+/*
+══════════════════════════════════════════════════════════════
+TEMP_RuntimeGhostAudit.gs
+READ-ONLY runtime ghost audit helpers.
+Do not mutate runtime from this file.
+══════════════════════════════════════════════════════════════
+*/
+
+function TEMP__safeTypeofGlobal_(name) {
+  try {
+    var g = (typeof globalThis !== 'undefined') ? globalThis : this;
+    return typeof g[name];
+  } catch (e) {
+    return 'ERROR:' + e.message;
+  }
+}
+
+function TEMP__safeFunctionExists_(name) {
+  try {
+    var g = (typeof globalThis !== 'undefined') ? globalThis : this;
+    return (typeof g[name] === 'function');
+  } catch (e) {
+    return false;
+  }
+}
+
+function TEMP_listTriggersDetailed() {
+  var triggers = ScriptApp.getProjectTriggers();
+  Logger.log('[GHOST][TRIGGERS] count=' + triggers.length);
+
+  for (var i = 0; i < triggers.length; i++) {
+    var t = triggers[i];
+    var handler = '';
+    var eventType = '';
+    var source = '';
+    var exists = false;
+
+    try { handler = t.getHandlerFunction(); } catch (e1) { handler = 'ERR:' + e1.message; }
+    try { eventType = String(t.getEventType()); } catch (e2) { eventType = 'ERR:' + e2.message; }
+    try { source = String(t.getTriggerSource()); } catch (e3) { source = 'ERR:' + e3.message; }
+
+    exists = TEMP__safeFunctionExists_(handler);
+
+    Logger.log(
+      '[GHOST][TRIGGER] idx=' + i +
+      ' handler=' + handler +
+      ' exists=' + exists +
+      ' eventType=' + eventType +
+      ' source=' + source
+    );
+  }
+}
+
+function TEMP_checkCriticalEntrypoints() {
+  var names = [
+    'MAIN_scheduledCycle',
+    'MAIN_dailyMaintenance',
+    'RUN_experimentMatrix_resumableStart',
+    'RUN_experimentMatrix_resumableContinue',
+    'RUN_experimentMatrix_rescueContinue',
+    'START_PERSISTENCE_HUNT_V2',
+    'START_PERSISTENCE_HUNT_V3',
+    'RUN_M2_sbAuditDatasetNow',
+    'RUN_M9_diagDirectLoad4hNow',
+    'RUN_M9_verifySupabaseHistoryAndUniverseNow',
+    'RUN_M9_freshDataSmokeBacktestNow',
+    'IGN_onOpen'
+  ];
+
+  Logger.log('[GHOST][ENTRYPOINTS] checking=' + names.length);
+
+  for (var i = 0; i < names.length; i++) {
+    var n = names[i];
+    Logger.log(
+      '[GHOST][ENTRYPOINT] name=' + n +
+      ' typeof=' + TEMP__safeTypeofGlobal_(n) +
+      ' exists=' + TEMP__safeFunctionExists_(n)
+    );
+  }
+}
+
+function TEMP_checkExperimentStateReadOnly() {
+  try {
+    if (typeof RUN__expLoadState_ !== 'function') {
+      Logger.log('[GHOST][EXPSTATE] RUN__expLoadState_ missing');
+      return;
+    }
+
+    var st = RUN__expLoadState_();
+    if (!st) {
+      Logger.log('[GHOST][EXPSTATE] no active experiment state');
+      return;
+    }
+
+    Logger.log('[GHOST][EXPSTATE] idx=' + st.idx +
+               ' jobs=' + (st.jobs ? st.jobs.length : 0) +
+               ' status=' + String(st.status || '') +
+               ' activeJobIdx=' + String(st.activeJobIdx) +
+               ' activeJobStartedAt=' + String(st.activeJobStartedAt || '') +
+               ' lastCompletedIdx=' + String(st.lastCompletedIdx) +
+               ' lastCompletedAt=' + String(st.lastCompletedAt || ''));
+  } catch (e) {
+    Logger.log('[GHOST][EXPSTATE] ERROR ' + e.message);
+  }
+}
+
+function TEMP_listInterestingPropertiesOnly() {
+  var props = null;
+  try {
+    props = RUN__getProps_();
+  } catch (e1) {
+    props = PropertiesService.getScriptProperties();
+  }
+
+  var all = props.getProperties();
+  var keys = Object.keys(all || {}).sort();
+
+  Logger.log('[GHOST][PROPS] count=' + keys.length);
+
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+
+    if (
+      k.indexOf('RUN_') === 0 ||
+      k.indexOf('M9_') === 0 ||
+      k.indexOf('M10_') === 0 ||
+      k.indexOf('M6_') === 0 ||
+      k.indexOf('M4_') === 0 ||
+      k.indexOf('M2B_') === 0 ||
+      k.indexOf('SUPABASE') === 0 ||
+      k.indexOf('VALR') === 0 ||
+      k.indexOf('CRYPTOCOMPARE') === 0 ||
+      k.indexOf('OPENROUTER') === 0
+    ) {
+      var v = String(all[k] || '');
+      Logger.log('[GHOST][PROP] key=' + k + ' len=' + v.length);
+    }
+  }
+}
+
+function TEMP_checkKnownFunctionSet() {
+  var names = [
+    'M2__executeRequest_',
+    'M2_valrPublicGet',
+    'M2_valrAuthGet',
+    'M2_fetchTopKCandlesIncremental',
+    'M2_fetchResearchUniverseCandlesIncremental',
+    'M2B_bootstrapFullActiveUniverse',
+    'M2B_bootstrapResearchUniverseResumableStart',
+    'M2B_bootstrapResearchUniverseResumableContinue',
+    'M2_sbGetCanonicalHistoryStatus_',
+    'M2_sbFetchCandles_',
+    'M9__btLoadDataClean4h_',
+    'M9__btLoadDataClean4hFromSupabase_',
+    'M9__resolveUniverseSymbolMap_',
+    'M6_runExecutionCycle',
+    'M10_createPendingCouncilDeliberationNow'
+  ];
+
+  for (var i = 0; i < names.length; i++) {
+    var n = names[i];
+    Logger.log('[GHOST][FNSET] ' + n + ' exists=' + TEMP__safeFunctionExists_(n));
+  }
+}
+
+/**
+ * Search source code files for suspicious references.
+ * Reads project files via Drive is not available directly in standard GAS source,
+ * so this helper is manual-reference only.
+ * Use this as a reminder runner.
+ */
+function TEMP_logManualSearchChecklist() {
+  Logger.log('[GHOST][SEARCH] Manual source search checklist:');
+  Logger.log('[GHOST][SEARCH] Search project for: IGN_onOpen');
+  Logger.log('[GHOST][SEARCH] Search project for: getDocumentById(');
+  Logger.log('[GHOST][SEARCH] Search project for: openById(');
+  Logger.log('[GHOST][SEARCH] Search project for: RUN_experimentMatrix_resumableContinue');
+  Logger.log('[GHOST][SEARCH] Search project for: RUN_experimentMatrix_rescueContinue');
+  Logger.log('[GHOST][SEARCH] Search project for: START_PERSISTENCE_HUNT_V2');
+  Logger.log('[GHOST][SEARCH] Search project for: START_PERSISTENCE_HUNT_V3');
+  Logger.log('[GHOST][SEARCH] Search project for duplicate definitions of: M9__btLoadDataClean4h_');
+  Logger.log('[GHOST][SEARCH] Search project for duplicate definitions of: RUN__ensureM9Globals_');
+  Logger.log('[GHOST][SEARCH] Search project for duplicate definitions of: M9__resolveUniverseSymbolMap_');
+}
+
+/**
+ * Master runner: read-only audit.
+ */
+function RUN_RuntimeGhostAuditNow() {
+  Logger.log('[GHOST][AUDIT] ═══════════════════════════════════════');
+  Logger.log('[GHOST][AUDIT] Runtime Ghost Audit starting');
+  Logger.log('[GHOST][AUDIT] READ-ONLY MODE');
+  Logger.log('[GHOST][AUDIT] ═══════════════════════════════════════');
+
+  TEMP_listTriggersDetailed();
+  TEMP_checkCriticalEntrypoints();
+  TEMP_checkExperimentStateReadOnly();
+  TEMP_listInterestingPropertiesOnly();
+  TEMP_checkKnownFunctionSet();
+  TEMP_logManualSearchChecklist();
+
+  Logger.log('[GHOST][AUDIT] ═══════════════════════════════════════');
+  Logger.log('[GHOST][AUDIT] Runtime Ghost Audit complete');
+  Logger.log('[GHOST][AUDIT] ═══════════════════════════════════════');
 }
