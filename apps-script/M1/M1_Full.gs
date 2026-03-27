@@ -993,36 +993,49 @@ function M1_lastCandleCloseUTC() {
 }
 
 
-/**
- * MODULE 1 — Foundation
- * M1_Menu.gs
- *
- * Custom Google Sheets menu for secure operations.
- * No hardcoded values — all actions call M1_ functions.
- *
- * @version 3.2.1
- */
 
+/**
+ * Simple trigger — only fires when a human opens the spreadsheet in a browser.
+ * Guarded so that if anything goes wrong (or if it's somehow invoked from 
+ * a non-UI context), it fails silently instead of throwing a runtime error.
+ */
 function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu('$T$T System')
-    .addItem('🔑 Set VALR Credentials', 'M1_menuSetValrCredentials')
-    .addItem('🔑 Set Supabase Credentials', 'M1_menuSetSupabaseCredentials')
-    .addItem('🔑 Set CryptoCompare Credentials', 'M1_menuSetCryptoCompareCredentials')
-    .addItem('🔑 Set OpenRouter Credentials', 'M1_menuSetOpenRouterCredentials')
-    .addItem('🔒 Run Security Audit', 'M1_menuSecurityAudit')
-    .addSeparator()
-    .addItem('🔄 M2: Pull VALR Instruments', 'M2_runInstrumentMasterPull')
-    .addItem('🔄 M2: Run Hard Filters & Build UNIVERSE', 'M2_runSpsAndBuildUniverse')
-    .addItem('🔄 M2: Fetch Top-K Candles', 'M2_fetchTopKCandlesIncremental')
-    .addItem('🔄 M2: Poll Funding Log', 'M2_pollAndLogFundingSettlements')
-    .addSeparator()
-    .addItem('🧪 Test M1 (Connectivity & Limit)', 'M1_testRunAll')
-    .addItem('🧪 Test M2 (Math & Data Rules)', 'M2_testRunAll')
-    .addSeparator()
-    .addItem('⚠️ KILL SWITCH ON', 'RUN_KillSwitchOn')
-    .addItem('✅ KILL SWITCH OFF', 'RUN_KillSwitchOff')
-    .addToUi();
+  try {
+    var ui = SpreadsheetApp.getUi();
+    ui.createMenu('$T$T System')
+      .addItem('🔑 Set VALR Credentials',          'M1_menuSetValrCredentials')
+      .addItem('🔑 Set Supabase Credentials',       'M1_menuSetSupabaseCredentials')
+      .addItem('🔑 Set CryptoCompare Credentials',  'M1_menuSetCryptoCompareCredentials')
+      .addItem('🔑 Set OpenRouter Credentials',      'M1_menuSetOpenRouterCredentials')
+      .addItem('🔒 Run Security Audit',              'M1_menuSecurityAudit')
+      .addSeparator()
+      .addItem('🔄 M2: Pull VALR Instruments',       'M2_runInstrumentMasterPull')
+      .addItem('🔄 M2: Run Hard Filters & Build UNIVERSE', 'M2_runSpsAndBuildUniverse')
+      .addItem('🔄 M2: Fetch Top-K Candles',         'M2_fetchTopKCandlesIncremental')
+      .addItem('🔄 M2: Poll Funding Log',            'M2_pollAndLogFundingSettlements')
+      .addSeparator()
+      .addItem('🧪 Test M1 (Connectivity & Limit)',  'M1_testRunAll')
+      .addItem('🧪 Test M2 (Math & Data Rules)',     'M2_testRunAll')
+      .addSeparator()
+      .addItem('⚠️ KILL SWITCH ON',                  'RUN_KillSwitchOn')
+      .addItem('✅ KILL SWITCH OFF',                  'RUN_KillSwitchOff')
+      .addToUi();
+  } catch (e) {
+    // Not in a UI context (time-driven trigger, API call, etc.) — swallow silently.
+    // This is expected and not an error worth logging in production.
+  }
+}
+
+
+/**
+ * NEUTRALIZED. This function existed and had a trigger pointing at it.
+ * The trigger has been deleted by RUN_auditAndCleanTriggers().
+ * This stub remains so that any lingering references don't throw "function not found".
+ * It does nothing.
+ */
+function IGN_onOpen() {
+  // Intentionally empty — neutralized rogue function.
+  return;
 }
 
 // Renamed from M1_menuSetCredentials to be specific
