@@ -404,7 +404,7 @@ Future worker/council/runtime-support design should move toward machine-readable
 ZAR pairs are no longer part of the canonical research/live universe.
 
 ### Why
-ZAR was imposing unnecessary constraints on:
+ZAR imposed unnecessary constraints on:
 - symbol coverage
 - freshness
 - source robustness
@@ -412,7 +412,7 @@ ZAR was imposing unnecessary constraints on:
 - fair cohort comparison
 - future live portability beyond South Africa-specific assumptions
 
-The research and live-trading substrate is now better served by a USDT spot/perp universe.
+The research and live-trading substrate is better served by a USDT spot/perp universe.
 
 ### Consequence
 Canonical research datasets should prefer:
