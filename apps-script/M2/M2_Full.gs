@@ -1948,6 +1948,66 @@ function M2_pollAndLogFundingSettlements() {
 
 
 function M2_getCanonicalHistoryStatus() {
+  if (M2__useSupabaseCanonicalHistory_()) {
+    var datasetId = M2__activeCanonicalDatasetId_();
+    var sb = M2_sbGetCanonicalHistoryStatus_(datasetId);
+
+    var result = {
+      ready: sb.ready,
+      dataset_id: datasetId,
+      symbols: {},
+      min4HRequired: 80,
+      min1DRequired: 30,
+      summary: {
+        symbolsReady: 0,
+        totalSymbols: 0
+      }
+    };
+
+    var symMap = {};
+
+    for (var i = 0; i < sb.rows.length; i++) {
+      var r = sb.rows[i];
+      var sym = String(r.symbol || '');
+      if (!symMap[sym]) {
+        symMap[sym] = {
+          rows4H: 0,
+          rows1D: 0,
+          first4H: null,
+          last4H: null,
+          first1D: null,
+          last1D: null,
+          ready: false
+        };
+      }
+
+      if (String(r.timeframe) === '4H') {
+        symMap[sym].rows4H = parseInt(r.row_count, 10) || 0;
+        symMap[sym].first4H = r.first_ts || null;
+        symMap[sym].last4H = r.last_ts || null;
+      } else if (String(r.timeframe) === '1D') {
+        symMap[sym].rows1D = parseInt(r.row_count, 10) || 0;
+        symMap[sym].first1D = r.first_ts || null;
+        symMap[sym].last1D = r.last_ts || null;
+      }
+    }
+
+    var keys = Object.keys(symMap);
+    result.summary.totalSymbols = keys.length;
+
+    for (var j = 0; j < keys.length; j++) {
+      var k = keys[j];
+      var st = symMap[k];
+      st.ready = (st.rows4H >= result.min4HRequired && st.rows1D >= result.min1DRequired);
+      result.symbols[k] = st;
+      if (st.ready) result.summary.symbolsReady++;
+    }
+
+    result.ready = result.summary.symbolsReady > 0;
+    return result;
+  }
+
+  // fallback: old sheet-based behavior
   var clean = M2__readAll_(M2_CONST.SHEETS.DATA_CLEAN);
   var result = {
     ready: false,
@@ -1959,20 +2019,15 @@ function M2_getCanonicalHistoryStatus() {
       totalSymbols: 0
     }
   };
-
   if (!clean || clean.length < 2) return result;
-
   var cm = M2_COL.DATA_CLEAN;
-
   for (var i = 1; i < clean.length; i++) {
     var row = clean[i];
     if (row[cm.Gap_Flag] === true) continue;
-
     var sym = String(row[cm.Symbol] || '').trim();
     var tf = String(row[cm.Timeframe] || '').trim();
     var ms = new Date(row[cm.Timestamp]).getTime();
     if (!sym || !isFinite(ms)) continue;
-
     if (!result.symbols[sym]) {
       result.symbols[sym] = {
         rows4H: 0,
@@ -1984,9 +2039,7 @@ function M2_getCanonicalHistoryStatus() {
         ready: false
       };
     }
-
     var s = result.symbols[sym];
-
     if (tf === '4H') {
       s.rows4H++;
       if (s.first4H === null || ms < s.first4H) s.first4H = ms;
@@ -1997,23 +2050,18 @@ function M2_getCanonicalHistoryStatus() {
       if (s.last1D === null || ms > s.last1D) s.last1D = ms;
     }
   }
-
   var syms = Object.keys(result.symbols);
   result.summary.totalSymbols = syms.length;
-
   for (var j = 0; j < syms.length; j++) {
     var symb = syms[j];
-    var st = result.symbols[symb];
-
-    st.ready = (st.rows4H >= result.min4HRequired && st.rows1D >= result.min1DRequired);
-    if (st.ready) result.summary.symbolsReady++;
-
-    if (st.first4H !== null) st.first4H = new Date(st.first4H).toISOString();
-    if (st.last4H  !== null) st.last4H  = new Date(st.last4H).toISOString();
-    if (st.first1D !== null) st.first1D = new Date(st.first1D).toISOString();
-    if (st.last1D  !== null) st.last1D  = new Date(st.last1D).toISOString();
+    var st2 = result.symbols[symb];
+    st2.ready = (st2.rows4H >= result.min4HRequired && st2.rows1D >= result.min1DRequired);
+    if (st2.ready) result.summary.symbolsReady++;
+    if (st2.first4H !== null) st2.first4H = new Date(st2.first4H).toISOString();
+    if (st2.last4H !== null) st2.last4H = new Date(st2.last4H).toISOString();
+    if (st2.first1D !== null) st2.first1D = new Date(st2.first1D).toISOString();
+    if (st2.last1D !== null) st2.last1D = new Date(st2.last1D).toISOString();
   }
-
   result.ready = result.summary.symbolsReady > 0;
   return result;
 }
@@ -2044,25 +2092,36 @@ function M2_logCanonicalHistoryStatus() {
 
 
 function M2_requireCanonicalHistoryForBacktest() {
-  var hs = M2_getCanonicalHistoryStatus();
+  if (M2__useSupabaseCanonicalHistory_()) {
+    var datasetId = M2__activeCanonicalDatasetId_();
+    return M2_sbRequireCanonicalHistoryForBacktest_(datasetId);
+  }
 
+  var hs = M2_getCanonicalHistoryStatus();
   if (!hs || !hs.ready) {
     throw new Error('[M2] BACKTEST_BLOCKED: No symbol has sufficient canonical history yet.');
   }
-
   var readySyms = [];
   var allSyms = Object.keys(hs.symbols);
   for (var i = 0; i < allSyms.length; i++) {
     if (hs.symbols[allSyms[i]].ready) readySyms.push(allSyms[i]);
   }
-
   if (!readySyms.length) {
     throw new Error('[M2] BACKTEST_BLOCKED: Canonical history exists but does not meet minimum 4H/1D depth.');
   }
-
   return readySyms;
 }
 
+
+function RUN_M2_verifyCanonicalHistorySwitchNow() {
+  var hs = M2_getCanonicalHistoryStatus();
+  Logger.log('[RUN][M2][VERIFY] dataset=' + String(hs.dataset_id || '(sheet-based)'));
+  Logger.log('[RUN][M2][VERIFY] ready=' + hs.ready);
+  Logger.log('[RUN][M2][VERIFY] symbolsReady=' + hs.summary.symbolsReady + '/' + hs.summary.totalSymbols);
+
+  var ready = M2_requireCanonicalHistoryForBacktest();
+  Logger.log('[RUN][M2][VERIFY] ready symbols: ' + JSON.stringify(ready));
+}
 
 
 
@@ -5140,4 +5199,314 @@ function RUN_M2B_diagFetch_BTC_USDTPERP() {
 
 function RUN_M2B_diagFetch_SOL_USDTPERP() {
   M2B_diagFetchOneTarget_('SOL/USDTPERP');
+}
+
+
+
+
+
+
+
+/*
+══════════════════════════════════════════════════════════════
+M2_SupabaseBridge.gs
+Minimal read-only bridge from Supabase canonical history to Apps Script.
+Phase 1 only: fetch candles, fetch coverage, audit dataset.
+══════════════════════════════════════════════════════════════
+*/
+
+function M2__sbUrl_() {
+  var v = '';
+  try {
+    var sp = PropertiesService.getScriptProperties();
+    v =
+      sp.getProperty('SUPABASE_URL') ||
+      sp.getProperty('SB_URL') ||
+      '';
+  } catch (e1) {}
+
+  if (!v) throw new Error('[M2][SB] Missing SUPABASE_URL in Script Properties.');
+  return String(v).replace(/\/+$/, '');
+}
+
+function M2__sbKey_() {
+  var v = '';
+  try {
+    var sp = PropertiesService.getScriptProperties();
+    v =
+      sp.getProperty('SUPABASE_API_KEY') ||
+      sp.getProperty('SUPABASE_KEY') ||
+      '';
+  } catch (e1) {}
+
+  if (!v) {
+    throw new Error('[M2][SB] Missing Supabase API key in Script Properties.');
+  }
+  return v;
+}
+
+function M2__sbHeaders_() {
+  var key = M2__sbKey_();
+  return {
+    'apikey': key,
+    'Authorization': 'Bearer ' + key,
+    'Content-Type': 'application/json'
+  };
+}
+
+function M2__sbFetchJson_(path) {
+  var url = M2__sbUrl_() + path;
+  var resp = UrlFetchApp.fetch(url, {
+    method: 'get',
+    muteHttpExceptions: true,
+    headers: M2__sbHeaders_()
+  });
+
+  var code = resp.getResponseCode();
+  var body = resp.getContentText();
+
+  if (code < 200 || code >= 300) {
+    throw new Error('[M2][SB] HTTP ' + code + ' on ' + path + ': ' + body);
+  }
+
+  return JSON.parse(body);
+}
+
+function M2_sbGetCoverageRows_(datasetId) {
+  if (!datasetId) throw new Error('[M2][SB] datasetId required');
+  var q =
+    '/rest/v1/dataset_symbol_coverage' +
+    '?dataset_id=eq.' + encodeURIComponent(datasetId) +
+    '&select=dataset_id,symbol,market_type,timeframe,first_ts,last_ts,row_count,gap_count,duplicate_count,freshness_lag_hours,is_ready,notes' +
+    '&order=symbol.asc,timeframe.asc';
+  return M2__sbFetchJson_(q);
+}
+
+function M2_sbGetCanonicalHistoryStatus_(datasetId) {
+  var rows = M2_sbGetCoverageRows_(datasetId);
+  var result = {
+    ready: false,
+    dataset_id: datasetId,
+    rows: rows,
+    summary: {
+      totalRows: rows.length,
+      readyRows: 0
+    }
+  };
+
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].is_ready === true) result.summary.readyRows++;
+  }
+
+  result.ready = result.summary.readyRows > 0;
+  return result;
+}
+
+function M2_sbFetchCandles_(datasetId, symbol, timeframe, marketType) {
+  if (!datasetId) throw new Error('[M2][SB] datasetId required');
+  if (!symbol) throw new Error('[M2][SB] symbol required');
+  if (!timeframe) throw new Error('[M2][SB] timeframe required');
+  if (!marketType) throw new Error('[M2][SB] marketType required');
+
+  var all = [];
+  var offset = 0;
+  var pageSize = 1000;
+
+  while (true) {
+    var q =
+      '/rest/v1/market_candles' +
+      '?dataset_id=eq.' + encodeURIComponent(datasetId) +
+      '&symbol=eq.' + encodeURIComponent(symbol) +
+      '&timeframe=eq.' + encodeURIComponent(timeframe) +
+      '&market_type=eq.' + encodeURIComponent(marketType) +
+      '&select=dataset_id,symbol,market_type,timeframe,ts,open,high,low,close,volume,source,is_stale_filled' +
+      '&order=ts.asc' +
+      '&limit=' + pageSize +
+      '&offset=' + offset;
+
+    var rows = M2__sbFetchJson_(q);
+    if (!rows || !rows.length) break;
+
+    for (var i = 0; i < rows.length; i++) all.push(rows[i]);
+
+    if (rows.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  return all;
+}
+
+
+
+function RUN_M2_sbAuditDatasetNow() {
+  var datasetId = 'OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1';
+
+  Logger.log('[RUN][M2][SB] ═══════════════════════════════════════');
+  Logger.log('[RUN][M2][SB] Supabase dataset audit starting');
+  Logger.log('[RUN][M2][SB] dataset=' + datasetId);
+  Logger.log('[RUN][M2][SB] ═══════════════════════════════════════');
+
+  var hs = M2_sbGetCanonicalHistoryStatus_(datasetId);
+  Logger.log('[RUN][M2][SB] ready=' + hs.ready +
+             ' readyRows=' + hs.summary.readyRows +
+             ' totalRows=' + hs.summary.totalRows);
+
+  M2_sbAuditOneSymbol_(datasetId, 'BTC');
+  M2_sbAuditOneSymbol_(datasetId, 'ETH');
+  M2_sbAuditOneSymbol_(datasetId, 'SOL');
+  M2_sbAuditOneSymbol_(datasetId, 'XRP');
+  M2_sbAuditOneSymbol_(datasetId, 'DOGE');
+
+  Logger.log('[RUN][M2][SB] Supabase dataset audit complete');
+}
+
+function M2_sbCandlesToDataCleanRows_(sbRows) {
+  var out = [];
+  if (!sbRows || !sbRows.length) return out;
+
+  for (var i = 0; i < sbRows.length; i++) {
+    var r = sbRows[i];
+    var o = parseFloat(r.open) || 0;
+    var h = parseFloat(r.high) || 0;
+    var l = parseFloat(r.low) || 0;
+    var c = parseFloat(r.close) || 0;
+    var v = parseFloat(r.volume) || 0;
+
+    if (!(o > 0 && h > 0 && l > 0 && c > 0)) continue;
+
+    var body = Math.abs(c - o);
+    var wick = body > 0 ? ((h - l) / body) : 0;
+
+    var row = new Array(17).fill('');
+    row[M2_COL.DATA_CLEAN.Timestamp] = M2__toIsoUtc_(r.ts);
+    row[M2_COL.DATA_CLEAN.Symbol] = String(r.symbol || '');
+    row[M2_COL.DATA_CLEAN.Market_Type] = String(r.market_type || '').toUpperCase() === 'PERP' ? 'PERP' : 'SPOT_MARGIN';
+    row[M2_COL.DATA_CLEAN.Timeframe] = String(r.timeframe || '');
+    row[M2_COL.DATA_CLEAN.Open] = o;
+    row[M2_COL.DATA_CLEAN.High] = h;
+    row[M2_COL.DATA_CLEAN.Low] = l;
+    row[M2_COL.DATA_CLEAN.Close] = c;
+    row[M2_COL.DATA_CLEAN.Volume] = v;
+    row[M2_COL.DATA_CLEAN.Volume_Quote] = '';
+    row[M2_COL.DATA_CLEAN.Volume_ZAR] = '';
+    row[M2_COL.DATA_CLEAN.USDT_ZAR_Rate_At_Fetch] = '';
+    row[M2_COL.DATA_CLEAN.Source] = String(r.source || 'SUPABASE');
+    row[M2_COL.DATA_CLEAN.Fetch_Timestamp] = M2__nowIso_();
+    row[M2_COL.DATA_CLEAN.Gap_Flag] = false;
+    row[M2_COL.DATA_CLEAN.Stale_Flag] = !!r.is_stale_filled;
+    row[M2_COL.DATA_CLEAN.Wick_To_Body_Ratio] = wick;
+
+    out.push(row);
+  }
+
+  return out;
+}
+
+function M2_sbFetchDataCleanRows_(datasetId, symbol, timeframe, marketType) {
+  var sbRows = M2_sbFetchCandles_(datasetId, symbol, timeframe, marketType);
+  return M2_sbCandlesToDataCleanRows_(sbRows);
+}
+
+function M2_sbRequireCanonicalHistoryForBacktest_(datasetId) {
+  var hs = M2_sbGetCanonicalHistoryStatus_(datasetId);
+  if (!hs || !hs.ready) {
+    throw new Error('[M2][SB] BACKTEST_BLOCKED: No ready Supabase history for dataset ' + datasetId);
+  }
+
+  var ready = [];
+  var seen = {};
+
+  for (var i = 0; i < hs.rows.length; i++) {
+    var r = hs.rows[i];
+    if (r.is_ready === true) {
+      var sym = String(r.symbol || '');
+      if (sym && !seen[sym]) {
+        seen[sym] = true;
+        ready.push(sym);
+      }
+    }
+  }
+
+  if (!ready.length) {
+    throw new Error('[M2][SB] BACKTEST_BLOCKED: No ready symbols found in coverage.');
+  }
+
+  return ready;
+}
+
+function M2_sbAuditOneSymbol_(datasetId, baseSymbol) {
+  var checks = [
+    { symbol: baseSymbol + '/USDT', marketType: 'spot', timeframe: '1D' },
+    { symbol: baseSymbol + '/USDT', marketType: 'spot', timeframe: '4H' },
+    { symbol: baseSymbol + '/USDTPERP', marketType: 'perp', timeframe: '1D' },
+    { symbol: baseSymbol + '/USDTPERP', marketType: 'perp', timeframe: '4H' }
+  ];
+
+  Logger.log('[M2][SB][AUDIT] dataset=' + datasetId + ' base=' + baseSymbol);
+
+  for (var i = 0; i < checks.length; i++) {
+    var x = checks[i];
+    try {
+      var rows = M2_sbFetchCandles_(datasetId, x.symbol, x.timeframe, x.marketType);
+      Logger.log('[M2][SB][AUDIT] ' +
+        x.symbol + ' | ' + x.marketType + ' | ' + x.timeframe +
+        ' | rows=' + rows.length);
+      if (rows.length) {
+        Logger.log('[M2][SB][AUDIT] first=' + rows[0].ts + ' last=' + rows[rows.length - 1].ts);
+      }
+    } catch (e) {
+      Logger.log('[M2][SB][AUDIT] ERROR ' +
+        x.symbol + ' | ' + x.marketType + ' | ' + x.timeframe +
+        ' | ' + e.message);
+    }
+  }
+}
+
+
+function RUN_M2_sbAuditDatasetNow() {
+  var datasetId = 'OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1';
+
+  Logger.log('[RUN][M2][SB] ═══════════════════════════════════════');
+  Logger.log('[RUN][M2][SB] Supabase dataset audit starting');
+  Logger.log('[RUN][M2][SB] dataset=' + datasetId);
+  Logger.log('[RUN][M2][SB] ═══════════════════════════════════════');
+
+  var hs = M2_sbGetCanonicalHistoryStatus_(datasetId);
+  Logger.log('[RUN][M2][SB] ready=' + hs.ready +
+             ' readyRows=' + hs.summary.readyRows +
+             ' totalRows=' + hs.summary.totalRows);
+
+  M2_sbAuditOneSymbol_(datasetId, 'BTC');
+  M2_sbAuditOneSymbol_(datasetId, 'ETH');
+  M2_sbAuditOneSymbol_(datasetId, 'SOL');
+  M2_sbAuditOneSymbol_(datasetId, 'XRP');
+  M2_sbAuditOneSymbol_(datasetId, 'DOGE');
+
+  Logger.log('[RUN][M2][SB] Supabase dataset audit complete');
+}
+
+
+
+
+
+
+function M2__activeCanonicalDatasetId_() {
+  try {
+    var sp = PropertiesService.getScriptProperties();
+    var v =
+      sp.getProperty('ACTIVE_DATASET_ID') ||
+      '';
+    if (v) return String(v).trim();
+  } catch (e1) {}
+  return 'OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1';
+}
+
+function M2__useSupabaseCanonicalHistory_() {
+  try {
+    var sp = PropertiesService.getScriptProperties();
+    var v = sp.getProperty('USE_SUPABASE_CANONICAL_HISTORY') || 'TRUE';
+    v = String(v).trim().toUpperCase();
+    return (v === 'TRUE' || v === '1' || v === 'YES' || v === 'ON');
+  } catch (e1) {}
+  return true;
 }
