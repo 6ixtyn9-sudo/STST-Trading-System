@@ -20,13 +20,13 @@ For every meaningful dataset state, record:
 
 ---
 
-## Current Primary Canonical Dataset
+## Legacy Canonical Dataset
 
 ### Dataset ID
 `CC_MAJORSPOTPERP_2021_2026_V1`
 
 ### Status
-Active but imperfect
+Legacy / imperfect / no longer preferred for active fresh-data persistence work
 
 ### Source
 - CryptoCompare bootstrap
@@ -34,17 +34,17 @@ Active but imperfect
 - downstream normalization into `DATA_CLEAN`
 
 ### Scope
-Crypto spot + perp universe used in current research / persistence runs
+Crypto spot + perp universe used in earlier research / persistence runs
 
 ### Observed symbols ready
-Approximately **14 symbols** have been observed in active run history-readiness logs.
+Approximately **14 symbols** were observed in historical readiness logs.
 
 ### Observed timeframes
 - `4H`
 - `1D`
 
 ### Observed date range
-Approximate current observed range:
+Approximate observed range:
 - **Start:** `2021-12-31`
 - **End:** up to `2026-03-26` for stronger symbols
 
@@ -53,11 +53,8 @@ Typical observed ranges:
 - roughly `~9250+` rows for 4H on stronger/current symbols
 - roughly `~1542–1543` rows for 1D on stronger/current symbols
 
----
-
-## Current Practical Universe Notes
-
-### Frequently observed symbols in ready-state logs
+### Legacy practical universe notes
+Frequently observed symbols included:
 - BNB/ZAR
 - BTC/USDT
 - BTC/USDTPERP
@@ -73,80 +70,149 @@ Typical observed ranges:
 - XRP/USDTPERP
 - XRP/ZAR
 
-This list reflects observed canonical readiness, not necessarily the final long-term research universe.
+### Important caveats
+- uneven symbol freshness
+- stale or partially lagging series
+- ZAR-heavy research baggage
+- workbook-heavy historical storage
+- lower reproducibility than the new Supabase-backed dataset
+
+### Why it matters historically
+This dataset remains important for interpreting:
+- `EDGE_CLARITY_V1`
+- `PERSISTENCE_HUNT_V1`
+- `PERSISTENCE_HUNT_V2`
+
+But it should no longer be treated as the cleanest current baseline.
+
+---
+
+## Current Active Canonical Dataset
+
+### Dataset ID
+`OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1`
+
+### Status
+Active / preferred for current fresh-data persistence work
+
+### Source
+- OKX public market data
+- fetched via Python / Google Colab using CCXT
+- stored canonically in Supabase `market_candles`
+- coverage tracked in Supabase `dataset_symbol_coverage`
+
+### Scope
+USDT-quoted major crypto spot + perp research universe with no ZAR pairs.
+
+### Canonical symbols
+- `BTC/USDT`
+- `BTC/USDTPERP`
+- `ETH/USDT`
+- `ETH/USDTPERP`
+- `SOL/USDT`
+- `SOL/USDTPERP`
+- `XRP/USDT`
+- `XRP/USDTPERP`
+- `DOGE/USDT`
+- `DOGE/USDTPERP`
+
+### Symbol count
+10
+
+### Timeframes
+- `4H`
+- `1D`
+
+### Observed 1D coverage
+- approximately `1440` rows per symbol
+- observed range:
+  - **Start:** `2022-04-18`
+  - **End:** `2026-03-27`
+
+### Observed 4H coverage
+- approximately `1440` rows per symbol
+- observed range:
+  - **Start:** `2025-07-30T12:00:00Z`
+  - **End:** `2026-03-27T08:00:00Z`
+
+### Current quality read
+Positive:
+- uniform symbol scope
+- uniform freshness
+- non-ZAR canonical universe
+- Supabase-backed persistence
+- Apps Script bridge verified
+- M2 canonical history gate verified against this dataset
+- M9 actual 4H backtest loader verified against this dataset
+- curated universe resolver aligned to this dataset
+- active V3 run is using this dataset
+
+### Important caveat
+4H depth is materially shallower than 1D depth on the current OKX/CCXT path.
+
+This means:
+- the dataset is useful for recent intraday persistence work
+- the dataset is useful for current V3 evaluation
+- the dataset is not yet equivalent to a deep multi-year 4H benchmark universe
+
+### Intended use
+- current V3 persistence experiment foundation
+- current preferred fresh-data research substrate
+- canonical non-ZAR persistence-testing baseline
+- active Apps Script / Supabase bridge validation dataset
 
 ---
 
 ## Current Curated Cohort Context
 
-The active persistence-hunt architecture now uses curated cohort modes such as:
+The active persistence architecture now uses curated cohort modes such as:
 - `TOP_SPS_CORE`
 - `TOP_SPS_WITH_DOGE`
 - `HARD_FILTER_ALL`
 - `PERP_CORE`
 - `SPOT_CORE`
+- `CUSTOM`
 
-This is important because:
-- dataset interpretation is no longer just “what symbols exist”
-- it is also “which curated cohorts were active during the run”
-
----
-
-## Important Current Data Quality Caveats
-
-### Uneven symbol freshness
-Not all symbols are equally current.
-
-Observed issues include:
-- some BTC / SOL / XRP / perp symbols current through late March 2026
-- some DOGE / BNB / ETH / XRP-ZAR variants lagging or ending materially earlier
-- some series appear stale while daily rows continue further
-
-### Why this matters
-This can affect:
-- OOS trade count
-- fairness of cohort comparisons
-- opportunity density
-- backtest path quality
-- persistence interpretation
-
-### Current conclusion
-The dataset is usable and materially deeper than earlier phases, but it is not yet ideal.
+Under the active canonical dataset, these are now interpreted against the USDT-only spot/perp universe rather than the older ZAR-mixed universe.
 
 ---
 
 ## Current Research Context Notes
 
+### Earlier experiment usage
+The older `PERSISTENCE_HUNT_V2` matrix should be interpreted relative to the legacy mixed-freshness dataset context.
+
 ### Current experiment usage
-The active `PERSISTENCE_HUNT_V2` matrix uses this deeper canonical dataset to run walk-forward backtests with OOS evaluation.
+The active `PERSISTENCE_HUNT_V3` matrix should be interpreted relative to:
+`OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1`
 
 ### Important implication
-Any future comparison against earlier runs must be careful if those earlier runs used:
-- shallower history
-- different symbol coverage
-- different bootstrap populations
-- different hard-filter states
-- older fake segmentation logic instead of curated cohort resolution
+Any comparison across V2 and V3 must be explicit about:
+- dataset identity
+- symbol scope
+- source
+- 4H depth differences
+- fresh-data bridge activation
+- universe definition changes
 
 ---
 
 ## Data Quality Notes
 
 ### Positive
-- canonical history readiness checks exist in M2
-- 4H and 1D sufficiency checks are explicit
-- gap and stale handling exist
-- bootstrap/resumable bootstrap exists
-- data is materially deeper than before
-- the active run is now able to use more realistic curated cohorts
+- canonical candles now exist in Supabase
+- 10-symbol core USDT spot/perp universe is loaded
+- freshness is uniform across the active phase-1 dataset
+- dataset coverage is queryable
+- Apps Script can read canonical history from Supabase
+- M9 real 4H loader has been validated against the fresh dataset
+- V3 is actively running on the fresh dataset
 
 ### Risks / caveats
-- universe composition may shift as filters and bootstrap scope evolve
-- some symbols have uneven row counts
-- some symbols are stale or partially lagged
-- synthetic ZAR conversions and FX paths must remain documented
-- comparisons across hidden dataset changes can be misleading
-- Sheets is still doing too much storage work for long-history research scale
+- 4H depth is still shallower than ideal
+- deeper multi-year intraday augmentation may still be desirable later
+- richer OOS reporting surfaces are still needed
+- comparisons against older runs remain weaker unless dataset ID is stated explicitly
 
 ---
 
@@ -164,30 +230,19 @@ Any future comparison against earlier runs must be careful if those earlier runs
 
 ## Proposed Future Dataset IDs
 
-These are placeholders for future clean labeling.
-
-### `CC_MAJORSPOTPERP_2021_2026_V2`
+### `OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V2`
 Use if:
 - same source
 - same broad scope
-- but materially improved symbol coverage or cleaning rules
+- but materially improved 4H depth, cleaning rules, or coverage logic
 
-### `CC_MAJORSPOTPERP_2021_2026_SUPABASE_V1`
+### `BENCHMARK_BTCETH_USDT_4H_DEEP_V1`
 Use if:
-- historical canonical storage moves materially into Supabase
-- with improved continuity and less workbook dependence
+- a narrower benchmark-only deep 4H dataset is created for BTC/ETH validation
 
-### `CC_MAJORSPOTPERP_2020_2026_V1`
+### `MULTISOURCE_MAJORSPOTPERP_USDT_2020_2026_V1`
 Use if:
-- the start date is pushed back further
-
-### `BTCETH_DEEP_2020_2026_V1`
-Use if:
-- a benchmark-only deep-history dataset is created for narrower validation
-
-### `UNIVERSE_EXPANDED_LIQUID_2021_2026_V1`
-Use if:
-- the research universe expands beyond the current majors-heavy / curated-core baseline
+- deeper history is later assembled from multiple sources while preserving explicit dataset identity
 
 ---
 
@@ -200,7 +255,7 @@ When discussing any experiment result, ask:
 3. What was the symbol scope?
 4. Which cohort / universe mode was active?
 5. Was the data source / cleaning pipeline the same?
-6. Were some series stale relative to others?
+6. Was the run using the legacy mixed-freshness dataset or the active Supabase-backed dataset?
 
 If those answers are unclear, the comparison is weaker.
 
@@ -208,17 +263,19 @@ If those answers are unclear, the comparison is weaker.
 
 ## Current Summary
 
-The project now has a meaningful canonical history dataset spanning roughly:
-- late 2021
-- through March 2026 for stronger/current symbols
-- across around 14 observed crypto spot/perp symbols
-- at 4H and 1D resolutions
+The system now has an active Supabase-backed canonical research dataset:
 
-This dataset is currently the baseline research substrate for the active matrix run.
+- USDT majors only
+- 10 spot/perp symbols
+- 1D depth back to `2022-04-18`
+- recent 4H depth back to `2025-07-30`
+- uniform freshness through `2026-03-27`
+- no ZAR dependence in the canonical research universe
+
+This dataset is now the preferred active substrate for current V3 persistence work.
 
 However:
-- freshness is uneven
-- some series are stale
-- long-history storage is still too dependent on Sheets
+- 4H depth is still limited relative to the longer-term deep-history ambition
+- future deeper 4H augmentation may still be desirable
 
-This dataset should be treated as a named asset, not an implicit assumption, and its future evolution toward Supabase-backed canonical persistence should be tracked explicitly.
+This dataset should be treated as a named research asset, not an implicit assumption.
