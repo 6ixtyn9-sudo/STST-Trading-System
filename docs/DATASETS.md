@@ -1,14 +1,10 @@
 # DATASETS
 
-This file tracks the known dataset states, sources, scope, and major notes for the $T$T system.
-
----
-
-## Dataset Philosophy
+This file tracks the known dataset states, sources, scope, quality caveats, and intended use of datasets in the $T$T system.
 
 Datasets must be treated as named research assets, not invisible background assumptions.
 
-If the data changes, comparisons can become invalid unless the dataset state is recorded.
+If the data changes, comparisons can become invalid unless the dataset identity and caveats are recorded explicitly.
 
 For every meaningful dataset state, record:
 - source
@@ -17,16 +13,42 @@ For every meaningful dataset state, record:
 - timeframe coverage
 - quality caveats
 - intended use
+- whether it is active, legacy, or experimental
 
 ---
 
-## Legacy Canonical Dataset
+## Dataset Governance Philosophy
+
+A dataset is not “just the candles.”
+A dataset also implies:
+- symbol scope
+- market type scope
+- source behavior
+- freshness profile
+- timeframe depth
+- cleaning assumptions
+- whether the downstream system actually consumes it
+
+This matters because:
+- stale data can produce false failures
+- hidden source changes can produce false confidence
+- changing the universe can distort persistence interpretation
+- changing time depth can make earlier experiments non-comparable
+
+Therefore:
+- if the data changes materially, the dataset ID must change or the change must be explicitly documented
+- experiments should be discussed with explicit dataset context
+- no major run should rely on implicit background data assumptions
+
+---
+
+## Legacy Dataset Family
 
 ### Dataset ID
 `CC_MAJORSPOTPERP_2021_2026_V1`
 
 ### Status
-Legacy / imperfect / no longer preferred for active fresh-data persistence work
+Legacy / imperfect / no longer preferred for current fresh-data persistence work
 
 ### Source
 - CryptoCompare bootstrap
@@ -34,10 +56,10 @@ Legacy / imperfect / no longer preferred for active fresh-data persistence work
 - downstream normalization into `DATA_CLEAN`
 
 ### Scope
-Crypto spot + perp universe used in earlier research / persistence runs
+Crypto spot + perp universe used in earlier research / persistence runs.
 
 ### Observed symbols ready
-Approximately **14 symbols** were observed in historical readiness logs.
+Approximately **14 symbols** were observed in earlier historical readiness logs.
 
 ### Observed timeframes
 - `4H`
@@ -46,44 +68,46 @@ Approximately **14 symbols** were observed in historical readiness logs.
 ### Observed date range
 Approximate observed range:
 - **Start:** `2021-12-31`
-- **End:** up to `2026-03-26` for stronger symbols
+- **End:** up to `2026-03-26` for stronger/current symbols
 
 ### Observed depth
 Typical observed ranges:
 - roughly `~9250+` rows for 4H on stronger/current symbols
 - roughly `~1542–1543` rows for 1D on stronger/current symbols
 
-### Legacy practical universe notes
-Frequently observed symbols included:
-- BNB/ZAR
-- BTC/USDT
-- BTC/USDTPERP
-- BTC/ZAR
-- DOGE/USDTPERP
-- DOGE/ZAR
-- ETH/USDT
-- ETH/USDTPERP
-- ETH/ZAR
-- SOL/USDTPERP
-- SOL/ZAR
-- XRP/USDT
-- XRP/USDTPERP
-- XRP/ZAR
+### Historically observed symbols
+This list reflects observed readiness during the older sheet-heavy canonical period:
+- `BNB/ZAR`
+- `BTC/USDT`
+- `BTC/USDTPERP`
+- `BTC/ZAR`
+- `DOGE/USDTPERP`
+- `DOGE/ZAR`
+- `ETH/USDT`
+- `ETH/USDTPERP`
+- `ETH/ZAR`
+- `SOL/USDTPERP`
+- `SOL/ZAR`
+- `XRP/USDT`
+- `XRP/USDTPERP`
+- `XRP/ZAR`
 
-### Important caveats
+### Historical caveats
 - uneven symbol freshness
 - stale or partially lagging series
+- mixed spot/perp freshness
 - ZAR-heavy research baggage
 - workbook-heavy historical storage
-- lower reproducibility than the new Supabase-backed dataset
+- weaker reproducibility than the current Supabase-backed dataset
+- comparisons could be distorted by hidden freshness differences
 
-### Why it matters historically
-This dataset remains important for interpreting:
+### Historical use
+This dataset family matters for interpretation of:
 - `EDGE_CLARITY_V1`
 - `PERSISTENCE_HUNT_V1`
 - `PERSISTENCE_HUNT_V2`
 
-But it should no longer be treated as the cleanest current baseline.
+It should remain documented for continuity, but it is no longer the preferred clean baseline for current persistence work.
 
 ---
 
@@ -98,11 +122,19 @@ Active / preferred for current fresh-data persistence work
 ### Source
 - OKX public market data
 - fetched via Python / Google Colab using CCXT
-- stored canonically in Supabase `market_candles`
-- coverage tracked in Supabase `dataset_symbol_coverage`
+- written into Supabase canonical candle storage
+- covered by Supabase `dataset_symbol_coverage`
+
+### Canonical storage location
+Supabase tables:
+- `market_candles`
+- `dataset_symbol_coverage`
+- `dataset_registry`
+- `ingestion_runs`
+- `data_quality_issues` (when populated)
 
 ### Scope
-USDT-quoted major crypto spot + perp research universe with no ZAR pairs.
+USDT-quoted major crypto spot + perp research universe with no ZAR pairs in the canonical research/live substrate.
 
 ### Canonical symbols
 - `BTC/USDT`
@@ -124,23 +156,30 @@ USDT-quoted major crypto spot + perp research universe with no ZAR pairs.
 - `1D`
 
 ### Observed 1D coverage
-- approximately `1440` rows per symbol
+Per symbol:
+- approximately `1440` rows
 - observed range:
   - **Start:** `2022-04-18`
   - **End:** `2026-03-27`
 
 ### Observed 4H coverage
-- approximately `1440` rows per symbol
+Per symbol:
+- approximately `1440` rows
 - observed range:
   - **Start:** `2025-07-30T12:00:00Z`
   - **End:** `2026-03-27T08:00:00Z`
+
+### Freshness profile
+All currently loaded canonical symbols are fresh and aligned through the current observed end date.
+This is materially cleaner than the legacy mixed-freshness sheet-backed dataset.
 
 ### Current quality read
 Positive:
 - uniform symbol scope
 - uniform freshness
-- non-ZAR canonical universe
-- Supabase-backed persistence
+- no ZAR pairs in canonical research universe
+- spot + perp both represented
+- canonical storage in Supabase
 - Apps Script bridge verified
 - M2 canonical history gate verified against this dataset
 - M9 actual 4H backtest loader verified against this dataset
@@ -151,21 +190,42 @@ Positive:
 4H depth is materially shallower than 1D depth on the current OKX/CCXT path.
 
 This means:
-- the dataset is useful for recent intraday persistence work
+- the dataset is very useful for recent intraday persistence work
 - the dataset is useful for current V3 evaluation
-- the dataset is not yet equivalent to a deep multi-year 4H benchmark universe
+- the dataset is not yet equivalent to a deep multi-year 4H benchmark dataset
 
 ### Intended use
 - current V3 persistence experiment foundation
 - current preferred fresh-data research substrate
 - canonical non-ZAR persistence-testing baseline
-- active Apps Script / Supabase bridge validation dataset
+- Apps Script / Supabase bridge validation dataset
+- active M9 fresh-data backtest source
 
 ---
 
-## Current Curated Cohort Context
+## Dataset Interpretation Notes
 
-The active persistence architecture now uses curated cohort modes such as:
+### Legacy vs active baseline
+The project now has two materially different dataset contexts:
+
+#### Legacy baseline
+`CC_MAJORSPOTPERP_2021_2026_V1`
+- older
+- mixed freshness
+- workbook-heavy
+- ZAR-influenced
+
+#### Active fresh baseline
+`OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1`
+- fresher
+- more uniform
+- Supabase-backed
+- no ZAR in canonical research universe
+
+These should not be treated as silently comparable.
+
+### Current active curated cohort interpretation
+The curated universe modes now operate against the active USDT-only spot/perp canonical dataset:
 - `TOP_SPS_CORE`
 - `TOP_SPS_WITH_DOGE`
 - `HARD_FILTER_ALL`
@@ -173,14 +233,14 @@ The active persistence architecture now uses curated cohort modes such as:
 - `SPOT_CORE`
 - `CUSTOM`
 
-Under the active canonical dataset, these are now interpreted against the USDT-only spot/perp universe rather than the older ZAR-mixed universe.
+Under the active dataset, these should be interpreted as USDT-based curated cohort definitions, not the older ZAR-mixed universe.
 
 ---
 
-## Current Research Context Notes
+## Current Research Context
 
 ### Earlier experiment usage
-The older `PERSISTENCE_HUNT_V2` matrix should be interpreted relative to the legacy mixed-freshness dataset context.
+The earlier persistence work should be interpreted relative to the older dataset context.
 
 ### Current experiment usage
 The active `PERSISTENCE_HUNT_V3` matrix should be interpreted relative to:
@@ -194,6 +254,8 @@ Any comparison across V2 and V3 must be explicit about:
 - 4H depth differences
 - fresh-data bridge activation
 - universe definition changes
+
+If those are not explicit, comparisons are weaker.
 
 ---
 
@@ -219,12 +281,14 @@ Any comparison across V2 and V3 must be explicit about:
 ## Dataset Governance Rules
 
 1. Do not silently mutate dataset assumptions during active experiment interpretation.
-2. Record major dataset expansions as new dataset IDs or new notes.
-3. If start date changes materially, record it.
-4. If symbol scope changes materially, record it.
-5. If source changes materially, record it.
+2. Record major dataset expansions as new dataset IDs or explicit dataset notes.
+3. If the start date changes materially, record it.
+4. If the symbol scope changes materially, record it.
+5. If the source changes materially, record it.
 6. If curated cohort definitions change materially, record it.
 7. If stale-history issues are corrected materially, record it.
+8. If the actual backtest load path changes to a new data source, record it.
+9. If a dataset is active in a named run, that run should be interpreted relative to that dataset ID.
 
 ---
 
@@ -238,7 +302,7 @@ Use if:
 
 ### `BENCHMARK_BTCETH_USDT_4H_DEEP_V1`
 Use if:
-- a narrower benchmark-only deep 4H dataset is created for BTC/ETH validation
+- a narrower benchmark-only deeper 4H dataset is created for BTC/ETH validation
 
 ### `MULTISOURCE_MAJORSPOTPERP_USDT_2020_2026_V1`
 Use if:
@@ -246,7 +310,7 @@ Use if:
 
 ---
 
-## Current Operational Guidance
+## Operational Guidance
 
 When discussing any experiment result, ask:
 
