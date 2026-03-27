@@ -163,3 +163,16 @@ The most important current home-building work is now:
 - reducing Sheets dependence for historical storage
 - making project memory durable
 - making worker/bot labor bounded through clearer contracts
+
+---
+
+## Current Practical Update
+
+The active research machine now has a real fresh-data bridge:
+
+- Python / Colab performs historical rebuild work
+- Supabase stores canonical market history
+- Apps Script reads canonical history from Supabase for current fresh-data research paths
+- Sheets remain the dashboard/control surface
+
+This is the first materially real reduction in dependence on workbook-only historical storage.
