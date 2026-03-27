@@ -51,6 +51,7 @@ No OOS-passing strategy found
 ### Caveats
 - family scope was broader than later persistence work
 - older segmentation logic was cruder than later curated cohort framework
+- older dataset context was weaker than the current fresh-data baseline
 
 ---
 
@@ -60,7 +61,7 @@ No OOS-passing strategy found
 2026-03-25 era
 
 ### Status
-Completed / superseded as cleaner baseline by V2
+Completed / superseded
 
 ### Launcher
 `RUN_experimentMatrix_resumableStart(...)`
@@ -93,10 +94,10 @@ This run was directionally useful, but later audit showed the underlying M9 reso
 ## `PERSISTENCE_HUNT_V2`
 
 ### Date
-2026-03-26 active era
+2026-03-26 era
 
 ### Status
-Active
+Completed / superseded as fresh-data baseline by V3
 
 ### Launcher
 `START_PERSISTENCE_HUNT_V2()`
@@ -124,15 +125,80 @@ Curated persistence hunt using:
 - `PERP_CORE`
 - `SPOT_CORE`
 
-### Current strongest read
-- best cohort so far: `TOP_SPS_WITH_DOGE`
-- best family so far: `LMI`
-- best near-miss rows often fail only on:
+### Current strongest read from that phase
+- best cohort: `TOP_SPS_WITH_DOGE`
+- best family: `LMI`
+- best near-miss rows often failed only on:
   - `MaxDD_Days`
   - `Sharpe`
 
-### Operational significance
-This run also provided evidence that the resumable experiment runner now persists meaningfully in unattended use.
+### Important caveats
+- interpreted against the older mixed-freshness dataset context
+- not the cleanest fresh-data baseline anymore
+
+---
+
+## `PERSISTENCE_HUNT_V3`
+
+### Date
+2026-03-27 active era
+
+### Status
+Active
+
+### Launcher
+`START_PERSISTENCE_HUNT_V3()`
+
+### Runner
+`RUN_experimentMatrix_resumableContinue`
+
+### Total Jobs
+240
+
+### Purpose
+Fresh-data persistence hunt using:
+- Supabase-backed canonical history
+- USDT-only spot/perp universe
+- V3 payoff overlay framework
+- two-phase experiment structure
+
+### Families
+- `LOOSE_MOMO_LONG | INVERTED_MIRROR`
+- `FAKEOUT_SHORT`
+
+### Cohorts
+- `TOP_SPS_WITH_DOGE`
+- `TOP_SPS_CORE`
+- `HARD_FILTER_ALL`
+
+### Dataset Context
+`OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1`
+
+### Experiment Structure
+
+#### Phase 1
+- CONTROL
+- TIME_STOP
+- TIME_STOP + TAIL_CLAMP
+- TIME_STOP + FULL_EXIT
+- TIME_STOP + FULL_EXIT + TAIL_CLAMP
+
+#### Phase 2
+- center-exit plumbing / bounded proxy modes
+- center-exit + tail-clamp variants
+- center-exit + full-exit variants
+
+### Current early read
+The earliest V3 rows are the most promising experiment posture observed so far.
+
+Current notable pattern:
+- some rows fail only on `OOS_Total_Trades < 20`
+- while showing strong PF / expectancy / Sharpe and low drawdown
+
+### Important caveats
+- 4H history depth in the active fresh dataset remains shallower than ideal
+- richer OOS metrics are not yet fully surfaced in the `EXPERIMENTS` sheet
+- this is the cleanest current persistence baseline, but not yet the final “perfect deep-history” dataset
 
 ---
 
