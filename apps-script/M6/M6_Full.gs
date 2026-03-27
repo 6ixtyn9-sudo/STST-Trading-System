@@ -1646,12 +1646,39 @@ function M6__cfgBool_(key, defaultVal) {
 }
 
 
+/**
+ * Returns document properties if available, falls back to script properties.
+ */
 function RUN__getProps_() {
   try {
-    return PropertiesService.getDocumentProperties();
+    var dp = PropertiesService.getDocumentProperties();
+    if (dp) return dp;
   } catch (e) {
-    return PropertiesService.getScriptProperties();
+    // Document context not available
   }
+  return PropertiesService.getScriptProperties();
+}
+
+/**
+ * Safe lock acquisition — tries document lock first, falls back to script lock.
+ * Returns { lock: Lock, acquired: boolean }
+ */
+function RUN__getSafeLock_(timeoutMs) {
+  timeoutMs = timeoutMs || 5000;
+  var lock;
+  try {
+    lock = LockService.getDocumentLock();
+    if (lock.tryLock(timeoutMs)) return { lock: lock, acquired: true };
+  } catch (e) {
+    // Document lock unavailable — try script lock
+  }
+  try {
+    lock = LockService.getScriptLock();
+    if (lock.tryLock(timeoutMs)) return { lock: lock, acquired: true };
+  } catch (e2) {
+    // Script lock also failed
+  }
+  return { lock: null, acquired: false };
 }
 
 function RUN_clearOverrideCaches() {
@@ -1797,617 +1824,130 @@ function RUN__expInitStateFields_(state) {
 }
 
 
-function RUN__expBuildJobs_(opts) {
-  opts = opts || {};
 
-  var name = String(opts.name || 'MULTI_STRAT').trim();
-  var universeMode = String(opts.universeMode || 'MAJORS_ONLY').trim().toUpperCase();
-  var invertProfiles = !!opts.invertProfiles;
 
-  var profiles = opts.strategyProfiles || [
-    'BREAKOUT_LONG',
-    'TREND_PULLBACK_LONG',
-    'LOOSE_MOMO_LONG',
-    'FAKEOUT_SHORT',
-    'EXHAUSTION_FADE_SHORT',
-    'BREAKDOWN_SHORT'
-  ];
 
-  var expandVariants = (opts.expandVariants !== undefined) ? !!opts.expandVariants : false;
-  var variantMode = String(opts.variantMode || 'STANDARD').trim().toUpperCase();
+function RUN__ensureM9Globals_() {
+  var g = (typeof globalThis !== 'undefined') ? globalThis : this;
 
-  var jobs = [];
-  var dedupe = {};
-
-  function deepCopy_(o) {
-    return JSON.parse(JSON.stringify(o || {}));
+  if (typeof g.M9_CONST === 'undefined' && typeof M9_CONST !== 'undefined') {
+    g.M9_CONST = M9_CONST;
+  }
+  if (typeof g.M9_COL === 'undefined' && typeof M9_COL !== 'undefined') {
+    g.M9_COL = M9_COL;
   }
 
-  function clamp_(x, lo, hi) {
-    x = parseFloat(x);
-    if (!isFinite(x)) x = lo;
-    if (x < lo) return lo;
-    if (x > hi) return hi;
-    return x;
+  if (typeof M9_CONST === 'undefined' && typeof g.M9_CONST !== 'undefined') {
+    M9_CONST = g.M9_CONST;
+  }
+  if (typeof M9_COL === 'undefined' && typeof g.M9_COL !== 'undefined') {
+    M9_COL = g.M9_COL;
   }
 
-  function intClamp_(x, lo, hi) {
-    x = Math.round(parseFloat(x));
-    if (!isFinite(x)) x = lo;
-    if (x < lo) return lo;
-    if (x > hi) return hi;
-    return x;
+  return {
+    hasFn: (typeof M9_runWalkForwardBacktest === 'function'),
+    hasConstLocal: (typeof M9_CONST !== 'undefined'),
+    hasColLocal: (typeof M9_COL !== 'undefined'),
+    hasConstGlobal: (typeof g.M9_CONST !== 'undefined'),
+    hasColGlobal: (typeof g.M9_COL !== 'undefined')
+  };
+}
+
+function RUN__assertM9Loaded_() {
+  var g = (typeof globalThis !== 'undefined') ? globalThis : this;
+  var st = RUN__ensureM9Globals_();
+
+  var ok =
+    st.hasFn &&
+    (st.hasConstLocal || st.hasConstGlobal) &&
+    (st.hasColLocal || st.hasColGlobal) &&
+    ((typeof M9_CONST !== 'undefined' && M9_CONST && M9_CONST.SHEETS && M9_CONST.HEADERS) ||
+     (typeof g.M9_CONST !== 'undefined' && g.M9_CONST && g.M9_CONST.SHEETS && g.M9_CONST.HEADERS)) &&
+    ((typeof M9_COL !== 'undefined' && M9_COL && M9_COL.BACKTEST_RESULTS) ||
+     (typeof g.M9_COL !== 'undefined' && g.M9_COL && g.M9_COL.BACKTEST_RESULTS));
+
+  if (!ok) {
+    throw new Error(
+      '[RUN] M9 not loaded correctly in this execution context.\n' +
+      'typeof M9_runWalkForwardBacktest=' + (typeof M9_runWalkForwardBacktest) + '\n' +
+      'typeof M9_CONST=' + (typeof M9_CONST) + '\n' +
+      'typeof M9_COL=' + (typeof M9_COL) + '\n' +
+      'typeof globalThis.M9_CONST=' + (typeof g.M9_CONST) + '\n' +
+      'typeof globalThis.M9_COL=' + (typeof g.M9_COL) + '\n' +
+      'Expected M9 function + constants + column maps in the same runtime.'
+    );
+  }
+}
+
+function RUN_diagM9ConstNow() {
+  var g = (typeof globalThis !== 'undefined') ? globalThis : this;
+  var st = RUN__ensureM9Globals_();
+
+  Logger.log('[RUN][M9 DIAG] ═══════════════════════════════════════');
+  Logger.log('[RUN][M9 DIAG] Starting');
+  Logger.log('[RUN][M9 DIAG] ═══════════════════════════════════════');
+
+  Logger.log('[RUN][M9 DIAG] typeof M9_runWalkForwardBacktest = ' + typeof M9_runWalkForwardBacktest);
+  Logger.log('[RUN][M9 DIAG] typeof M9_CONST = ' + typeof M9_CONST);
+  Logger.log('[RUN][M9 DIAG] typeof M9_COL = ' + typeof M9_COL);
+  Logger.log('[RUN][M9 DIAG] typeof globalThis.M9_CONST = ' + typeof g.M9_CONST);
+  Logger.log('[RUN][M9 DIAG] typeof globalThis.M9_COL = ' + typeof g.M9_COL);
+
+  Logger.log('[RUN][M9 DIAG] ensure.hasFn = ' + st.hasFn);
+  Logger.log('[RUN][M9 DIAG] ensure.hasConstLocal = ' + st.hasConstLocal);
+  Logger.log('[RUN][M9 DIAG] ensure.hasColLocal = ' + st.hasColLocal);
+  Logger.log('[RUN][M9 DIAG] ensure.hasConstGlobal = ' + st.hasConstGlobal);
+  Logger.log('[RUN][M9 DIAG] ensure.hasColGlobal = ' + st.hasColGlobal);
+
+  try {
+    Logger.log('[RUN][M9 DIAG] M9_CONST.SHEETS = ' + JSON.stringify((typeof M9_CONST !== 'undefined' && M9_CONST) ? M9_CONST.SHEETS : null));
+  } catch (e1) {
+    Logger.log('[RUN][M9 DIAG] M9_CONST.SHEETS failed: ' + e1.message);
   }
 
-  function normalizeOv_(ov) {
-    ov = deepCopy_(ov);
-
-    ov.DQS_Gate_V2 = intClamp_(ov.DQS_Gate_V2, 10, 60);
-    ov.V2_Retest_Window_Candles = intClamp_(ov.V2_Retest_Window_Candles, 3, 12);
-    ov.V2_Retest_Max_Deviation_ATR = clamp_(ov.V2_Retest_Max_Deviation_ATR, 0.50, 1.50);
-    ov.Volume_Multiplier_Threshold = clamp_(ov.Volume_Multiplier_Threshold, 0.80, 1.50);
-    ov.RSI_Overbought_Long = intClamp_(ov.RSI_Overbought_Long, 50, 90);
-    ov.V2_Confirmation_Body_Min_Frac = clamp_(ov.V2_Confirmation_Body_Min_Frac, 0.00, 0.60);
-    ov.V2_Breakout_Buffer_ATR = clamp_(ov.V2_Breakout_Buffer_ATR, 0.00, 0.20);
-
-    ov.Invert_All_Signals = !!ov.Invert_All_Signals;
-    ov.V2_Long_Only = !!ov.V2_Long_Only;
-
-    if (ov.Invert_All_Signals === true && ov.V2_Long_Only === true) {
-      ov.V2_Long_Only = false;
-    }
-
-    return ov;
+  try {
+    Logger.log('[RUN][M9 DIAG] M9_CONST.HEADERS keys = ' + Object.keys((typeof M9_CONST !== 'undefined' && M9_CONST && M9_CONST.HEADERS) ? M9_CONST.HEADERS : {}).join(', '));
+  } catch (e2) {
+    Logger.log('[RUN][M9 DIAG] M9_CONST.HEADERS failed: ' + e2.message);
   }
 
-  function stableKey_(ov) {
-    ov = normalizeOv_(ov);
-    return [
-      String(ov.Strategy_Profile || ''),
-      String(ov.Universe_Mode || ''),
-      String(ov.Invert_All_Signals),
-      String(ov.V2_Long_Only),
-      String(ov.DQS_Gate_V2),
-      String(ov.V2_Retest_Window_Candles),
-      String(ov.V2_Retest_Max_Deviation_ATR),
-      String(ov.Volume_Multiplier_Threshold),
-      String(ov.RSI_Overbought_Long),
-      String(ov.V2_Confirmation_Body_Min_Frac),
-      String(ov.V2_Breakout_Buffer_ATR)
-    ].join('|');
+  try {
+    Logger.log('[RUN][M9 DIAG] M9_COL keys = ' + Object.keys((typeof M9_COL !== 'undefined' && M9_COL) ? M9_COL : {}).join(', '));
+  } catch (e3) {
+    Logger.log('[RUN][M9 DIAG] M9_COL keys failed: ' + e3.message);
   }
 
-  function pushJob_(label, mode, ov) {
-    ov = normalizeOv_(ov);
+  Logger.log('[RUN][M9 DIAG] ═══════════════════════════════════════');
+  Logger.log('[RUN][M9 DIAG] Complete');
+  Logger.log('[RUN][M9 DIAG] ═══════════════════════════════════════');
+}
 
-    var key = stableKey_(ov);
-    if (dedupe[key]) return;
-    dedupe[key] = true;
 
-    jobs.push({
-      runName: name + ' | ' + label,
-      mode: mode,
-      ov: deepCopy_(ov)
-    });
+
+function RUN__ensureM9Globals_() {
+  var g = (typeof globalThis !== 'undefined') ? globalThis : this;
+
+  if (typeof g.M9_CONST === 'undefined' && typeof M9_CONST !== 'undefined') {
+    g.M9_CONST = M9_CONST;
+  }
+  if (typeof g.M9_COL === 'undefined' && typeof M9_COL !== 'undefined') {
+    g.M9_COL = M9_COL;
   }
 
-  function buildProfileBase_(profileName, uniMode) {
-    var p = String(profileName || '').trim().toUpperCase();
-    var u = String(uniMode || universeMode).trim().toUpperCase();
-
-    if (p === 'BREAKOUT_LONG') {
-      return {
-        label: 'BREAKOUT_LONG',
-        ov: {
-          Strategy_Profile: 'BREAKOUT_LONG',
-          Universe_Mode: u,
-          DQS_Gate_V2: 25,
-          V2_Retest_Window_Candles: 6,
-          V2_Retest_Max_Deviation_ATR: 0.75,
-          Volume_Multiplier_Threshold: 1.10,
-          RSI_Overbought_Long: 65,
-          V2_Confirmation_Body_Min_Frac: 0.35,
-          V2_Breakout_Buffer_ATR: 0.05,
-          Invert_All_Signals: false,
-          V2_Long_Only: true
-        }
-      };
-    }
-
-    if (p === 'TREND_PULLBACK_LONG') {
-      return {
-        label: 'TREND_PULLBACK_LONG',
-        ov: {
-          Strategy_Profile: 'TREND_PULLBACK_LONG',
-          Universe_Mode: u,
-          DQS_Gate_V2: 22,
-          V2_Retest_Window_Candles: 8,
-          V2_Retest_Max_Deviation_ATR: 1.00,
-          Volume_Multiplier_Threshold: 1.00,
-          RSI_Overbought_Long: 60,
-          V2_Confirmation_Body_Min_Frac: 0.25,
-          V2_Breakout_Buffer_ATR: 0.00,
-          Invert_All_Signals: false,
-          V2_Long_Only: true
-        }
-      };
-    }
-
-    if (p === 'LOOSE_MOMO_LONG') {
-      return {
-        label: 'LOOSE_MOMO_LONG',
-        ov: {
-          Strategy_Profile: 'LOOSE_MOMO_LONG',
-          Universe_Mode: u,
-          DQS_Gate_V2: 18,
-          V2_Retest_Window_Candles: 6,
-          V2_Retest_Max_Deviation_ATR: 1.00,
-          Volume_Multiplier_Threshold: 1.00,
-          RSI_Overbought_Long: 72,
-          V2_Confirmation_Body_Min_Frac: 0.25,
-          V2_Breakout_Buffer_ATR: 0.00,
-          Invert_All_Signals: false,
-          V2_Long_Only: true
-        }
-      };
-    }
-
-    if (p === 'FAKEOUT_SHORT') {
-      return {
-        label: 'FAKEOUT_SHORT',
-        ov: {
-          Strategy_Profile: 'FAKEOUT_SHORT',
-          Universe_Mode: u,
-          DQS_Gate_V2: 20,
-          V2_Retest_Window_Candles: 6,
-          V2_Retest_Max_Deviation_ATR: 0.75,
-          Volume_Multiplier_Threshold: 1.00,
-          RSI_Overbought_Long: 75,
-          V2_Confirmation_Body_Min_Frac: 0.30,
-          V2_Breakout_Buffer_ATR: 0.05,
-          Invert_All_Signals: true,
-          V2_Long_Only: false
-        }
-      };
-    }
-
-    if (p === 'EXHAUSTION_FADE_SHORT') {
-      return {
-        label: 'EXHAUSTION_FADE_SHORT',
-        ov: {
-          Strategy_Profile: 'EXHAUSTION_FADE_SHORT',
-          Universe_Mode: u,
-          DQS_Gate_V2: 18,
-          V2_Retest_Window_Candles: 6,
-          V2_Retest_Max_Deviation_ATR: 1.00,
-          Volume_Multiplier_Threshold: 1.20,
-          RSI_Overbought_Long: 80,
-          V2_Confirmation_Body_Min_Frac: 0.25,
-          V2_Breakout_Buffer_ATR: 0.00,
-          Invert_All_Signals: true,
-          V2_Long_Only: false
-        }
-      };
-    }
-
-    if (p === 'BREAKDOWN_SHORT') {
-      return {
-        label: 'BREAKDOWN_SHORT',
-        ov: {
-          Strategy_Profile: 'BREAKDOWN_SHORT',
-          Universe_Mode: u,
-          DQS_Gate_V2: 25,
-          V2_Retest_Window_Candles: 8,
-          V2_Retest_Max_Deviation_ATR: 0.75,
-          Volume_Multiplier_Threshold: 1.10,
-          RSI_Overbought_Long: 60,
-          V2_Confirmation_Body_Min_Frac: 0.35,
-          V2_Breakout_Buffer_ATR: 0.05,
-          Invert_All_Signals: true,
-          V2_Long_Only: false
-        }
-      };
-    }
-
-    return null;
+  if (typeof M9_CONST === 'undefined' && typeof g.M9_CONST !== 'undefined') {
+    M9_CONST = g.M9_CONST;
+  }
+  if (typeof M9_COL === 'undefined' && typeof g.M9_COL !== 'undefined') {
+    M9_COL = g.M9_COL;
   }
 
-  function emitPersistenceHunt_() {
-    var segments = [
-      'MAJORS_ONLY',
-      'BTC_ONLY',
-      'ETH_ONLY',
-      'MAJORS_EX_BTC_ETH'
-    ];
-
-    var looseMomoInvBase = {
-      Strategy_Profile: 'LOOSE_MOMO_LONG',
-      Universe_Mode: 'MAJORS_ONLY',
-      DQS_Gate_V2: 20,
-      V2_Retest_Window_Candles: 5,
-      V2_Retest_Max_Deviation_ATR: 0.97,
-      Volume_Multiplier_Threshold: 0.28,
-      RSI_Overbought_Long: 72,
-      V2_Confirmation_Body_Min_Frac: 0.01,
-      V2_Breakout_Buffer_ATR: 0.00,
-      Invert_All_Signals: true,
-      V2_Long_Only: false
-    };
-
-    var fakeoutShortBase = {
-      Strategy_Profile: 'FAKEOUT_SHORT',
-      Universe_Mode: 'MAJORS_ONLY',
-      DQS_Gate_V2: 23,
-      V2_Retest_Window_Candles: 6,
-      V2_Retest_Max_Deviation_ATR: 1.08,
-      Volume_Multiplier_Threshold: 0.30,
-      RSI_Overbought_Long: 70,
-      V2_Confirmation_Body_Min_Frac: 0.05,
-      V2_Breakout_Buffer_ATR: 0.00,
-      Invert_All_Signals: true,
-      V2_Long_Only: false
-    };
-
-    var looseVariants = [
-      { tag: 'R1', dqs: 0,  win: 0,  dev: 0.00, vol: 0.00, rsi: 0,  body: 0.00, buf: 0.00 },
-      { tag: 'R2', dqs: 2,  win: 0,  dev: -0.05, vol: 0.02, rsi: -2, body: 0.00, buf: 0.00 },
-      { tag: 'R3', dqs: -2, win: 1,  dev: 0.05, vol: -0.03, rsi: 2,  body: 0.00, buf: 0.00 },
-      { tag: 'R4', dqs: 0,  win: -1, dev: 0.00, vol: 0.05, rsi: -1, body: 0.00, buf: 0.01 }
-    ];
-
-    var fakeVariants = [
-      { tag: 'R1', dqs: 0,  win: 0,  dev: 0.00, vol: 0.00, rsi: 0,  body: 0.00, buf: 0.00 },
-      { tag: 'R2', dqs: 2,  win: 0,  dev: -0.08, vol: 0.04, rsi: -2, body: 0.00, buf: 0.00 },
-      { tag: 'R3', dqs: -2, win: 1,  dev: 0.08, vol: -0.02, rsi: 2,  body: 0.00, buf: 0.00 },
-      { tag: 'R4', dqs: 0,  win: -1, dev: 0.00, vol: 0.06, rsi: -1, body: 0.00, buf: 0.02 }
-    ];
-
-    function applyVariant_(baseOv, k) {
-      var ov = deepCopy_(baseOv);
-
-      ov.DQS_Gate_V2 = (+ov.DQS_Gate_V2 || 0) + (k.dqs || 0);
-      ov.V2_Retest_Window_Candles = (+ov.V2_Retest_Window_Candles || 6) + (k.win || 0);
-      ov.V2_Retest_Max_Deviation_ATR = (+ov.V2_Retest_Max_Deviation_ATR || 1.0) + (k.dev || 0);
-      ov.Volume_Multiplier_Threshold = (+ov.Volume_Multiplier_Threshold || 1.0) + (k.vol || 0);
-      ov.V2_Confirmation_Body_Min_Frac = (+ov.V2_Confirmation_Body_Min_Frac || 0.25) + (k.body || 0);
-      ov.RSI_Overbought_Long = (+ov.RSI_Overbought_Long || 65) + (k.rsi || 0);
-      ov.V2_Breakout_Buffer_ATR = (+ov.V2_Breakout_Buffer_ATR || 0.0) + (k.buf || 0);
-
-      return normalizeOv_(ov);
-    }
-
-    for (var s = 0; s < segments.length; s++) {
-      var seg = segments[s];
-
-      for (var i = 0; i < looseVariants.length; i++) {
-        var lov = applyVariant_(looseMomoInvBase, looseVariants[i]);
-        lov.Universe_Mode = seg;
-        pushJob_('LOOSE_MOMO_LONG | INVERTED_MIRROR | ' + looseVariants[i].tag, 'PERSISTENCE_HUNT', lov);
-      }
-
-      for (var j = 0; j < fakeVariants.length; j++) {
-        var fov = applyVariant_(fakeoutShortBase, fakeVariants[j]);
-        fov.Universe_Mode = seg;
-        pushJob_('FAKEOUT_SHORT | ' + fakeVariants[j].tag, 'PERSISTENCE_HUNT', fov);
-      }
-    }
-  }
-
-  function buildStandardVariants_() {
-    return [
-      { tag: 'BASE',      dqs: 0,  win: 0,  dev: 0.00, vol: 0.00, body: 0.00, rsi: 0,  buf: 0.00 },
-      { tag: 'TIGHT',     dqs: 3,  win: -1, dev: -0.10, vol: 0.05, body: 0.05, rsi: -3, buf: 0.02 },
-      { tag: 'LOOSE',     dqs: -3, win: 1,  dev: 0.10, vol: -0.05, body: -0.05, rsi: 3,  buf: -0.02 },
-      { tag: 'QUAL_BIAS', dqs: 1,  win: 0,  dev: -0.05, vol: 0.10, body: 0.03, rsi: -2, buf: 0.00 }
-    ];
-  }
-
-  function buildDenseVariants_() {
-    return [
-      { tag: 'V01', dqs: -6, win:  2, dev:  0.15, vol: -0.10, body: -0.08, rsi:  4, buf: -0.03 },
-      { tag: 'V02', dqs: -4, win:  1, dev:  0.10, vol: -0.08, body: -0.05, rsi:  3, buf: -0.02 },
-      { tag: 'V03', dqs: -3, win:  1, dev:  0.08, vol: -0.05, body: -0.05, rsi:  2, buf: -0.02 },
-      { tag: 'V04', dqs: -2, win:  1, dev:  0.05, vol: -0.03, body: -0.03, rsi:  1, buf: -0.01 },
-      { tag: 'V05', dqs: -1, win:  0, dev:  0.03, vol: -0.02, body: -0.02, rsi:  1, buf:  0.00 },
-      { tag: 'V06', dqs:  0, win:  0, dev:  0.00, vol:  0.00, body:  0.00, rsi:  0, buf:  0.00 },
-      { tag: 'V07', dqs:  1, win:  0, dev: -0.03, vol:  0.02, body:  0.02, rsi: -1, buf:  0.00 },
-      { tag: 'V08', dqs:  2, win: -1, dev: -0.05, vol:  0.03, body:  0.03, rsi: -1, buf:  0.01 },
-      { tag: 'V09', dqs:  3, win: -1, dev: -0.08, vol:  0.05, body:  0.05, rsi: -2, buf:  0.01 },
-      { tag: 'V10', dqs:  4, win: -1, dev: -0.10, vol:  0.08, body:  0.06, rsi: -3, buf:  0.02 },
-      { tag: 'V11', dqs:  5, win: -2, dev: -0.12, vol:  0.10, body:  0.08, rsi: -4, buf:  0.02 },
-      { tag: 'V12', dqs:  6, win: -2, dev: -0.15, vol:  0.12, body:  0.10, rsi: -5, buf:  0.03 },
-      { tag: 'V13', dqs: -5, win:  2, dev:  0.12, vol: -0.12, body: -0.06, rsi:  5, buf: -0.03 },
-      { tag: 'V14', dqs: -3, win:  2, dev:  0.10, vol: -0.07, body: -0.04, rsi:  3, buf: -0.02 },
-      { tag: 'V15', dqs: -1, win:  1, dev:  0.06, vol: -0.02, body: -0.01, rsi:  2, buf: -0.01 },
-      { tag: 'V16', dqs:  1, win: -1, dev: -0.06, vol:  0.04, body:  0.03, rsi: -2, buf:  0.01 }
-    ];
-  }
-
-  function applyVariant_(baseOv, k) {
-    var ov = deepCopy_(baseOv);
-
-    ov.DQS_Gate_V2 = (+ov.DQS_Gate_V2 || 0) + (k.dqs || 0);
-    ov.V2_Retest_Window_Candles = (+ov.V2_Retest_Window_Candles || 6) + (k.win || 0);
-    ov.V2_Retest_Max_Deviation_ATR = (+ov.V2_Retest_Max_Deviation_ATR || 1.0) + (k.dev || 0);
-    ov.Volume_Multiplier_Threshold = (+ov.Volume_Multiplier_Threshold || 1.0) + (k.vol || 0);
-    ov.V2_Confirmation_Body_Min_Frac = (+ov.V2_Confirmation_Body_Min_Frac || 0.25) + (k.body || 0);
-    ov.RSI_Overbought_Long = (+ov.RSI_Overbought_Long || 65) + (k.rsi || 0);
-    ov.V2_Breakout_Buffer_ATR = (+ov.V2_Breakout_Buffer_ATR || 0.0) + (k.buf || 0);
-
-    return normalizeOv_(ov);
-  }
-
-  function emitStandardOrDense_(label, mode, baseOv) {
-    var variants = (mode === 'DENSE') ? buildDenseVariants_() : buildStandardVariants_();
-
-    if (!expandVariants) {
-      pushJob_(label, 'PROFILE', normalizeOv_(baseOv));
-      return;
-    }
-
-    for (var i = 0; i < variants.length; i++) {
-      var ov = applyVariant_(baseOv, variants[i]);
-      pushJob_(label + ' | ' + variants[i].tag, 'PROFILE', ov);
-    }
-  }
-
-  function profileResearchGrid_(baseOv) {
-    var p = String(baseOv.Strategy_Profile || '').toUpperCase();
-    var out = [];
-
-    function addCombo_(tag, dqs, win, vol, body, rsi, buf, dev) {
-      out.push({
-        tag: tag,
-        dqs: dqs,
-        win: win,
-        vol: vol,
-        body: body,
-        rsi: rsi,
-        buf: buf,
-        dev: dev
-      });
-    }
-
-    if (p === 'BREAKOUT_LONG') {
-      var dqsA = [-4, 0, 4];
-      var winA = [-1, 0, 1];
-      var volA = [-0.05, 0.00, 0.10];
-      var bodyA = [-0.05, 0.00, 0.05];
-      var rsiA = [-4, 0, 4];
-      var bufA = [-0.03, 0.00, 0.03];
-      var devA = [-0.10, 0.00, 0.10];
-
-      for (var a1 = 0; a1 < dqsA.length; a1++) {
-        for (var a2 = 0; a2 < winA.length; a2++) {
-          for (var a3 = 0; a3 < volA.length; a3++) {
-            addCombo_(
-              'R' + (out.length + 1),
-              dqsA[a1],
-              winA[a2],
-              volA[a3],
-              bodyA[(a1 + a2 + a3) % bodyA.length],
-              rsiA[(a2 + a3) % rsiA.length],
-              bufA[(a1 + a3) % bufA.length],
-              devA[(a1 + a2 + a3) % devA.length]
-            );
-          }
-        }
-      }
-    } else if (p === 'TREND_PULLBACK_LONG') {
-      var dqsB = [-3, 0, 3];
-      var winB = [-2, 0, 2];
-      var volB = [-0.05, 0.00, 0.05];
-      var bodyB = [-0.03, 0.00, 0.03];
-      var rsiB = [-3, 0, 3];
-      var bufB = [0.00, 0.02];
-      var devB = [-0.10, 0.00, 0.10];
-
-      for (var b1 = 0; b1 < dqsB.length; b1++) {
-        for (var b2 = 0; b2 < winB.length; b2++) {
-          for (var b3 = 0; b3 < devB.length; b3++) {
-            addCombo_(
-              'R' + (out.length + 1),
-              dqsB[b1],
-              winB[b2],
-              volB[(b1 + b2 + b3) % volB.length],
-              bodyB[(b2 + b3) % bodyB.length],
-              rsiB[(b1 + b3) % rsiB.length],
-              bufB[(b1 + b2 + b3) % bufB.length],
-              devB[b3]
-            );
-          }
-        }
-      }
-    } else if (p === 'LOOSE_MOMO_LONG') {
-      var dqsC = [-4, -2, 0, 2];
-      var winC = [-1, 0, 1];
-      var volC = [-0.08, -0.03, 0.00, 0.05];
-      var bodyC = [-0.05, -0.02, 0.00, 0.03];
-      var rsiC = [-6, -3, 0, 3];
-      var bufC = [0.00, 0.01, 0.03];
-      var devC = [-0.10, 0.00, 0.10];
-
-      for (var c1 = 0; c1 < dqsC.length; c1++) {
-        for (var c2 = 0; c2 < rsiC.length; c2++) {
-          for (var c3 = 0; c3 < volC.length; c3++) {
-            addCombo_(
-              'R' + (out.length + 1),
-              dqsC[c1],
-              winC[(c1 + c2 + c3) % winC.length],
-              volC[c3],
-              bodyC[(c2 + c3) % bodyC.length],
-              rsiC[c2],
-              bufC[(c1 + c3) % bufC.length],
-              devC[(c1 + c2 + c3) % devC.length]
-            );
-          }
-        }
-      }
-    } else if (p === 'FAKEOUT_SHORT') {
-      var dqsD = [-3, 0, 3];
-      var winD = [-1, 0, 1];
-      var volD = [-0.05, 0.00, 0.08];
-      var bodyD = [-0.04, 0.00, 0.04];
-      var rsiD = [-5, 0, 5];
-      var bufD = [-0.03, 0.00, 0.03];
-      var devD = [-0.08, 0.00, 0.08];
-
-      for (var d1 = 0; d1 < dqsD.length; d1++) {
-        for (var d2 = 0; d2 < bodyD.length; d2++) {
-          for (var d3 = 0; d3 < bufD.length; d3++) {
-            addCombo_(
-              'R' + (out.length + 1),
-              dqsD[d1],
-              winD[(d1 + d2 + d3) % winD.length],
-              volD[(d2 + d3) % volD.length],
-              bodyD[d2],
-              rsiD[(d1 + d3) % rsiD.length],
-              bufD[d3],
-              devD[(d1 + d2 + d3) % devD.length]
-            );
-          }
-        }
-      }
-    } else if (p === 'EXHAUSTION_FADE_SHORT') {
-      var dqsE = [-4, -1, 2];
-      var winE = [-1, 0, 1];
-      var volE = [0.00, 0.08, 0.15];
-      var bodyE = [-0.03, 0.00, 0.03];
-      var rsiE = [-6, -3, 0, 3];
-      var bufE = [0.00, 0.02];
-      var devE = [-0.10, 0.00, 0.10];
-
-      for (var e1 = 0; e1 < dqsE.length; e1++) {
-        for (var e2 = 0; e2 < volE.length; e2++) {
-          for (var e3 = 0; e3 < rsiE.length; e3++) {
-            addCombo_(
-              'R' + (out.length + 1),
-              dqsE[e1],
-              winE[(e1 + e2 + e3) % winE.length],
-              volE[e2],
-              bodyE[(e2 + e3) % bodyE.length],
-              rsiE[e3],
-              bufE[(e1 + e2 + e3) % bufE.length],
-              devE[(e1 + e3) % devE.length]
-            );
-          }
-        }
-      }
-    } else if (p === 'BREAKDOWN_SHORT') {
-      var dqsF = [-4, 0, 4];
-      var winF = [-2, 0, 1];
-      var volF = [-0.05, 0.00, 0.08];
-      var bodyF = [-0.05, 0.00, 0.05];
-      var rsiF = [-4, 0, 4];
-      var bufF = [-0.03, 0.00, 0.03];
-      var devF = [-0.10, 0.00, 0.10];
-
-      for (var f1 = 0; f1 < dqsF.length; f1++) {
-        for (var f2 = 0; f2 < winF.length; f2++) {
-          for (var f3 = 0; f3 < bodyF.length; f3++) {
-            addCombo_(
-              'R' + (out.length + 1),
-              dqsF[f1],
-              winF[f2],
-              volF[(f1 + f2 + f3) % volF.length],
-              bodyF[f3],
-              rsiF[(f2 + f3) % rsiF.length],
-              bufF[(f1 + f3) % bufF.length],
-              devF[(f1 + f2 + f3) % devF.length]
-            );
-          }
-        }
-      }
-    }
-
-    return out;
-  }
-
-  function profileResearchGridWide_(baseOv) {
-    var base = profileResearchGrid_(baseOv);
-    var extra = [];
-
-    for (var i = 0; i < base.length; i++) {
-      var x = deepCopy_(base[i]);
-
-      if (i % 2 === 0) x.dqs += 2;
-      if (i % 3 === 0) x.body += 0.02;
-      if (i % 4 === 0) x.vol += 0.05;
-      if (i % 5 === 0) x.buf += 0.02;
-      if (i % 6 === 0) x.rsi -= 2;
-
-      x.tag = String(x.tag) + '_W';
-      extra.push(x);
-    }
-
-    return base.concat(extra);
-  }
-
-  function emitResearch_(label, baseOv, wide) {
-    var grid = wide ? profileResearchGridWide_(baseOv) : profileResearchGrid_(baseOv);
-
-    for (var i = 0; i < grid.length; i++) {
-      var g = grid[i];
-      var ov = deepCopy_(baseOv);
-
-      ov.DQS_Gate_V2 = (+ov.DQS_Gate_V2 || 0) + (g.dqs || 0);
-      ov.V2_Retest_Window_Candles = (+ov.V2_Retest_Window_Candles || 6) + (g.win || 0);
-      ov.V2_Retest_Max_Deviation_ATR = (+ov.V2_Retest_Max_Deviation_ATR || 1.0) + (g.dev || 0);
-      ov.Volume_Multiplier_Threshold = (+ov.Volume_Multiplier_Threshold || 1.0) + (g.vol || 0);
-      ov.V2_Confirmation_Body_Min_Frac = (+ov.V2_Confirmation_Body_Min_Frac || 0.25) + (g.body || 0);
-      ov.RSI_Overbought_Long = (+ov.RSI_Overbought_Long || 65) + (g.rsi || 0);
-      ov.V2_Breakout_Buffer_ATR = (+ov.V2_Breakout_Buffer_ATR || 0.0) + (g.buf || 0);
-
-      ov = normalizeOv_(ov);
-
-      pushJob_(label + ' | ' + String(g.tag || ('R' + i)), 'PROFILE', ov);
-    }
-  }
-
-  if (variantMode === 'PERSISTENCE_HUNT') {
-    emitPersistenceHunt_();
-    return jobs;
-  }
-
-  for (var p = 0; p < profiles.length; p++) {
-    var built = buildProfileBase_(profiles[p], universeMode);
-    if (!built) continue;
-
-    var mirrorSet = [];
-
-    mirrorSet.push({
-      label: built.label,
-      ov: normalizeOv_(built.ov)
-    });
-
-    if (invertProfiles) {
-      var inv = deepCopy_(built.ov);
-      inv.Invert_All_Signals = !inv.Invert_All_Signals;
-      inv = normalizeOv_(inv);
-
-      mirrorSet.push({
-        label: built.label + ' | INVERTED_MIRROR',
-        ov: inv
-      });
-    }
-
-    for (var m = 0; m < mirrorSet.length; m++) {
-      var label = mirrorSet[m].label;
-      var ov = mirrorSet[m].ov;
-
-      if (variantMode === 'RESEARCH') {
-        emitResearch_(label, ov, false);
-      } else if (variantMode === 'RESEARCH_WIDE') {
-        emitResearch_(label, ov, true);
-      } else if (variantMode === 'DENSE') {
-        emitStandardOrDense_(label, 'DENSE', ov);
-      } else {
-        emitStandardOrDense_(label, 'STANDARD', ov);
-      }
-    }
-  }
-
-  return jobs;
+  return {
+    hasFn: (typeof M9_runWalkForwardBacktest === 'function'),
+    hasConstLocal: (typeof M9_CONST !== 'undefined'),
+    hasColLocal: (typeof M9_COL !== 'undefined'),
+    hasConstGlobal: (typeof g.M9_CONST !== 'undefined'),
+    hasColGlobal: (typeof g.M9_COL !== 'undefined')
+  };
 }
 
 
@@ -2435,12 +1975,18 @@ function TRG_deleteBrokenTriggersNow() {
 }
 
 
+/**
+ * Main scheduled cycle — runs on a time-driven trigger.
+ * NOW: checks whether an experiment is in progress and skips M6 execution
+ * to avoid collisions with the experiment's own M6 calls.
+ */
 function MAIN_scheduledCycle() {
   Logger.log('[MAIN] ═══════════════════════════════════════');
   Logger.log('[MAIN] MAIN_scheduledCycle starting');
   Logger.log('[MAIN] ═══════════════════════════════════════');
 
   try {
+    // ── Kill switch ──
     if (typeof M1_ksRequireOff === 'function') {
       try {
         M1_ksRequireOff();
@@ -2450,6 +1996,22 @@ function MAIN_scheduledCycle() {
       }
     }
 
+    // ── Check for active experiment ──
+    var experimentRunning = false;
+    try {
+      if (typeof RUN__expLoadState_ === 'function') {
+        var expState = RUN__expLoadState_();
+        if (expState && expState.jobs && expState.idx < expState.jobs.length) {
+          experimentRunning = true;
+          Logger.log('[MAIN] Active experiment detected (idx=' + expState.idx +
+            '/' + expState.jobs.length + '). Will skip M6 to avoid collision.');
+        }
+      }
+    } catch (expCheckErr) {
+      Logger.log('[MAIN][WARN] Could not check experiment state: ' + expCheckErr.message);
+    }
+
+    // ── M2: Candle fetch — safe to run even during experiments ──
     if (typeof M2_fetchTopKCandlesIncremental === 'function') {
       try {
         M2_fetchTopKCandlesIncremental();
@@ -2458,11 +2020,16 @@ function MAIN_scheduledCycle() {
       }
     }
 
-    if (typeof M6_runExecutionCycle === 'function') {
-      try {
-        M6_runExecutionCycle();
-      } catch (e6) {
-        Logger.log('[MAIN][WARN] M6_runExecutionCycle failed: ' + e6.message);
+    // ── M6: Execution cycle — SKIP if experiment is running ──
+    if (experimentRunning) {
+      Logger.log('[MAIN] Skipping M6_runExecutionCycle — experiment owns execution right now.');
+    } else {
+      if (typeof M6_runExecutionCycle === 'function') {
+        try {
+          M6_runExecutionCycle();
+        } catch (e6) {
+          Logger.log('[MAIN][WARN] M6_runExecutionCycle failed: ' + e6.message);
+        }
       }
     }
 
@@ -2679,10 +2246,10 @@ function RUN_experimentMatrix_resumableCancel() {
   return { status: 'CANCELED' };
 }
 
-
-
 function RUN_experimentMatrix_resumableStart(opts) {
   opts = opts || {};
+
+  RUN__assertM9Loaded_();
 
   var lock = LockService.getDocumentLock();
   if (!lock.tryLock(5000)) {
@@ -2723,9 +2290,6 @@ function RUN_experimentMatrix_resumableStart(opts) {
 
   return RUN_experimentMatrix_resumableContinue();
 }
-
-
-
 
 
 
@@ -2869,10 +2433,15 @@ function RUN__getDqsSummary_(btId) {
 }
 
 
+/**
+ * Normal continuation — processes one job per invocation, then reschedules itself.
+ * ONLY ONE DEFINITION OF THIS FUNCTION SHOULD EXIST IN YOUR PROJECT.
+ * Delete any duplicate.
+ */
 function RUN_experimentMatrix_resumableContinue() {
-  var lock = LockService.getDocumentLock();
-  if (!lock.tryLock(5000)) {
-    Logger.log('[EXP] Could not acquire document lock. Rescheduling normal continuation.');
+  var lockResult = RUN__getSafeLock_(5000);
+  if (!lockResult.acquired) {
+    Logger.log('[EXP] Could not acquire lock. Rescheduling normal continuation.');
     RUN__expEnsureContinueTrigger_();
     return { status: 'LOCKED' };
   }
@@ -2880,7 +2449,8 @@ function RUN_experimentMatrix_resumableContinue() {
   try {
     var state = RUN__expLoadState_();
     if (!state) {
-      throw new Error('No resumable experiment state found. Run RUN_experimentMatrix_resumableStart(...) first.');
+      Logger.log('[EXP] No resumable experiment state found. Nothing to do.');
+      return { status: 'NO_STATE' };
     }
     state = RUN__expInitStateFields_(state);
 
@@ -2907,19 +2477,28 @@ function RUN_experimentMatrix_resumableContinue() {
       state.status = 'RUNNING';
 
       RUN__expSaveState_(state);
-      SpreadsheetApp.flush();
+      try { SpreadsheetApp.flush(); } catch (flushErr) {}
 
-      // Dead-man rescue trigger: if we timeout before we schedule next step,
-      // this rescue invocation will check whether the job actually completed.
+      // Dead-man rescue trigger
       RUN__expEnsureRescueTrigger_();
 
       Logger.log('[EXP] Starting job idx=' + state.idx + '/' + state.jobs.length +
         ' attempts=' + job.attempts +
         ' runName=' + String(job.runName || ''));
 
-      RUN__expRunOneJob_(job);
+      try {
+        RUN__expRunOneJob_(job);
+      } catch (jobErr) {
+        Logger.log('[EXP][ERROR] Job idx=' + state.idx + ' threw: ' + jobErr.message);
+        if (jobErr.stack) Logger.log('[EXP][STACK] ' + jobErr.stack);
+        // Don't mark as completed — rescue trigger will handle retry
+        RUN__expSaveState_(state);
+        try { SpreadsheetApp.flush(); } catch (fe) {}
+        // Leave rescue trigger armed, schedule no continuation
+        return { status: 'JOB_ERROR', idx: state.idx, message: jobErr.message };
+      }
 
-      // If we get here, heavy work completed successfully.
+      // Job completed successfully
       state.lastCompletedIdx = state.idx;
       state.lastCompletedAt = new Date().toISOString();
       state.idx++;
@@ -2928,12 +2507,13 @@ function RUN_experimentMatrix_resumableContinue() {
       ran++;
 
       RUN__expSaveState_(state);
-      SpreadsheetApp.flush();
+      try { SpreadsheetApp.flush(); } catch (flushErr) {}
 
-      // Clear rescue since this job completed.
+      // Clear rescue since this job completed
       RUN__expDeleteRescueTriggers_();
     }
 
+    // More jobs remaining — schedule next invocation
     if (state.idx < state.jobs.length) {
       RUN__expEnsureContinueTrigger_();
       Logger.log('[EXP] Pausing at idx=' + state.idx + '/' + state.jobs.length +
@@ -2941,36 +2521,59 @@ function RUN_experimentMatrix_resumableContinue() {
       return { status: 'PAUSED', idx: state.idx, total: state.jobs.length };
     }
 
-    if (state.oldM9 === null || state.oldM9 === undefined) props.deleteProperty('M9_CFG_OVERRIDE');
-    else props.setProperty('M9_CFG_OVERRIDE', state.oldM9);
+    // ── All jobs done — restore original config overrides ──
+    if (state.oldM9 === null || state.oldM9 === undefined) {
+      props.deleteProperty('M9_CFG_OVERRIDE');
+    } else {
+      props.setProperty('M9_CFG_OVERRIDE', state.oldM9);
+    }
 
-    if (state.oldM4 === null || state.oldM4 === undefined) props.deleteProperty('M4_CFG_OVERRIDE');
-    else props.setProperty('M4_CFG_OVERRIDE', state.oldM4);
+    if (state.oldM4 === null || state.oldM4 === undefined) {
+      props.deleteProperty('M4_CFG_OVERRIDE');
+    } else {
+      props.setProperty('M4_CFG_OVERRIDE', state.oldM4);
+    }
 
-    if (state.oldM6 === null || state.oldM6 === undefined) props.deleteProperty('M6_CFG_OVERRIDE');
-    else props.setProperty('M6_CFG_OVERRIDE', state.oldM6);
+    if (state.oldM6 === null || state.oldM6 === undefined) {
+      props.deleteProperty('M6_CFG_OVERRIDE');
+    } else {
+      props.setProperty('M6_CFG_OVERRIDE', state.oldM6);
+    }
 
-    RUN_clearOverrideCaches();
+    if (typeof RUN_clearOverrideCaches === 'function') {
+      try { RUN_clearOverrideCaches(); } catch (e) {}
+    }
+
     state.status = 'DONE';
     RUN__expSaveState_(state);
-
     RUN__expDeleteState_();
     RUN__expClearAllTriggers_();
-    SpreadsheetApp.flush();
+    try { SpreadsheetApp.flush(); } catch (flushErr) {}
 
-    Logger.log('[EXP] Resumable experiment complete.');
+    Logger.log('[EXP] ═══════════════════════════════════════');
+    Logger.log('[EXP] Resumable experiment COMPLETE.');
+    Logger.log('[EXP] ═══════════════════════════════════════');
     return { status: 'DONE', idx: state.jobs.length, total: state.jobs.length };
 
+  } catch (outerErr) {
+    Logger.log('[EXP][FATAL] resumableContinue failed: ' + outerErr.message);
+    if (outerErr.stack) Logger.log('[EXP][STACK] ' + outerErr.stack);
+    return { status: 'FATAL_ERROR', message: outerErr.message };
   } finally {
-    try { lock.releaseLock(); } catch (e3) {}
+    try { if (lockResult.lock) lockResult.lock.releaseLock(); } catch (e) {}
   }
 }
 
 
 
+/**
+ * Rescue function — called by a dead-man trigger to recover from timed-out jobs.
+ * ONLY ONE DEFINITION OF THIS FUNCTION SHOULD EXIST IN YOUR PROJECT.
+ * Delete any duplicate.
+ */
 function RUN_experimentMatrix_rescueContinue() {
-  var lock = LockService.getDocumentLock();
-  if (!lock.tryLock(5000)) {
+  var lockResult = RUN__getSafeLock_(5000);
+  if (!lockResult.acquired) {
     Logger.log('[EXP][RESCUE] Could not acquire lock. Re-arming rescue trigger.');
     RUN__expEnsureRescueTrigger_();
     return { status: 'LOCKED' };
@@ -2985,24 +2588,24 @@ function RUN_experimentMatrix_rescueContinue() {
     }
     state = RUN__expInitStateFields_(state);
 
-    // If already done, nothing to rescue.
+    // Already done — clean up
     if (state.idx >= state.jobs.length) {
-      Logger.log('[EXP][RESCUE] State already complete. Clearing rescue triggers.');
+      Logger.log('[EXP][RESCUE] State already complete. Clearing all triggers.');
       RUN__expClearAllTriggers_();
       return { status: 'DONE_ALREADY' };
     }
 
-    // If no active job is marked, just ensure normal continuation exists.
+    // No active job marked — just ensure normal continuation
     if (state.activeJobIdx === -1) {
       Logger.log('[EXP][RESCUE] No active job marked. Scheduling normal continuation.');
       RUN__expDeleteRescueTriggers_();
-      RUN__expEnsureContinueTrigger_();
+      if (state.idx < state.jobs.length) RUN__expEnsureContinueTrigger_();
       return { status: 'NO_ACTIVE_JOB' };
     }
 
-    // If last completed idx caught up to active job, then the job actually finished.
+    // Job already completed (idx caught up)
     if (state.lastCompletedIdx >= state.activeJobIdx) {
-      Logger.log('[EXP][RESCUE] Active job already completed (idx=' + state.activeJobIdx + '). Scheduling normal continuation.');
+      Logger.log('[EXP][RESCUE] Active job already completed (idx=' + state.activeJobIdx + ').');
       state.activeJobIdx = -1;
       state.activeJobStartedAt = '';
       RUN__expSaveState_(state);
@@ -3014,6 +2617,7 @@ function RUN_experimentMatrix_rescueContinue() {
     var idx = state.activeJobIdx;
     var job = state.jobs[idx];
 
+    // Missing job object
     if (!job) {
       Logger.log('[EXP][RESCUE][WARN] Missing job at activeJobIdx=' + idx + '. Skipping.');
       state.lastCompletedIdx = idx;
@@ -3027,23 +2631,21 @@ function RUN_experimentMatrix_rescueContinue() {
       return { status: 'SKIPPED_MISSING_JOB', idx: state.idx, total: state.jobs.length };
     }
 
+    // Retry limit exceeded
     var attempts = job.attempts || 0;
     if (attempts >= 3) {
       Logger.log('[EXP][RESCUE][FAIL] Job idx=' + idx + ' exceeded retry limit. Skipping permanently.');
       job.failedPermanently = true;
       job.failedReason = 'Exceeded rescue retry limit';
       job.lastFailedAt = new Date().toISOString();
-
       state.lastCompletedIdx = idx;
       state.lastCompletedAt = new Date().toISOString();
       state.idx = idx + 1;
       state.activeJobIdx = -1;
       state.activeJobStartedAt = '';
       RUN__expSaveState_(state);
-
       RUN__expDeleteRescueTriggers_();
       if (state.idx < state.jobs.length) RUN__expEnsureContinueTrigger_();
-
       return { status: 'SKIPPED_AFTER_RETRIES', idx: state.idx, total: state.jobs.length };
     }
 
@@ -3051,16 +2653,25 @@ function RUN_experimentMatrix_rescueContinue() {
       ' attempts=' + attempts +
       ' runName=' + String(job.runName || ''));
 
-    // Clear active markers and let the normal continuation rerun the same idx.
+    // Clear active markers so normal continuation re-runs same idx
     state.activeJobIdx = -1;
     state.activeJobStartedAt = '';
     RUN__expSaveState_(state);
-
     RUN__expDeleteRescueTriggers_();
+
+    // Release lock BEFORE calling resumableContinue (it acquires its own)
+    try { lockResult.lock.releaseLock(); } catch (e) {}
+
     return RUN_experimentMatrix_resumableContinue();
 
+  } catch (outerErr) {
+    Logger.log('[EXP][RESCUE][FATAL] ' + outerErr.message);
+    if (outerErr.stack) Logger.log('[EXP][RESCUE][STACK] ' + outerErr.stack);
+    // Re-arm rescue so we don't lose the experiment
+    try { RUN__expEnsureRescueTrigger_(); } catch (e) {}
+    return { status: 'ERROR', message: outerErr.message };
   } finally {
-    try { lock.releaseLock(); } catch (e) {}
+    try { if (lockResult.lock) lockResult.lock.releaseLock(); } catch (e) {}
   }
 }
 
@@ -3068,6 +2679,8 @@ function RUN_experimentMatrix_rescueContinue() {
 
 function RUN__expRunOneJob_(job) {
   if (!job || !job.ov) throw new Error('Invalid job');
+
+  RUN__assertM9Loaded_();
 
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var exp = ss.getSheetByName('EXPERIMENTS');
@@ -3100,15 +2713,37 @@ function RUN__expRunOneJob_(job) {
   RUN_setOverride_('M4_CFG_OVERRIDE', ov);
   RUN_setOverride_('M6_CFG_OVERRIDE', {});
 
-  var btResult = RUN_backtestSafe();
-  var btId = btResult.backtestId;
-  var btMap = latestBacktestMap_();
+  var btResult = null;
+  var btId = 'BT-ERROR-' + Utilities.getUuid();
+  var btMap = {};
+  var d = {};
+  var passFail = {};
+  var oosTotal = '';
+  var reasonsArr = [];
+  var reasonsJson = '[]';
 
-  var d = btResult && btResult.diagV2 ? btResult.diagV2 : {};
-  var passFail = btResult && btResult.passFail ? btResult.passFail : {};
-  var oosTotal = (btResult && btResult.oos && btResult.oos.metrics) ? btResult.oos.metrics.total : '';
-  var reasonsArr = (passFail && passFail.reasons) ? passFail.reasons : [];
-  var reasonsJson = JSON.stringify(reasonsArr || []);
+  try {
+    btResult = RUN_backtestSafe();
+    btId = btResult.backtestId;
+    btMap = latestBacktestMap_();
+
+    d = btResult && btResult.diagV2 ? btResult.diagV2 : {};
+    passFail = btResult && btResult.passFail ? btResult.passFail : {};
+    oosTotal = (btResult && btResult.oos && btResult.oos.metrics) ? btResult.oos.metrics.total : '';
+    reasonsArr = (passFail && passFail.reasons) ? passFail.reasons : [];
+    reasonsJson = JSON.stringify(reasonsArr || []);
+  } catch (eBT) {
+    Logger.log('[EXP][WARN] Backtest failed for ' + job.runName + ': ' + eBT.message);
+    if (eBT && eBT.stack) Logger.log('[EXP][WARN][STACK] ' + eBT.stack);
+    btResult = {
+      error: {
+        message: eBT.message,
+        stack: eBT.stack || ''
+      }
+    };
+    reasonsArr = ['BACKTEST_RUNTIME_ERROR'];
+    reasonsJson = JSON.stringify(reasonsArr);
+  }
 
   exp.appendRow([
     new Date().toISOString(),
@@ -3175,6 +2810,8 @@ function RUN__expRunOneJob_(job) {
     oos_fail_reasons_json: reasonsArr || []
   };
 
+  var sbInsertOk = false;
+
   try {
     var supabaseBody = {
       strategy_id: MEM__strategyIdFromRunName_(job.runName),
@@ -3212,9 +2849,20 @@ function RUN__expRunOneJob_(job) {
     };
 
     M10__sbFetchJson_('post', '/rest/v1/experiment_logs', supabaseBody);
+    sbInsertOk = true;
     Logger.log('[EXP][SB] experiment_logs inserted for BT=' + btId);
   } catch (e1) {
     Logger.log('[EXP][SB][WARN] Could not insert experiment_logs row for BT=' + btId + ': ' + e1.message);
+  }
+
+  if (sbInsertOk) {
+    try {
+      if (typeof M9_printBacktestDiag === 'function') {
+        M9_printBacktestDiag(btId);
+      }
+    } catch (diagErr) {
+      Logger.log('[RUN] Backtest diag print skipped: ' + diagErr.message);
+    }
   }
 
   return btId;
@@ -3285,10 +2933,507 @@ function RUN__assertExperimentJobCountSafe_(jobs, maxJobs) {
 }
 
 
-RUN_experimentMatrix_resumableStart({
-  name: 'PERSISTENCE_HUNT_V1',
-  variantMode: 'PERSISTENCE_HUNT',
-  maxJobs: 100
-});
 
+
+function RUN__expBuildJobs_(opts) {
+  opts = opts || {};
+
+  var name = String(opts.name || 'MULTI_STRAT').trim();
+  var universeMode = String(opts.universeMode || 'MAJORS_ONLY').trim().toUpperCase();
+  var invertProfiles = !!opts.invertProfiles;
+
+  var profiles = opts.strategyProfiles || [
+    'BREAKOUT_LONG',
+    'TREND_PULLBACK_LONG',
+    'LOOSE_MOMO_LONG',
+    'FAKEOUT_SHORT',
+    'EXHAUSTION_FADE_SHORT',
+    'BREAKDOWN_SHORT'
+  ];
+
+  var expandVariants = (opts.expandVariants !== undefined) ? !!opts.expandVariants : false;
+  var variantMode = String(opts.variantMode || 'STANDARD').trim().toUpperCase();
+
+  var jobs = [];
+  var dedupe = {};
+
+  function deepCopy_(o) {
+    return JSON.parse(JSON.stringify(o || {}));
+  }
+
+  function clamp_(x, lo, hi) {
+    x = parseFloat(x);
+    if (!isFinite(x)) x = lo;
+    if (x < lo) return lo;
+    if (x > hi) return hi;
+    return x;
+  }
+
+  function intClamp_(x, lo, hi) {
+    x = Math.round(parseFloat(x));
+    if (!isFinite(x)) x = lo;
+    if (x < lo) return lo;
+    if (x > hi) return hi;
+    return x;
+  }
+
+  function normalizeOv_(ov) {
+    ov = deepCopy_(ov);
+
+    ov.DQS_Gate_V2 = intClamp_(ov.DQS_Gate_V2, 10, 60);
+    ov.V2_Retest_Window_Candles = intClamp_(ov.V2_Retest_Window_Candles, 3, 12);
+    ov.V2_Retest_Max_Deviation_ATR = clamp_(ov.V2_Retest_Max_Deviation_ATR, 0.50, 1.50);
+    ov.Volume_Multiplier_Threshold = clamp_(ov.Volume_Multiplier_Threshold, 0.90, 1.50);
+    ov.RSI_Overbought_Long = intClamp_(ov.RSI_Overbought_Long, 50, 90);
+    ov.V2_Confirmation_Body_Min_Frac = clamp_(ov.V2_Confirmation_Body_Min_Frac, 0.00, 0.60);
+    ov.V2_Breakout_Buffer_ATR = clamp_(ov.V2_Breakout_Buffer_ATR, 0.00, 0.20);
+
+    ov.Invert_All_Signals = !!ov.Invert_All_Signals;
+    ov.V2_Long_Only = !!ov.V2_Long_Only;
+    if (ov.Invert_All_Signals === true && ov.V2_Long_Only === true) {
+      ov.V2_Long_Only = false;
+    }
+
+    if (ov.Symbol_Allowlist && ov.Symbol_Allowlist.length) {
+      var tmp = [];
+      for (var i = 0; i < ov.Symbol_Allowlist.length; i++) {
+        var s = String(ov.Symbol_Allowlist[i] || '').trim();
+        if (s) tmp.push(s);
+      }
+      ov.Symbol_Allowlist = tmp;
+    }
+
+    if (ov.Symbol_Cohort_Tag !== undefined) {
+      ov.Symbol_Cohort_Tag = String(ov.Symbol_Cohort_Tag || '').trim().toUpperCase();
+    }
+
+    ov.Payoff_Overlay_Mode = String(ov.Payoff_Overlay_Mode || 'CONTROL').trim().toUpperCase();
+    ov.Progress_Deadline_Bars = intClamp_(ov.Progress_Deadline_Bars, 2, 60);
+    ov.Progress_Min_R = clamp_(ov.Progress_Min_R, 0.0, 1.0);
+    ov.Max_Hold_Bars = intClamp_(ov.Max_Hold_Bars, 4, 120);
+    ov.Full_Exit_On_TP1 = !!ov.Full_Exit_On_TP1;
+    ov.Tail_Clamp_Enabled = !!ov.Tail_Clamp_Enabled;
+    ov.Tail_Clamp_Trigger_R = clamp_(ov.Tail_Clamp_Trigger_R, 0.1, 3.0);
+    ov.Tail_Clamp_Stop_R = clamp_(ov.Tail_Clamp_Stop_R, -0.2, 1.5);
+    ov.Center_Exit_Enabled = !!ov.Center_Exit_Enabled;
+    ov.Center_Exit_Mode = String(ov.Center_Exit_Mode || 'NONE').trim().toUpperCase();
+    ov.Center_Exit_Buffer_ATR = clamp_(ov.Center_Exit_Buffer_ATR, 0.0, 1.0);
+
+    return ov;
+  }
+
+  function stableKey_(ov) {
+    ov = normalizeOv_(ov);
+    var symKey = '';
+    if (ov.Symbol_Allowlist && ov.Symbol_Allowlist.length) {
+      symKey = ov.Symbol_Allowlist.slice().sort().join(',');
+    }
+    return [
+      String(ov.Strategy_Profile || ''),
+      String(ov.Universe_Mode || ''),
+      String(ov.Symbol_Cohort_Tag || ''),
+      symKey,
+      String(ov.Invert_All_Signals),
+      String(ov.V2_Long_Only),
+      String(ov.DQS_Gate_V2),
+      String(ov.V2_Retest_Window_Candles),
+      String(ov.V2_Retest_Max_Deviation_ATR),
+      String(ov.Volume_Multiplier_Threshold),
+      String(ov.RSI_Overbought_Long),
+      String(ov.V2_Confirmation_Body_Min_Frac),
+      String(ov.V2_Breakout_Buffer_ATR),
+      String(ov.Payoff_Overlay_Mode),
+      String(ov.Progress_Deadline_Bars),
+      String(ov.Progress_Min_R),
+      String(ov.Max_Hold_Bars),
+      String(ov.Full_Exit_On_TP1),
+      String(ov.Tail_Clamp_Enabled),
+      String(ov.Tail_Clamp_Trigger_R),
+      String(ov.Tail_Clamp_Stop_R),
+      String(ov.Center_Exit_Enabled),
+      String(ov.Center_Exit_Mode),
+      String(ov.Center_Exit_Buffer_ATR)
+    ].join('|');
+  }
+
+  function pushJob_(label, mode, ov) {
+    ov = normalizeOv_(ov);
+    var key = stableKey_(ov);
+    if (dedupe[key]) return;
+    dedupe[key] = true;
+    jobs.push({
+      runName: name + ' | ' + label,
+      mode: mode,
+      ov: deepCopy_(ov)
+    });
+  }
+
+  function buildProfileBase_(profileName, uniMode) {
+    var p = String(profileName || '').trim().toUpperCase();
+    var u = String(uniMode || universeMode).trim().toUpperCase();
+
+    if (p === 'BREAKOUT_LONG') {
+      return {
+        label: 'BREAKOUT_LONG',
+        ov: {
+          Strategy_Profile: 'BREAKOUT_LONG',
+          Universe_Mode: u,
+          DQS_Gate_V2: 25,
+          V2_Retest_Window_Candles: 6,
+          V2_Retest_Max_Deviation_ATR: 0.75,
+          Volume_Multiplier_Threshold: 1.10,
+          RSI_Overbought_Long: 65,
+          V2_Confirmation_Body_Min_Frac: 0.35,
+          V2_Breakout_Buffer_ATR: 0.05,
+          Invert_All_Signals: false,
+          V2_Long_Only: true
+        }
+      };
+    }
+
+    if (p === 'TREND_PULLBACK_LONG') {
+      return {
+        label: 'TREND_PULLBACK_LONG',
+        ov: {
+          Strategy_Profile: 'TREND_PULLBACK_LONG',
+          Universe_Mode: u,
+          DQS_Gate_V2: 22,
+          V2_Retest_Window_Candles: 8,
+          V2_Retest_Max_Deviation_ATR: 1.00,
+          Volume_Multiplier_Threshold: 1.00,
+          RSI_Overbought_Long: 60,
+          V2_Confirmation_Body_Min_Frac: 0.25,
+          V2_Breakout_Buffer_ATR: 0.00,
+          Invert_All_Signals: false,
+          V2_Long_Only: true
+        }
+      };
+    }
+
+    if (p === 'LOOSE_MOMO_LONG') {
+      return {
+        label: 'LOOSE_MOMO_LONG',
+        ov: {
+          Strategy_Profile: 'LOOSE_MOMO_LONG',
+          Universe_Mode: u,
+          DQS_Gate_V2: 18,
+          V2_Retest_Window_Candles: 6,
+          V2_Retest_Max_Deviation_ATR: 1.00,
+          Volume_Multiplier_Threshold: 1.00,
+          RSI_Overbought_Long: 72,
+          V2_Confirmation_Body_Min_Frac: 0.25,
+          V2_Breakout_Buffer_ATR: 0.00,
+          Invert_All_Signals: false,
+          V2_Long_Only: true
+        }
+      };
+    }
+
+    if (p === 'FAKEOUT_SHORT') {
+      return {
+        label: 'FAKEOUT_SHORT',
+        ov: {
+          Strategy_Profile: 'FAKEOUT_SHORT',
+          Universe_Mode: u,
+          DQS_Gate_V2: 20,
+          V2_Retest_Window_Candles: 6,
+          V2_Retest_Max_Deviation_ATR: 0.75,
+          Volume_Multiplier_Threshold: 1.00,
+          RSI_Overbought_Long: 75,
+          V2_Confirmation_Body_Min_Frac: 0.30,
+          V2_Breakout_Buffer_ATR: 0.05,
+          Invert_All_Signals: true,
+          V2_Long_Only: false
+        }
+      };
+    }
+
+    if (p === 'EXHAUSTION_FADE_SHORT') {
+      return {
+        label: 'EXHAUSTION_FADE_SHORT',
+        ov: {
+          Strategy_Profile: 'EXHAUSTION_FADE_SHORT',
+          Universe_Mode: u,
+          DQS_Gate_V2: 18,
+          V2_Retest_Window_Candles: 6,
+          V2_Retest_Max_Deviation_ATR: 1.00,
+          Volume_Multiplier_Threshold: 1.20,
+          RSI_Overbought_Long: 80,
+          V2_Confirmation_Body_Min_Frac: 0.25,
+          V2_Breakout_Buffer_ATR: 0.00,
+          Invert_All_Signals: true,
+          V2_Long_Only: false
+        }
+      };
+    }
+
+    if (p === 'BREAKDOWN_SHORT') {
+      return {
+        label: 'BREAKDOWN_SHORT',
+        ov: {
+          Strategy_Profile: 'BREAKDOWN_SHORT',
+          Universe_Mode: u,
+          DQS_Gate_V2: 25,
+          V2_Retest_Window_Candles: 8,
+          V2_Retest_Max_Deviation_ATR: 0.75,
+          Volume_Multiplier_Threshold: 1.10,
+          RSI_Overbought_Long: 60,
+          V2_Confirmation_Body_Min_Frac: 0.35,
+          V2_Breakout_Buffer_ATR: 0.05,
+          Invert_All_Signals: true,
+          V2_Long_Only: false
+        }
+      };
+    }
+
+    return null;
+  }
+
+  function applyVariant_(baseOv, k) {
+    var ov = deepCopy_(baseOv);
+    ov.DQS_Gate_V2 = (+ov.DQS_Gate_V2 || 0) + (k.dqs || 0);
+    ov.V2_Retest_Window_Candles = (+ov.V2_Retest_Window_Candles || 6) + (k.win || 0);
+    ov.V2_Retest_Max_Deviation_ATR = (+ov.V2_Retest_Max_Deviation_ATR || 1.0) + (k.dev || 0);
+    ov.Volume_Multiplier_Threshold = (+ov.Volume_Multiplier_Threshold || 1.0) + (k.vol || 0);
+    ov.V2_Confirmation_Body_Min_Frac = (+ov.V2_Confirmation_Body_Min_Frac || 0.25) + (k.body || 0);
+    ov.RSI_Overbought_Long = (+ov.RSI_Overbought_Long || 65) + (k.rsi || 0);
+    ov.V2_Breakout_Buffer_ATR = (+ov.V2_Breakout_Buffer_ATR || 0.0) + (k.buf || 0);
+
+    if (k.ovExtra) {
+      for (var kk in k.ovExtra) {
+        if (k.ovExtra.hasOwnProperty(kk)) ov[kk] = k.ovExtra[kk];
+      }
+    }
+
+    return normalizeOv_(ov);
+  }
+
+  function emitPersistenceHuntV3_() {
+    var cohorts = [
+      { tag: 'TOP_SPS_WITH_DOGE', mode: 'TOP_SPS_WITH_DOGE' },
+      { tag: 'TOP_SPS_CORE', mode: 'TOP_SPS_CORE' },
+      { tag: 'HARD_FILTER_ALL', mode: 'HARD_FILTER_ALL' }
+    ];
+
+    var families = [
+      {
+        tag: 'LMI',
+        base: {
+          Strategy_Profile: 'LOOSE_MOMO_LONG',
+          Universe_Mode: 'TOP_SPS_WITH_DOGE',
+          DQS_Gate_V2: 24,
+          V2_Retest_Window_Candles: 5,
+          V2_Retest_Max_Deviation_ATR: 0.90,
+          Volume_Multiplier_Threshold: 1.05,
+          RSI_Overbought_Long: 69,
+          V2_Confirmation_Body_Min_Frac: 0.03,
+          V2_Breakout_Buffer_ATR: 0.00,
+          Invert_All_Signals: true,
+          V2_Long_Only: false
+        }
+      },
+      {
+        tag: 'FOS',
+        base: {
+          Strategy_Profile: 'FAKEOUT_SHORT',
+          Universe_Mode: 'TOP_SPS_WITH_DOGE',
+          DQS_Gate_V2: 24,
+          V2_Retest_Window_Candles: 6,
+          V2_Retest_Max_Deviation_ATR: 1.02,
+          Volume_Multiplier_Threshold: 1.05,
+          RSI_Overbought_Long: 69,
+          V2_Confirmation_Body_Min_Frac: 0.06,
+          V2_Breakout_Buffer_ATR: 0.00,
+          Invert_All_Signals: true,
+          V2_Long_Only: false
+        }
+      }
+    ];
+
+    var phase1Regimes = [
+      { tag: 'P1_CTL', ovExtra: { Payoff_Overlay_Mode: 'CONTROL', Full_Exit_On_TP1: false, Tail_Clamp_Enabled: false, Center_Exit_Enabled: false } },
+      { tag: 'P1_TIME', ovExtra: { Payoff_Overlay_Mode: 'TIME_STOP', Full_Exit_On_TP1: false, Tail_Clamp_Enabled: false, Center_Exit_Enabled: false } },
+      { tag: 'P1_TIME_TAIL', ovExtra: { Payoff_Overlay_Mode: 'TIME_STOP_TAIL_CLAMP', Full_Exit_On_TP1: false, Tail_Clamp_Enabled: true, Center_Exit_Enabled: false } },
+      { tag: 'P1_TIME_FULL', ovExtra: { Payoff_Overlay_Mode: 'TIME_STOP_FULL_EXIT', Full_Exit_On_TP1: true, Tail_Clamp_Enabled: false, Center_Exit_Enabled: false } },
+      { tag: 'P1_TIME_FULL_TAIL', ovExtra: { Payoff_Overlay_Mode: 'TIME_STOP_FULL_EXIT_TAIL_CLAMP', Full_Exit_On_TP1: true, Tail_Clamp_Enabled: true, Center_Exit_Enabled: false } }
+    ];
+
+    var phase2Regimes = [
+      { tag: 'P2_CENTER', ovExtra: { Payoff_Overlay_Mode: 'TIME_STOP_CENTER_EXIT', Full_Exit_On_TP1: false, Tail_Clamp_Enabled: false, Center_Exit_Enabled: true, Center_Exit_Mode: 'STRUCTURE_PROXY' } },
+      { tag: 'P2_CENTER_TAIL', ovExtra: { Payoff_Overlay_Mode: 'TIME_STOP_CENTER_EXIT_TAIL_CLAMP', Full_Exit_On_TP1: false, Tail_Clamp_Enabled: true, Center_Exit_Enabled: true, Center_Exit_Mode: 'STRUCTURE_PROXY' } },
+      { tag: 'P2_CENTER_FULL', ovExtra: { Payoff_Overlay_Mode: 'TIME_STOP_CENTER_EXIT_FULL_EXIT', Full_Exit_On_TP1: true, Tail_Clamp_Enabled: false, Center_Exit_Enabled: true, Center_Exit_Mode: 'STRUCTURE_PROXY' } },
+      { tag: 'P2_CENTER_FULL_TAIL', ovExtra: { Payoff_Overlay_Mode: 'TIME_STOP_CENTER_EXIT_FULL_EXIT_TAIL_CLAMP', Full_Exit_On_TP1: true, Tail_Clamp_Enabled: true, Center_Exit_Enabled: true, Center_Exit_Mode: 'STRUCTURE_PROXY' } },
+      { tag: 'P2_CENTER_ALT', ovExtra: { Payoff_Overlay_Mode: 'TIME_STOP_CENTER_EXIT_ALT', Full_Exit_On_TP1: false, Tail_Clamp_Enabled: true, Center_Exit_Enabled: true, Center_Exit_Mode: 'TP_PROXY' } }
+    ];
+
+    var intensities = [
+      {
+        tag: 'I1',
+        dqs: 0, win: 0, dev: 0.00, vol: 0.00, rsi: 0, body: 0.00, buf: 0.00,
+        ovExtra: {
+          Progress_Deadline_Bars: 12,
+          Progress_Min_R: 0.25,
+          Max_Hold_Bars: 28,
+          Tail_Clamp_Trigger_R: 1.00,
+          Tail_Clamp_Stop_R: 0.00,
+          Center_Exit_Buffer_ATR: 0.10
+        }
+      },
+      {
+        tag: 'I2',
+        dqs: 1, win: 0, dev: -0.02, vol: 0.03, rsi: -1, body: 0.01, buf: 0.00,
+        ovExtra: {
+          Progress_Deadline_Bars: 10,
+          Progress_Min_R: 0.35,
+          Max_Hold_Bars: 24,
+          Tail_Clamp_Trigger_R: 0.75,
+          Tail_Clamp_Stop_R: 0.00,
+          Center_Exit_Buffer_ATR: 0.10
+        }
+      },
+      {
+        tag: 'I3',
+        dqs: 2, win: -1, dev: -0.04, vol: 0.06, rsi: -2, body: 0.02, buf: 0.01,
+        ovExtra: {
+          Progress_Deadline_Bars: 8,
+          Progress_Min_R: 0.50,
+          Max_Hold_Bars: 20,
+          Tail_Clamp_Trigger_R: 0.60,
+          Tail_Clamp_Stop_R: 0.10,
+          Center_Exit_Buffer_ATR: 0.08
+        }
+      },
+      {
+        tag: 'I4',
+        dqs: 3, win: -1, dev: -0.06, vol: 0.09, rsi: -3, body: 0.03, buf: 0.01,
+        ovExtra: {
+          Progress_Deadline_Bars: 6,
+          Progress_Min_R: 0.50,
+          Max_Hold_Bars: 16,
+          Tail_Clamp_Trigger_R: 0.50,
+          Tail_Clamp_Stop_R: 0.20,
+          Center_Exit_Buffer_ATR: 0.05
+        }
+      }
+    ];
+
+    function emitRegimeSet_(regimes, modeName) {
+      for (var c = 0; c < cohorts.length; c++) {
+        for (var f = 0; f < families.length; f++) {
+          for (var r = 0; r < regimes.length; r++) {
+            for (var it = 0; it < intensities.length; it++) {
+              var base = deepCopy_(families[f].base);
+              base.Universe_Mode = cohorts[c].mode;
+              base.Symbol_Cohort_Tag = cohorts[c].tag;
+
+              var k = deepCopy_(intensities[it]);
+              var regimeOv = deepCopy_(regimes[r].ovExtra || {});
+              k.ovExtra = k.ovExtra || {};
+              for (var kk in regimeOv) {
+                if (regimeOv.hasOwnProperty(kk)) k.ovExtra[kk] = regimeOv[kk];
+              }
+
+              var ov = applyVariant_(base, k);
+              pushJob_(
+                families[f].tag + ' | ' + cohorts[c].tag + ' | ' + regimes[r].tag + ' | ' + intensities[it].tag,
+                modeName,
+                ov
+              );
+            }
+          }
+        }
+      }
+    }
+
+    emitRegimeSet_(phase1Regimes, 'PERSISTENCE_HUNT_V3');
+    emitRegimeSet_(phase2Regimes, 'PERSISTENCE_HUNT_V3');
+  }
+
+  function buildStandardVariants_() {
+    return [
+      { tag: 'BASE', dqs: 0, win: 0, dev: 0.00, vol: 0.00, body: 0.00, rsi: 0, buf: 0.00 },
+      { tag: 'TIGHT', dqs: 3, win: -1, dev: -0.10, vol: 0.05, body: 0.05, rsi: -3, buf: 0.02 },
+      { tag: 'LOOSE', dqs: -3, win: 1, dev: 0.10, vol: -0.05, body: -0.05, rsi: 3, buf: -0.02 },
+      { tag: 'QUAL_BIAS', dqs: 1, win: 0, dev: -0.05, vol: 0.10, body: 0.03, rsi: -2, buf: 0.00 }
+    ];
+  }
+
+  function buildDenseVariants_() {
+    return [
+      { tag: 'V01', dqs: -6, win: 2, dev: 0.15, vol: -0.10, body: -0.08, rsi: 4, buf: -0.03 },
+      { tag: 'V02', dqs: -4, win: 1, dev: 0.10, vol: -0.08, body: -0.05, rsi: 3, buf: -0.02 },
+      { tag: 'V03', dqs: -3, win: 1, dev: 0.08, vol: -0.05, body: -0.05, rsi: 2, buf: -0.02 },
+      { tag: 'V04', dqs: -2, win: 1, dev: 0.05, vol: -0.03, body: -0.03, rsi: 1, buf: -0.01 },
+      { tag: 'V05', dqs: -1, win: 0, dev: 0.03, vol: -0.02, body: -0.02, rsi: 1, buf: 0.00 },
+      { tag: 'V06', dqs: 0, win: 0, dev: 0.00, vol: 0.00, body: 0.00, rsi: 0, buf: 0.00 },
+      { tag: 'V07', dqs: 1, win: 0, dev: -0.03, vol: 0.02, body: 0.02, rsi: -1, buf: 0.00 },
+      { tag: 'V08', dqs: 2, win: -1, dev: -0.05, vol: 0.03, body: 0.03, rsi: -1, buf: 0.01 },
+      { tag: 'V09', dqs: 3, win: -1, dev: -0.08, vol: 0.05, body: 0.05, rsi: -2, buf: 0.01 },
+      { tag: 'V10', dqs: 4, win: -1, dev: -0.10, vol: 0.08, body: 0.06, rsi: -3, buf: 0.02 },
+      { tag: 'V11', dqs: 5, win: -2, dev: -0.12, vol: 0.10, body: 0.08, rsi: -4, buf: 0.02 },
+      { tag: 'V12', dqs: 6, win: -2, dev: -0.15, vol: 0.12, body: 0.10, rsi: -5, buf: 0.03 },
+      { tag: 'V13', dqs: -5, win: 2, dev: 0.12, vol: -0.12, body: -0.06, rsi: 5, buf: -0.03 },
+      { tag: 'V14', dqs: -3, win: 2, dev: 0.10, vol: -0.07, body: -0.04, rsi: 3, buf: -0.02 },
+      { tag: 'V15', dqs: -1, win: 1, dev: 0.06, vol: -0.02, body: -0.01, rsi: 2, buf: -0.01 },
+      { tag: 'V16', dqs: 1, win: -1, dev: -0.06, vol: 0.04, body: 0.03, rsi: -2, buf: 0.01 }
+    ];
+  }
+
+  function emitStandardOrDense_(label, mode, baseOv) {
+    var variants = (mode === 'DENSE') ? buildDenseVariants_() : buildStandardVariants_();
+
+    if (!expandVariants) {
+      pushJob_(label, 'PROFILE', normalizeOv_(baseOv));
+      return;
+    }
+
+    for (var i = 0; i < variants.length; i++) {
+      var ov = applyVariant_(baseOv, variants[i]);
+      pushJob_(label + ' | ' + variants[i].tag, 'PROFILE', ov);
+    }
+  }
+
+  if (variantMode === 'PERSISTENCE_HUNT_V3') {
+    emitPersistenceHuntV3_();
+    return jobs;
+  }
+
+  for (var p = 0; p < profiles.length; p++) {
+    var built = buildProfileBase_(profiles[p], universeMode);
+    if (!built) continue;
+
+    var mirrorSet = [];
+    mirrorSet.push({
+      label: built.label,
+      ov: normalizeOv_(built.ov)
+    });
+
+    if (invertProfiles) {
+      var inv = deepCopy_(built.ov);
+      inv.Invert_All_Signals = !inv.Invert_All_Signals;
+      inv = normalizeOv_(inv);
+      mirrorSet.push({
+        label: built.label + ' | INVERTED_MIRROR',
+        ov: inv
+      });
+    }
+
+    for (var m = 0; m < mirrorSet.length; m++) {
+      var label = mirrorSet[m].label;
+      var ov = mirrorSet[m].ov;
+      emitStandardOrDense_(label, 'STANDARD', ov);
+    }
+  }
+
+  return jobs;
+}
+
+
+function START_PERSISTENCE_HUNT_V3() {
+  return RUN_experimentMatrix_resumableStart({
+    name: 'PERSISTENCE_HUNT_V3',
+    variantMode: 'PERSISTENCE_HUNT_V3',
+    maxJobs: 240
+  });
+}
 
