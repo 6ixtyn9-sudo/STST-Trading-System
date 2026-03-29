@@ -1,251 +1,265 @@
 # PROJECT STATE
 
 ## Date
-2026-03-27
+2026-03-29
 
 ## Current Phase
-**Fresh-Data Persistence Transition + Supabase-Backed V3 Execution**
+**Python-Based Strategy Validation + V9 Micro-Live Readiness**
 
-The project is no longer merely stabilizing a research machine.  
-It is now actively running V3 persistence research on a fresh Supabase-backed canonical dataset.
+The project is no longer primarily centered on Apps Script persistence-hunt experiments over the older V3 structure.
+
+It has now advanced into a Python-driven research and pre-live phase that includes:
+- expanded backtest engine work
+- friction-aware execution modeling
+- leverage-cap-aware sizing
+- candidate strategy selection
+- micro-live deployment preparation
+- live governance / kill-switch scaffolding
+
+This is not yet scaled live deployment.
+It is the transition from validated research into controlled micro-live readiness.
 
 ---
 
 ## Current Reality
 
 ### System status
-- Core modules M1–M10 exist.
-- Experiment matrix runner is active and resumable.
-- Rescue-trigger timeout recovery is implemented.
-- Supabase persistence is live for experiment logging.
-- Full diagnostic blob persistence is active.
-- AI council scaffolding exists.
-- Governance state exists.
-- Research and execution are both real subsystems.
-- Runtime integrity improved materially.
-- Curated cohort universe selection is working inside the actual M9 path.
-- Fresh canonical dataset now exists in Supabase and is being used by the active M9 4H backtest loader.
-- `PERSISTENCE_HUNT_V3` is active.
+- Core modules M1–M10 still exist conceptually and remain valid as the project architecture.
+- Python is now active for research-critical and pre-live-critical workflows.
+- The backtest engine is no longer friction-blind:
+  - fees are modeled
+  - slippage is modeled
+  - stop/TP adverse slippage is modeled
+  - funding cost is modeled
+  - leverage is treated as a sizing/notional cap
+- V7 robustness mapping completed.
+- V8 friction stress completed.
+- V9 champion / backup selection completed.
+- Live governance scaffolding is now real:
+  - deploy bundle exists
+  - champion / backup configs exist
+  - live risk rules exist
+  - monitoring dashboard exists
+  - kill-switch evaluator exists
+  - active / paused / hard-stop state handling exists
+- Shadow / micro-live runtime guard work is now the next active implementation layer.
 
 ### Main bottleneck
-The bottleneck is no longer basic machine viability.
+The bottleneck is no longer:
+- basic machine viability
+- or whether the project can run research at all
 
-The current bottlenecks are now:
-- richer durable project memory
-- cleaner run/dataset/code-version binding
-- richer OOS experiment visibility in reporting
-- eventual deeper 4H history
-- final proof of edge persistence
+The main bottlenecks are now:
+- safe and disciplined transition into shadow / micro-live
+- real telemetry and runtime protection
+- operational handling of prolonged underwater periods
+- preserving architectural clarity while Python becomes more active
+- avoiding drift away from the phased migration plan
 
 ---
 
 ## Current Stack
 
+### Active
 - Google Sheets
 - Apps Script
 - Supabase
-- OpenRouter
 - GitHub
-- Google Colab / Python (active data rebuild workbench)
+- OpenRouter
+- Google Colab / Python
+
+### Current role split
+- **Python**: active research runtime, friction-aware backtesting, V7/V8/V9, live monitoring scaffolding
+- **Supabase**: structured persistence and canonical memory / data layer
+- **Apps Script**: still relevant as current control-plane / governance / dashboard layer where useful
+- **GitHub**: canonical code + documentation home
 
 ---
 
-## Current Experiment Status
+## Current Strategy Status
 
-### Prior completed runs
+### Current lead family
+`BREAKOUT_LONG`
 
-#### `EDGE_CLARITY_V1`
-- completed
-- no OOS-passing strategy found
-- older weaker baseline
+### Current champion
+`TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
 
-#### `PERSISTENCE_HUNT_V1`
-- completed / superseded
-- directionally useful
-- older crude segmentation framework
+### Current backup
+`TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN`
 
-#### `PERSISTENCE_HUNT_V2`
-- completed / superseded as fresh-data baseline by V3
-- major result: `TOP_SPS_WITH_DOGE` and `LMI` looked strongest
-- major caveat: still tied to older mixed-freshness dataset context
+These were selected from the actual `F2_MED + LEV3` survivor pool in V8 / V9.
 
-### Current active run
+---
 
-#### `PERSISTENCE_HUNT_V3`
-- **Status:** active
-- **Launcher:** `START_PERSISTENCE_HUNT_V3()`
-- **Runner:** `RUN_experimentMatrix_resumableContinue`
-- **Total Jobs:** `240`
-- **Dataset:** `OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1`
+## Current Research Status
 
-### Current early V3 read
-Early V3 rows are the most promising research posture observed so far.
+### V7
+V7 established the strongest operating neighborhood around:
+- `BREAKOUT_LONG`
+- `TOP_SPS_WITH_DOGE`
+- `D2_A / D3_A`
+- `P2_FAST / P1_BASE`
+- `T1_OPEN / T2_BAL`
 
-Current notable pattern:
-- several early rows fail only on `OOS_Total_Trades < 20`
-- while showing strong:
-  - profit factor
-  - expectancy
-  - Sharpe
-  - low drawdown
+This confirmed a real center-of-mass rather than a one-row fluke.
 
-This is not deployment proof, but it is materially stronger than earlier failure structures.
+### V8
+V8 introduced real friction-aware and leverage-cap-aware testing.
+
+#### V8 results
+- total rows: `120`
+- strict passes: `30`
+- survival passes: `42`
+- friction-ignored suspects: `0`
+
+#### Key V8 conclusion
+The edge survives medium friction in a narrow but credible cluster.
+
+#### Important V8 constraint
+Heavy friction (`F3_HEAVY`) effectively destroys viability.
+
+#### Leverage conclusion
+`LEV3` and `LEV5` behaved identically in the tested board.
+This implies leverage above 3x is not adding practical value in the current candidate zone.
+
+### V9
+V9 selected:
+- one champion
+- one backup
+- micro-live posture
+- deploy bundle
+- live risk rules
+
+#### V9 sanity rerun on champion
+- trades: `866`
+- PF: `~1.60`
+- ExpR: `~0.239`
+- Sharpe: `~1.12`
+- DD days: `174`
+
+It failed the strict research gate only on:
+- `OOS_MaxDD_Days(174)>120`
+
+This is interpreted as:
+- **good enough for micro-live validation**
+- **not good enough for scaled deployment confidence**
+
+---
+
+## Current Risk Understanding
+
+### Primary unresolved risk
+The main unresolved live-operational weakness is:
+
+**drawdown duration / prolonged underwater time**
+
+This is now the dominant caution, more than leverage stress.
+
+### Why this matters
+The edge remains economically alive under medium friction, but recovery periods remain long enough to create:
+- operational drag
+- psychological drag
+- governance pressure
+- possible live deployment discomfort
+
+This must be treated explicitly in live governance and scaling decisions.
+
+---
+
+## Current Deployment Posture
+
+### Approved for
+- shadow-live
+- micro-live validation
+- conservative runtime hardening
+- telemetry / governance integration
+
+### Not approved for
+- aggressive capital deployment
+- leverage expansion
+- autonomous scale-up
+- treating the strategy as fully production-proven
+
+---
+
+## Current Governance Status
+
+### Built
+- live state machine:
+  - `ACTIVE`
+  - `PAUSED`
+  - `HARD_STOP`
+- deploy bundle
+- champion / backup artifacts
+- live risk rules
+- monitoring dashboard
+- kill-switch evaluator
+- pre-trade runtime guard design
+- telemetry-aware entry constraints
+
+### Current principle
+No new entries should be allowed without:
+- equity telemetry
+- fresh governance evaluation
+- active config
+- ACTIVE state
 
 ---
 
 ## Current Data Status
 
-### Active canonical dataset
-`OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1`
+### Important note
+The project’s center of gravity has shifted away from the earlier Apps Script persistence-hunt framing.
 
-### Scope
-- USDT spot + perp only
-- 10 core symbols
-- no ZAR pairs in canonical research universe
+The Python research stack is currently working from a different active dataset path than the earlier 2026-03-27 V3 framing.
 
-### Observed coverage
+### Operational truth
+The project is now best understood as being in:
+- Python-led strategy validation and pre-live governance buildout
 
-#### 1D
-- start: `2022-04-18`
-- end: `2026-03-27`
-- ~1440 rows per symbol
+rather than in:
+- Apps Script-led fresh-data persistence-hunt as the dominant active frame
 
-#### 4H
-- start: `2025-07-30T12:00:00Z`
-- end: `2026-03-27T08:00:00Z`
-- ~1440 rows per symbol
-
-### Current data conclusion
-The active research dataset is now:
-- fresher
-- cleaner
-- more uniform
-- Supabase-backed
-- non-ZAR
-- operationally integrated into M9
-
-However:
-- 4H depth is still shallower than ideal
-- future deeper 4H augmentation may still be desirable
-
----
-
-## Current Universe / Cohort Status
-
-Curated universe modes are now aligned to the active canonical USDT spot/perp dataset:
-
-- `TOP_SPS_CORE`
-- `TOP_SPS_WITH_DOGE`
-- `HARD_FILTER_ALL`
-- `PERP_CORE`
-- `SPOT_CORE`
-- `CUSTOM`
-
-This is materially cleaner than the earlier ZAR-mixed or fake-name-bucket interpretations.
-
----
-
-## Current Research Read
-
-### Strongest family cluster
-Still:
-- `LOOSE_MOMO_LONG | INVERTED_MIRROR`
-- `FAKEOUT_SHORT`
-
-### Strongest cohort direction
-Still:
-- `TOP_SPS_WITH_DOGE`
-
-### New V3-specific read
-With the fresh Supabase-backed dataset and V3 foundation, the failure frontier appears to be narrowing further.
-
-Early V3 rows suggest:
-- path quality may be materially improved
-- drawdown/Sharpe structure may be cleaner
-- the main remaining blocker in early examples is often sample size rather than broad edge collapse
-
-This is the strongest experimental posture seen so far, though still not final proof.
-
----
-
-## Current Persistence Status
-
-### Already persistent
-- experiment logs in Supabase
-- DQS summaries in Supabase
-- diagnostic blobs in Supabase experiment logs
-- dataset coverage in Supabase
-- canonical candles in Supabase
-- resumable experiment state
-- active run continuation
-- fresh canonical history bridge into Apps Script/M9
-
-### Not yet sufficiently persistent
-- all code mirrored fully into GitHub
-- all module docs complete
-- all decisions inserted structurally
-- richer OOS metric visibility in experiment reporting
-- worker contracts formalized machine-readably everywhere
-
----
-
-## Important Runtime Lessons Captured
-
-### Confirmed now
-- fresh-data bridge works
-- M2 history gate works against Supabase
-- M9 actual loader uses Supabase path
-- universe resolver aligned to new dataset
-- V3 builder validated at 240 jobs
-- V3 launch succeeded and first jobs executed
-- runtime ghost audit showed no active trigger ghosts attached at the audit moment
-
-### Still-open cleanup items
-- legacy bootstrap / old-source code still exists and should be pruned later
-- richer OOS columns should be added to experiment reporting
-- stale properties and old helper duplication should be cleaned after the active run
-
-### New rule
-Do not prune aggressively during active V3 execution.  
-Bridge first, patch second, prune later.
+That older context remains historically important, but is no longer the best description of present reality.
 
 ---
 
 ## Immediate Priorities
 
-1. Let `PERSISTENCE_HUNT_V3` continue unless a true fatal issue appears
-2. Monitor V3 run progression and continuation health
-3. Rank best early V3 rows by:
-   - fewest OOS fail reasons
-   - highest OOS trade count
-   - strongest PF / expectancy / Sharpe
-4. Add richer explicit OOS columns to experiment reporting after the run or during a safe pause
-5. Capture post-run project snapshot
-6. Continue reducing continuity dependence on chats/PDFs
-7. Prune legacy bootstrap / ZAR / old-source code after V3 stabilizes
+1. Update docs so project reality matches current state.
+2. Finalize runtime-safe shadow execution loop.
+3. Ensure equity telemetry is present before any entries are allowed.
+4. Run shadow execution using champion config.
+5. Validate monitoring / governance under real runtime flow.
+6. Only then consider actual micro-live activation.
 
 ---
 
 ## Not Priorities Right Now
-
-- large code pruning during active V3
-- new broad family brute force
-- full Python rewrite
-- cosmetic cleanup that risks comparability
+- broad new family search
+- panic rewrite of Apps Script
+- cosmetic cleanup that changes active operational truth
+- leverage expansion
+- pretending V9 is fully live-proven
+- scaled deployment
 
 ---
 
 ## Strategic Summary
 
-The machine is alive.  
-The fresh-data path is real.  
-The bridge to Supabase-backed canonical history is working.  
-V3 is running.
+The project has moved beyond broad persistence hunting and into a more operational phase.
 
-Most important current strategic change:
-- the project is no longer evaluating persistence on stale mixed sheet-heavy history
-- it is now evaluating persistence on a fresh canonical Supabase-backed USDT spot/perp dataset
+The machine is now:
+- strategy-selective
+- friction-aware
+- governance-aware
+- pre-live capable
+
+Most important current strategic truth:
+- the edge appears real enough to survive medium friction,
+- but the main unresolved risk is prolonged underwater duration,
+- so the correct next move is disciplined shadow/micro-live validation rather than scale.
 
 Current mission:
 
-**let V3 continue, preserve comparability, observe whether the stronger early posture survives broader job coverage, and then clean, document, and deepen the system from a position of real empirical progress.**
+**preserve architectural clarity, enforce telemetry-aware governance, validate the selected champion in shadow/micro-live posture, and only escalate from a position of real operational evidence rather than research enthusiasm.**
