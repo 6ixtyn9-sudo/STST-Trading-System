@@ -1,56 +1,82 @@
 {
-  "date": "2026-03-26",
-  "phase": "research_machine_stabilization_plus_curated_persistence_hunt_execution",
-  "prior_completed_run": {
-    "name": "EDGE_CLARITY_V1",
-    "jobs_total": 416,
-    "runner": "RUN_experimentMatrix_resumableContinue",
-    "status": "completed",
-    "result": "no_oos_pass",
-    "caveat": "used weaker family targeting and older crude segmentation framework"
+  "date": "2026-03-29",
+  "phase": "python_led_strategy_validation_plus_micro_live_readiness",
+  "prior_research_context": {
+    "apps_script_persistence_hunt_phase": "historically important but no longer the best description of current reality",
+    "older_snapshot_to_preserve": "project_snapshot_2026-03-24.json"
   },
-  "current_run": {
-    "name": "PERSISTENCE_HUNT_V2",
-    "runner": "RUN_experimentMatrix_resumableContinue",
-    "launch_path": "RUN_experimentMatrix_resumableStart",
-    "variant_mode": "PERSISTENCE_HUNT_V2",
-    "jobs_total": 240,
-    "status": "active"
+  "current_strategy_state": {
+    "lead_family": "BREAKOUT_LONG",
+    "lifecycle_stage": "micro_live_validation_posture",
+    "champion": {
+      "universe": "TOP_SPS_WITH_DOGE",
+      "defense": "D2_A",
+      "payoff": "P2_FAST",
+      "tune": "T2_BAL",
+      "friction": "F2_MED",
+      "leverage_cap": "LEV3"
+    },
+    "backup": {
+      "universe": "TOP_SPS_WITH_DOGE",
+      "defense": "D2_A",
+      "payoff": "P1_BASE",
+      "tune": "T1_OPEN",
+      "friction": "F2_MED",
+      "leverage_cap": "LEV3"
+    }
   },
-  "history_status": {
-    "symbols_ready_observed": 14,
-    "rows_4h_typical": 9250,
-    "rows_1d_typical": 1543,
-    "start": "2021-12-31",
-    "end_best_symbols": "2026-03-26",
-    "note": "symbol freshness is uneven; some series are stale or partially lagged"
+  "research_status": {
+    "v7": {
+      "purpose": "robustness_mapping",
+      "result": "confirmed_breakout_long_center_of_mass"
+    },
+    "v8": {
+      "purpose": "friction_and_leverage_cap_stress",
+      "rows_total": 120,
+      "strict_passes": 30,
+      "survival_passes": 42,
+      "friction_ignored_suspects": 0,
+      "main_conclusion": "edge_survives_medium_friction_in_narrow_cluster"
+    },
+    "v9": {
+      "purpose": "micro_live_candidate_selection",
+      "champion_selected": true,
+      "backup_selected": true,
+      "deploy_bundle_created": true,
+      "live_risk_rules_created": true,
+      "monitoring_scaffold_created": true
+    }
   },
-  "research_signal": {
-    "base_longs": "weak",
-    "strongest_frontier": [
-      "LOOSE_MOMO_LONG | INVERTED_MIRROR",
-      "FAKEOUT_SHORT"
-    ],
-    "current_best_cohort": "TOP_SPS_WITH_DOGE",
-    "main_failure_modes": [
-      "oos_sharpe_weak",
-      "drawdown_duration_too_long",
-      "sometimes_oos_trade_count_too_small"
+  "v9_sanity_rerun": {
+    "run_name": "V9_LIVE | BREAKOUT_LONG | TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL",
+    "oos_trades": 866,
+    "pf": 1.6007207495283173,
+    "expectancy_r": 0.23946111614681695,
+    "sharpe": 1.124384528563206,
+    "dd_days": 174,
+    "passed_flag": false,
+    "fail_reasons": [
+      "OOS_MaxDD_Days(174)>120"
     ]
   },
-  "persistence_hunt": {
-    "lever": "curated_cohort_universe_selection_plus_quality_suppression",
-    "families": [
-      "LOOSE_MOMO_LONG | INVERTED_MIRROR",
-      "FAKEOUT_SHORT"
-    ],
-    "cohorts": [
-      "TOP_SPS_CORE",
-      "TOP_SPS_WITH_DOGE",
-      "HARD_FILTER_ALL",
-      "PERP_CORE",
-      "SPOT_CORE"
-    ]
+  "main_risk_understanding": {
+    "primary_unresolved_risk": "drawdown_duration_or_prolonged_underwater_time",
+    "secondary_note": "leverage_above_3x_added_no_practical_value_in_tested_board"
+  },
+  "runtime_status": {
+    "python_backtest_engine_active": true,
+    "friction_modeling_active": true,
+    "leverage_cap_modeling_active": true,
+    "live_monitor_dashboard_active": true,
+    "kill_switch_evaluator_active": true,
+    "deploy_bundle_active": true,
+    "pre_trade_guard_scaffolding_active": true,
+    "shadow_execution_scaffolding_active": true
+  },
+  "live_governance_state": {
+    "status": "ACTIVE",
+    "active_config": "CHAMPION",
+    "note": "no_trades_or_equity_points_yet_at_initial_monitor_state"
   },
   "architecture": {
     "m1": "foundation",
@@ -64,19 +90,13 @@
     "m9": "research_audit",
     "m10": "memory_council"
   },
-  "runtime_status": {
-    "resumable_runner": true,
-    "rescue_trigger_enabled": true,
-    "supabase_experiment_logging": true,
-    "supabase_diag_blob_persistence": true,
-    "top_level_autostart_removed": true,
-    "m9_runtime_integrity_confirmed": true,
-    "unattended_run_progress_confirmed": true,
-    "known_runtime_noise": [
-      "dead_IGN_onOpen_trigger",
-      "missing_document_dependency_observed_once"
-    ]
+  "migration_status": {
+    "apps_script": "still_relevant_as_control_plane_and_governance_surface",
+    "python": "now_active_for_research_and_pre_live_runtime",
+    "supabase": "active_structured_memory_and_persistence_layer",
+    "github": "canonical_code_and_doc_home",
+    "migration_mode": "phased_not_panic_driven"
   },
-  "major_architecture_finding": "curated_cohort_universe_resolution_replaced_crude_name_based_segmentation_as_the_preferred_persistence_framework",
-  "main_bottleneck": "persistent_project_memory_plus_data_storage_quality_plus_unproven_final_edge_persistence"
+  "main_bottleneck": "safe_transition_into_shadow_or_micro_live_with_telemetry_and_governance_discipline",
+  "current_mission": "stabilize_docs_runtime_and_governance_around_the_selected_champion_then_validate_under_shadow_or_micro_live_posture_before_any_scale_up"
 }
