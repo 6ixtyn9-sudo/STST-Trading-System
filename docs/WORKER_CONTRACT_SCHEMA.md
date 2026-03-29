@@ -1,6 +1,6 @@
 # WORKER CONTRACT SCHEMA
 
-This document defines the intended machine-readable contract shape for bounded AI/bot workers inside the $T$T system.
+This document defines the intended machine-readable contract shape for bounded AI/bot workers inside the system.
 
 The goal is to move from prose-only worker descriptions toward explicit operational contracts.
 
@@ -9,7 +9,6 @@ The goal is to move from prose-only worker descriptions toward explicit operatio
 ## Purpose
 
 A worker contract should define:
-
 - who the worker is
 - what the worker is allowed to do
 - what the worker reads
@@ -24,13 +23,13 @@ This is a foundation for:
 - clearer bot orchestration
 - durable labor definitions
 - lower context dependence
+- stronger runtime discipline
 
 ---
 
 ## Design Principles
 
 Worker contracts should be:
-
 - explicit
 - bounded
 - machine-readable
@@ -44,13 +43,13 @@ Workers should not be:
 - config sovereignty
 - empirical truth override
 - silent launchers
+- substitutes for runtime governance
 
 ---
 
 ## Minimal Contract Fields
 
 A minimal worker contract should contain:
-
 - `worker_id`
 - `name`
 - `category`
@@ -66,6 +65,50 @@ A minimal worker contract should contain:
 
 ---
 
+## Strongly Recommended Additional Fields
+
+As the project matures, contracts should also support:
+- `depends_on_modules`
+- `requires_governance_state`
+- `requires_telemetry`
+- `requires_human_ack`
+- `artifacts_must_exist`
+- `artifacts_must_be_fresh`
+- `failure_behavior`
+- `idempotency_expectation`
+- `notes`
+
+These become especially important for:
+- runtime workers
+- monitoring workers
+- execution-adjacent workers
+- migration/orchestration workers
+
+---
+
+## Core Contract Principles
+
+### 1. Advisory does not mean authority
+A worker may recommend something without being allowed to do it.
+
+### 2. Runtime safety must be explicit
+If a worker depends on telemetry, governance, or live state, the contract should say so.
+
+### 3. Missing inputs should fail closed
+If required artifacts are missing or stale, the worker should:
+- refuse action
+- emit a bounded warning
+- not guess its way forward
+
+### 4. Worker authority must be narrower than system authority
+No worker should silently outrank:
+- M1
+- M8 governance state
+- M9 empirical truth
+- operator review where required
+
+---
+
 ## Example YAML Contract
 
 ```yaml
@@ -76,8 +119,8 @@ mission: observe long experiment runs and summarize runner health
 
 mode_scope:
   allowed_modes:
-    - experiment mode
-    - audit mode
+    - experiment_mode
+    - audit_mode
 
 inputs:
   artifacts:
@@ -120,5 +163,9 @@ forbidden_actions:
   - start_experiment
   - delete_runtime_state
   - change_config
+
+failure_behavior:
+  on_missing_inputs: fail_closed
+  on_ambiguous_runtime: escalate
 
 success_condition: runner health summary produced with clear next action
