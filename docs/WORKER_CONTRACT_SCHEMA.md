@@ -169,3 +169,63 @@ failure_behavior:
   on_ambiguous_runtime: escalate
 
 success_condition: runner health summary produced with clear next action
+
+worker_id: pre_trade_guard
+name: Pre-Trade Guard
+category: runtime_integrity
+mission: determine whether new entries are currently allowed
+
+mode_scope:
+  allowed_modes:
+    - shadow_live_mode
+    - micro_live_mode
+
+inputs:
+  artifacts:
+    - live_state.json
+    - live_equity.jsonl
+    - live_events.jsonl
+    - deploy_bundle.json
+    - live_risk_rules.json
+
+outputs:
+  artifacts:
+    - shadow_decisions.jsonl
+  ephemeral_allowed: true
+
+output_format:
+  type: json
+  required_fields:
+    - ok
+    - reason
+    - active_config
+    - latest_equity_ts
+    - latest_governance_ts
+
+authority:
+  may_edit_code: false
+  may_launch_runs: false
+  may_place_orders: false
+  may_recommend: true
+  may_override_governance: false
+  may_override_m1: false
+
+requires_governance_state:
+  allowed_values:
+    - ACTIVE
+
+requires_telemetry:
+  equity_required: true
+  governance_heartbeat_required: true
+
+forbidden_actions:
+  - place_order
+  - switch_config_silently
+  - ignore_stale_telemetry
+
+failure_behavior:
+  on_missing_equity: fail_closed
+  on_stale_governance: fail_closed
+  on_missing_active_config: fail_closed
+
+success_condition: clear yes_or_no entry permission decision returned
