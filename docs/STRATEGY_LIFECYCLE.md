@@ -1,52 +1,63 @@
 # STRATEGY LIFECYCLE
 
-This document defines how strategy ideas should move from research into live eligibility, and how they should be maintained over time.
+This document defines how strategy ideas move from research into live eligibility, and how they should be maintained over time.
 
 ---
 
 ## Purpose
 
-A strategy should not be treated as permanently valid just because it looked promising once.
+A strategy should not be treated as permanently valid because it looked good once.
 
-Markets change.
+Markets drift.
 Edges decay.
-Regimes drift.
+Friction matters.
+Execution reality matters.
+Operational pain matters.
 
-Therefore strategies need a lifecycle, not just a one-time approval.
+Therefore strategies require:
+- discovery
+- validation
+- friction-aware stress testing
+- governance review
+- continuous maintenance
+- possible quarantine or retirement
+
+This project now treats strategy lifecycle as a living process, not a one-time approval.
 
 ---
 
 ## Lifecycle Overview
 
-A strategy should move through the following states:
+A strategy should move through these states:
 
 1. **Experimental**
 2. **Candidate**
 3. **Validated**
 4. **Live Eligible**
-5. **Active**
-6. **Restricted / Quarantined**
-7. **Retired**
+5. **Micro-Live Active**
+6. **Active**
+7. **Restricted / Quarantined**
+8. **Retired**
 
 ---
 
 ## 1. Experimental
 
 ### Meaning
-The family is still exploratory.
+The family is exploratory.
 
 ### Typical characteristics
 - broad matrix runs
 - unclear empirical support
-- weak or mixed results
 - many failures
+- family comparison still active
 - inversion testing still useful
 
 ### Allowed actions
 - broad research
 - parameter sweeps
 - family comparison
-- symbol-scope exploration
+- symbol/universe exploration
 
 ### Not allowed
 - live deployment
@@ -58,25 +69,24 @@ The family is still exploratory.
 ## 2. Candidate
 
 ### Meaning
-The family is not proven, but is less bad than the field.
+The family is still not proven, but is among the strongest available directions.
 
 ### Typical characteristics
-- repeatedly among best or least-worst rows
-- evidence of some coherence
-- maybe strong mirrored behavior
-- worth narrower follow-up
+- repeatedly among best or least-bad rows
+- recurring structure across runs
+- enough coherence to justify narrower work
 
 ### Allowed actions
 - narrower reruns
+- cleaner data reruns
 - family-specific testing
-- symbol-specific testing
-- deeper data validation
+- tighter parameter neighborhood testing
 
 ### Promotion criteria
 Move to **Validated** only if:
-- performance survives deeper checks
-- behavior is not a one-row fluke
-- pattern persists with clearer controls
+- the pattern survives deeper checks
+- the cluster is not just one lucky row
+- data refresh does not destroy the result
 
 ---
 
@@ -86,210 +96,256 @@ Move to **Validated** only if:
 The family has survived stronger empirical scrutiny.
 
 ### Typical characteristics
-- acceptable behavior across updated tests
-- not just one lucky row
-- clearer evidence under better data
-- more stable parameter neighborhood
+- survives narrower reruns
+- survives cleaner data
+- parameter neighborhood has coherence
+- stronger evidence than “least bad”
 
 ### Allowed actions
-- repeat validation
-- regime segmentation
-- symbol-family specialization
-- pre-live maintenance framework setup
+- friction stress
+- maintenance framework setup
+- governance preparation
+- candidate selection
 
 ### Promotion criteria
 Move to **Live Eligible** only if:
-- empirical gates are satisfied
-- governance gates do not block
-- risk profile is acceptable
-- maintenance plan exists
+- friction-aware testing remains acceptable
+- governance does not block
+- operational risk is understood
+- candidate selection is explicit
 
 ---
 
 ## 4. Live Eligible
 
 ### Meaning
-The strategy is allowed to be considered by the live machine.
+The strategy is allowed to be considered for live use.
 
 ### Important
-Live eligible does **not** mean always active.
+Live Eligible does **not** mean approved for unrestricted live deployment.
 
 It means:
-- the strategy may be selected for live deployment
-- subject to current governance, current regime, and current maintenance status
+- a strategy may be selected for shadow or live use
+- subject to current governance state
+- subject to current runtime protections
+- subject to active monitoring
 
 ### Requirements
-- empirical pass state
-- acceptable OOS behavior
-- acceptable drawdown / duration
-- acceptable sample size
-- governance state not blocking deployment
-- explicit approval in registry/state
+- empirical support remains acceptable
+- friction-aware testing does not invalidate the edge
+- no major governance block exists
+- explicit candidate state exists in project memory
 
 ---
 
-## 5. Active
+## 5. Micro-Live Active
 
 ### Meaning
-The strategy is currently permitted for live deployment.
+The strategy is approved for:
+- shadow-live
+- paper-live
+- or tiny-risk micro-live validation
+
+This is the current project posture for the selected champion.
+
+### Current approved champion
+`BREAKOUT_LONG | TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
+
+### Current backup
+`BREAKOUT_LONG | TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN`
+
+### Important
+Micro-Live Active does **not** imply:
+- scaled capital
+- strategy maturity beyond question
+- immunity from quarantine
+
+It means:
+- the edge is real enough to test in tightly governed live conditions
+- but still has unresolved operational risk
+
+---
+
+## 6. Active
+
+### Meaning
+The strategy is currently permitted for broader live deployment.
 
 ### Requirements
 - still live eligible
 - not degraded
 - not quarantined
-- current governance permits operation
-- current regime/use-case still makes sense
+- governance permits
+- telemetry is healthy
+- runtime integrity is healthy
+- live evidence supports continuation
 
 ### Important
-An active strategy must be continuously re-evaluated.
+An Active strategy must still be continuously re-evaluated.
 
 ---
 
-## 6. Restricted / Quarantined
+## 7. Restricted / Quarantined
 
 ### Meaning
 The strategy is temporarily or conditionally blocked.
 
-### Reasons this may happen
-- rolling OOS degradation
-- drawdown expansion
+### Reasons
+- rolling live degradation
+- DD-duration becoming operationally unacceptable
+- PF / expectancy collapse
 - Sharpe collapse
-- sample quality deterioration
-- current regime mismatch
+- telemetry failure
 - governance restriction
-- data integrity concerns
+- regime mismatch
+- data integrity issues
 
 ### Allowed actions
 - reduced-size simulation
-- targeted revalidation
-- further research only
+- shadow-only operation
+- revalidation
+- diagnosis
 
 ### Not allowed
 - unrestricted live deployment
 
 ---
 
-## 7. Retired
+## 8. Retired
 
 ### Meaning
 The strategy is no longer worth operational capital.
 
-### Reasons this may happen
-- repeated empirical failure
+### Reasons
+- repeated degradation
 - edge decay
 - better families replace it
-- data no longer supports it
-- it was a temporary market artifact
+- friction realism destroys viability
+- live maintenance repeatedly fails
 
 ### Allowed actions
 - archive
 - historical study
-- possible future re-test only if strong reason emerges
+- re-test only if strong evidence justifies it
 
 ---
 
-## Lifecycle Promotion Logic
+## Promotion / Demotion Logic
 
----
-
-## Experimental → Candidate
+### Experimental → Candidate
 Promote when:
-- family consistently appears among least-bad or best rows
-- results are not random one-offs
-- there is enough reason to spend more research effort
+- a family repeatedly appears among the strongest rows
+- it is worth focused follow-up
 
----
-
-## Candidate → Validated
+### Candidate → Validated
 Promote when:
-- narrower reruns remain respectable
-- deeper data does not destroy the pattern
-- symbol/family behavior still has coherence
-- parameter neighborhood is not absurdly fragile
+- deeper checks do not destroy the pattern
+- the cluster remains coherent under cleaner tests
 
----
-
-## Validated → Live Eligible
+### Validated → Live Eligible
 Promote when:
-- OOS gates pass
-- risk profile acceptable
-- governance permits
-- maintenance rules defined
-- explicit strategy registry state updated
+- friction-aware testing still leaves a credible candidate set
+- governance does not block
+- a specific configuration can be selected
 
----
-
-## Live Eligible → Active
+### Live Eligible → Micro-Live Active
 Promote when:
-- current environment still supports deployment
-- no quarantine flags exist
-- governance state is acceptable
-- live machine is authorized to use it
+- champion / backup are selected
+- deploy bundle exists
+- risk rules exist
+- telemetry / governance infrastructure exists
+- operator acknowledges the strategy is only in validation posture
 
----
+### Micro-Live Active → Active
+Promote only when:
+- live evidence supports broader trust
+- no major governance failures occur
+- DD-duration behavior is acceptable in practice
+- explicit operator review approves escalation
 
-## Active → Restricted / Quarantined
+### Any live state → Restricted / Quarantined
 Demote when:
-- rolling degradation appears
-- maintenance gates fail
+- live metrics degrade materially
+- telemetry is stale or missing
 - governance blocks
-- strategy no longer fits current conditions
+- underwater duration becomes unacceptable
+- strategy no longer justifies continued live risk
 
----
-
-## Restricted / Quarantined → Active
-Restore only after:
-- revalidation
-- governance clearance
-- explicit status update
-
----
-
-## Any State → Retired
+### Any state → Retired
 Retire when:
-- edge clearly dies
-- repeated maintenance failure
-- family no longer justifies research or capital
+- repeated evidence shows the edge is no longer worth capital or maintenance effort
 
 ---
 
-## Perpetual Gate Maintenance
+## Current Lifecycle State
 
-Strategies should not be admitted once and trusted forever.
+### Lead family
+`BREAKOUT_LONG`
 
-They must be monitored continuously.
+### Current state
+**MICRO_LIVE_ACTIVE (VALIDATION POSTURE)**
 
-### Maintenance checks should eventually include:
-- rolling OOS pass/fail
-- rolling Sharpe
+This is more specific than “Validated” and more conservative than “Active.”
+
+### Why
+The current champion:
+- survives medium friction
+- has positive expectancy
+- has healthy PF / Sharpe under micro-live posture
+- but still fails the strict DD-duration threshold
+
+Therefore it is:
+- not merely experimental,
+- not merely validated,
+- not yet fully active in the broad deployment sense,
+- but appropriate for micro-live validation.
+
+---
+
+## Known Current Weakness
+The current strategy’s primary unresolved weakness is:
+
+**drawdown duration / prolonged underwater time**
+
+This is the dominant caution that prevents broader confidence.
+
+---
+
+## Maintenance Requirements
+A strategy is never “approved forever.”
+
+It must be monitored for:
 - rolling PF
 - rolling expectancy
+- rolling Sharpe
 - drawdown severity
 - drawdown duration
 - sample sufficiency
-- regime fit
-- degradation trend
+- telemetry health
+- execution integrity
+- governance health
 
-### If maintenance fails:
+If maintenance fails:
 - reduce size
 - restrict
+- pause
 - quarantine
-- retire
+- or retire
 
-This is perpetual gate maintenance.
+That is perpetual gate maintenance.
 
 ---
 
 ## Role of Modules in Lifecycle
 
 ### M9
-Empirical truth and research validation
+Empirical validation and evidence authority
 
 ### M8
-Governance state and gate restrictions
+Governance-state authority
 
 ### M10
-Persistent deliberation / orchestration / memory
+Memory / orchestration / continuity layer
 
 ### M5
 Risk-law gate before deployment
@@ -298,39 +354,39 @@ Risk-law gate before deployment
 Execution only after lawful approval
 
 ### M1
-Supreme authority over all of the above
+Constitutional supremacy over all of the above
 
 ---
 
-## Future Registry Suggestion
-
-Eventually the `strategy_registry` should support fields like:
+## Registry Direction
+Eventually `strategy_registry` should include fields like:
 - strategy_id
 - family
 - lifecycle_state
+- champion_flag
+- backup_flag
 - last_validated_at
 - last_dataset_id
-- last_oos_pass
-- degradation_flag
+- last_friction_stage
 - live_eligible
-- active
+- micro_live_active
 - restricted_reason
 - retired_reason
 
-This will make the lifecycle machine-readable.
+This should become machine-readable over time.
 
 ---
 
-## Current Strategic Implication
-
-Because experiments should be perpetual,
-the system must evolve from:
-- one-time backtest judgments
+## Strategic Implication
+The system must continue evolving from:
+- one-time backtest judgment
 
 to:
 - continuous discovery
 - continuous validation
+- friction-aware realism
+- telemetry-aware deployment
 - continuous maintenance
-- controlled promotion/demotion
+- controlled promotion and demotion
 
-That is the real destination.
+That is the real lifecycle.
