@@ -1,54 +1,83 @@
 # MIGRATION TRACKER
 
-This file tracks the transition from fragmented bootstrap infrastructure into a durable long-term home.
+This file tracks the transition from fragmented bootstrap infrastructure into a durable long-term architecture.
 
 ---
 
 ## Migration Objective
 
-Move the $T$T system from:
-
+Move the system from:
 - chat-dependent continuity
-- PDF-based knowledge transfer
+- PDF-heavy knowledge transfer
 - Sheets-heavy memory
-- Script Properties overuse
-- unclear project-state persistence
+- Apps Script as too much of the entire backbone
+- unclear runtime / data / state binding
 
 to:
-
 - GitHub as canonical code/doc home
-- Supabase as structured memory home
-- Sheets as dashboard/control surface
-- Apps Script as current control plane
-- later Python for heavy compute and live services
+- Supabase as structured memory and persistence home
+- Apps Script as current control / governance plane where useful
+- Python as the active home for workloads Apps Script is structurally bad at
 - machine-readable contracts for bounded AI/bot work
+
+---
+
+## Migration Principle
+
+Migration must be:
+- phased
+- workload-driven
+- persistence-first
+- not panic-driven
+- not novelty-driven
+
+Python is not being adopted because it is fashionable.
+It is being adopted because some workloads now clearly exceed what Apps Script should be carrying.
 
 ---
 
 ## Current State
 
 ### Already true
-- core modules M1–M10 exist
-- resumable experiment matrix works
-- Supabase experiment logging works
-- council deliberation scaffolding works
-- governance state exists
-- active run continuation is proven in unattended operation
-- fresh canonical candles now exist in Supabase
-- Apps Script can read canonical history from Supabase
-- M2 canonical history gate can use the Supabase-backed dataset
-- M9 actual 4H backtest loader can use the Supabase-backed dataset
-- active V3 run is using the fresh Supabase-backed canonical dataset
+- core modules M1–M10 still exist as the architecture frame
+- GitHub is active as canonical doc/code home
+- Supabase is active for structured persistence
+- Apps Script remains useful as current control-plane surface
+- Python is now active for:
+  - research engine evolution
+  - V7 / V8 / V9 workflows
+  - friction-aware backtest execution
+  - deploy bundle generation
+  - live monitoring / governance scaffolding
+  - pre-trade runtime guard work
 
 ### Not yet true enough
-- code is not fully housed in GitHub
-- docs are not yet complete everywhere
-- project state still lives too much in chats
-- module registry is not yet formally stored everywhere it should be
-- richer OOS reporting is not yet surfaced cleanly
-- machine-readable worker contracts do not yet exist
-- deeper 4H history may still be desirable
-- Python migration plan is understood, but not yet staged concretely as primary runtime
+- code is not fully mirrored and normalized into GitHub
+- module docs are not complete everywhere
+- some architectural memory still lives too much in chats
+- worker contracts are not yet machine-readable
+- Apps Script / Python responsibility boundaries are still emerging rather than fully formalized
+- live execution service layer is not yet fully operationalized
+- Supabase persistence is not yet uniformly integrated across all runtime surfaces
+
+---
+
+## Migration Reality Update
+
+### Old framing
+Earlier migration framing treated Python mainly as:
+- future ingestion path
+- future research scaling path
+- future live-service possibility
+
+### Current framing
+Python is now already active in the project’s research and pre-live path.
+
+Therefore migration is no longer purely future-planned.
+It is now **partially active**.
+
+This does not mean Apps Script has been replaced.
+It means the project is now in a **hybrid migration phase**.
 
 ---
 
@@ -56,13 +85,13 @@ to:
 
 1. Do not rewrite robust modules casually.
 2. Prioritize persistence before elegance.
-3. Preserve comparability of active research runs.
+3. Preserve comparability of active workflows.
 4. Keep M1 sovereign.
 5. Keep AI advisory, bounded, and fail-closed.
 6. Treat Apps Script as current control plane, not forever backbone.
-7. Move meaning into docs and memory tables, not chats.
-8. Treat historical data architecture as a first-class migration concern.
-9. Prefer contracts over vague automation.
+7. Move meaning into docs and structured memory, not chats.
+8. Treat historical data and runtime telemetry as first-class architecture.
+9. Prefer explicit contracts over vague automation.
 
 ---
 
@@ -81,24 +110,22 @@ In progress
 ### Tasks
 - [x] Create GitHub repository
 - [x] Add README
-- [x] Add PROJECT_STATE
-- [x] Add ARCHITECTURE
-- [x] Add MODULE_REGISTRY
-- [x] Add DECISIONS
-- [x] Add DATASETS
-- [x] Add MIGRATION_TRACKER
-- [x] Add COUNCIL_ROLES
-- [x] Add RUNBOOKS
-- [ ] Mirror module source files into repo folders
-- [ ] Add SQL schema files
-- [ ] Add snapshot JSONs if useful
+- [x] Add architecture/state/governance docs
+- [x] Add migration tracker
+- [x] Add decision log
+- [x] Add strategy / module docs
+- [x] Add Python migration README
+- [ ] Mirror all relevant module source files into repo structure
+- [ ] Normalize current Python research/runtime code into repo
+- [ ] Add SQL schema files cleanly
+- [ ] Add snapshots / run artifacts as needed
 
 ### Success condition
 All meaningful code and docs have a canonical GitHub home.
 
 ---
 
-## Workstream B — Project Brain Migration
+## Workstream B — Structured Memory Migration
 
 ### Goal
 Make Supabase the structured memory home for project state.
@@ -107,159 +134,135 @@ Make Supabase the structured memory home for project state.
 In progress / materially advanced
 
 ### Tasks
-- [x] experiment_logs table
-- [x] diagnostic_notes table
-- [x] council_deliberations table
-- [x] create module_registry table
-- [x] create decision_log table
-- [x] create dataset_registry table
-- [x] create project_snapshots table
-- [x] create active_todos table
-- [x] create project_chunks table
-- [x] create canonical candle storage tables
-- [x] create dataset coverage tables
-- [ ] insert complete module rows
-- [ ] insert key decisions
-- [ ] insert current dataset state
+- [x] experiment logs
+- [x] diagnostic notes
+- [x] council deliberations
+- [x] module registry table
+- [x] decision log table
+- [x] dataset registry table
+- [x] project snapshots table
+- [x] canonical market candles
+- [x] dataset coverage tables
+- [ ] insert complete current module rows
+- [ ] insert current major decisions structurally
 - [ ] insert regular project snapshots
-- [ ] store future chunk summaries of modules/chats
+- [ ] persist current strategy lifecycle state structurally
+- [ ] persist champion / backup selection structurally
 
 ### Success condition
-Project continuity can be reconstructed from Supabase without needing dead chats.
+Project continuity can be reconstructed from Supabase without relying on dead chats.
 
 ---
 
-## Workstream C — Research Memory Cleanup
+## Workstream C — Research Runtime Migration
 
 ### Goal
-Reduce dependence on Document Properties and ambiguous reporting.
-
-### Status
-Partial / improved
-
-### Tasks
-- [ ] reduce reliance on `M9_DIAG_*` property blobs
-- [x] ensure DQS summary is externally persisted
-- [ ] clarify ALL vs OOS metrics in reporting
-- [x] version important experiment contexts via dataset identity
-- [ ] log dataset ID alongside all major experiment surfaces consistently
-- [ ] create reproducibility notes for major runs
-
-### Success condition
-Research history is durable, queryable, and interpretable without guessing.
-
----
-
-## Workstream D — Dataset Governance
-
-### Goal
-Treat datasets as named assets.
+Move heavy research / validation logic into Python where appropriate.
 
 ### Status
 Active
 
-### Tasks
-- [x] establish DATASETS doc
-- [x] insert dataset_registry rows
-- [x] define active fresh dataset identity
-- [x] separate legacy and fresh dataset contexts
-- [x] remove ZAR from canonical research/live universe
-- [ ] record future deeper-history expansions explicitly
-- [ ] record future 4H augmentation explicitly
-- [ ] tag all major runs consistently with dataset ID
-
-### Success condition
-Every important experiment can be tied to a clearly identified dataset state.
-
----
-
-## Workstream E — Governance + Council Formalization
-
-### Goal
-Make M8 + M10 a durable constitutional decision layer.
-
-### Status
-Partial
-
-### Tasks
-- [x] governance state function exists
-- [x] council fact pack exists
-- [x] pending deliberation creation exists
-- [ ] store governance events historically
-- [ ] document council role prompts in repo
-- [ ] clarify presidential override flow
-- [ ] ensure hard policy remains fail-closed
-- [ ] keep M1 supremacy explicit in docs
-- [ ] define machine-readable council role contracts
-
-### Success condition
-Council behavior is documented, bounded, and persistently auditable.
-
----
-
-## Workstream F — Apps Script to Python Migration Planning
-
-### Goal
-Stage future migration without destabilizing current system.
-
-### Status
-Future-planned
-
-### Candidate order
-1. M2-heavy ingestion/bootstrap logic
-2. M9-heavy research/backtest logic
-3. M6 live execution services
-4. M10 service orchestration if needed
-
-### Tasks
-- [x] create `python/README.md`
-- [ ] define migration phases
-- [ ] identify first service candidates
-- [ ] define data contracts between old/new layers
-- [ ] preserve Sheets as dashboard where useful
-
-### Success condition
-Python migration happens by layer, not by panic rewrite.
-
----
-
-## Workstream G — Historical Data / Storage Migration
-
-### Goal
-Reduce dependence on Google Sheets as the primary historical warehouse.
-
-### Status
-Active / phase 1 materially achieved
-
-### Why this matters
-Historical research interpretation was being distorted by:
-- uneven symbol freshness
-- stale series
-- workbook-based historical storage limitations
-- hidden dataset ambiguity
-
-### Achieved
-- fresh canonical candles stored in Supabase
-- active USDT-only spot/perp dataset established
-- Apps Script bridge to canonical history works
-- M9 actual backtest load path uses the active Supabase-backed dataset
-- V3 launched on fresh canonical dataset
+### Already achieved
+- Python backtest engine active
+- timestamp-normalized engine active
+- friction-aware execution modeling active
+- leverage-cap-aware sizing active
+- V7 / V8 / V9 research flow active
 
 ### Remaining tasks
-- define phase-2 deeper 4H augmentation if needed
-- reduce remaining workbook dependence in downstream paths
-- enrich historical retrieval governance and versioning
-- clarify what remains warehouse-backed vs rebuildable long term
+- normalize engine into maintainable Python source layout
+- reduce notebook-only drift
+- formalize experiment runner interfaces
+- improve reproducibility / config versioning
+- bind runs more cleanly to code version and dataset version
 
 ### Success condition
-Historical research quality is no longer constrained primarily by Sheets, and future deeper-history augmentation is explicit rather than hidden.
+Python becomes the stable home for heavy research runtime without losing governance clarity.
 
 ---
 
-## Workstream H — Worker Contract Formalization
+## Workstream D — Live Runtime / Monitoring Migration
 
 ### Goal
-Move from descriptive AI roles toward machine-readable bounded worker contracts.
+Stage Python as the home for live runtime support where Apps Script is structurally weak.
+
+### Status
+Emerging / active preparation
+
+### Already achieved
+- deploy bundle generation
+- champion / backup config artifacts
+- live risk rules
+- live monitoring dashboard
+- kill-switch evaluator
+- runtime state machine
+- pre-trade guard design
+- shadow execution scaffolding
+
+### Remaining tasks
+- equity snapshot heartbeat integration
+- shadow execution orchestration loop
+- safe real execution bridge
+- durable order / fill reconciliation
+- stronger observability and service reliability
+
+### Success condition
+Live runtime protection and execution support no longer depend on fragile script-only assumptions.
+
+---
+
+## Workstream E — Apps Script Preservation / Role Clarification
+
+### Goal
+Preserve Apps Script where it still adds value, while reducing structural overload.
+
+### Status
+Important and ongoing
+
+### Apps Script should remain useful for
+- M1 constitutional logic
+- governance/control surfaces
+- Sheets dashboards
+- lightweight orchestration where runtime limits are acceptable
+
+### Apps Script should stop being the default home for
+- heavier compute
+- deep research scaling
+- fragile persistence hacks
+- live execution infrastructure that needs stronger durability
+
+### Success condition
+Apps Script remains valuable, but no longer overburdened.
+
+---
+
+## Workstream F — Dataset / Historical Data Governance
+
+### Goal
+Treat datasets as named assets and bind experiments to them explicitly.
+
+### Status
+Still important
+
+### Tasks
+- [x] establish dataset docs and registry
+- [x] maintain canonical candle storage
+- [ ] ensure all major Python runs consistently carry dataset identity
+- [ ] ensure code-version binding is explicit
+- [ ] preserve historical interpretability across runtime environments
+
+### Success condition
+Every important run can be tied to:
+- a known dataset
+- a known code version
+- a known config state
+
+---
+
+## Workstream G — Worker Contract Formalization
+
+### Goal
+Move from descriptive AI roles toward machine-readable bounded contracts.
 
 ### Status
 Emerging priority
@@ -267,68 +270,15 @@ Emerging priority
 ### Tasks
 - [ ] define worker contract schema
 - [ ] define authority fields
-- [ ] define artifact IO fields
-- [ ] define trigger/invocation rules
-- [ ] map existing worker roles into contract form
-- [ ] define which contracts are advisory only vs operationally callable
+- [ ] define artifact I/O fields
+- [ ] define invocation rules
+- [ ] map current worker roles into structured contract form
 
 ### Success condition
-AI/bot labor is governed by explicit contracts rather than chat interpretation alone.
+AI/bot labor is governed by explicit contracts rather than chat interpretation.
 
 ---
 
-## Immediate Priorities
+## Effective Migration Order
 
-### Now
-- keep active `PERSISTENCE_HUNT_V3` stable
-- monitor fresh-data V3 behavior
-- preserve comparability
-- avoid destabilizing the active runner
-
-### This week
-- capture V3 findings durably
-- enrich OOS reporting visibility after run or safe pause
-- continue code/docs mirroring into GitHub
-- prepare post-run pruning plan for legacy bootstrap and stale source logic
-
-### Later
-- deepen 4H history if needed
-- formalize worker contracts
-- continue migration toward cleaner service boundaries
-
----
-
-## Things Explicitly Deferred
-
-- full Python rewrite now
-- replacing robust modules just because they are large
-- giant PDF uploads as primary continuity mechanism
-- overbuilding AI features before persistence and contracts are cleaner
-- destabilizing active research for cosmetic cleanup
-
----
-
-## Current Biggest Risk
-
-The biggest risk is no longer simple code absence.
-
-The biggest risks are now:
-- knowledge and state fragmentation across chats, Sheets, properties, runtime, and human memory
-- richer OOS visibility lagging behind the quality of current experiments
-- deeper 4H history becoming the next limiting factor on final persistence truth
-
----
-
-## Current Biggest Opportunity
-
-The machine is already real.
-
-Now that the fresh-data path is working, the project gains:
-- continuity
-- cleaner comparability
-- less stale-data distortion
-- stronger empirical trust
-- better foundation for later pruning and migration
-- a much fairer chance to evaluate whether V3 truly improves persistence
-
-That is the point of this migration.
+### 1. M2-heavy ingestion / 
