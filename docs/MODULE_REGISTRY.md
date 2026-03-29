@@ -2,7 +2,7 @@
 
 This file is the human-readable registry of the current system modules.
 
-The purpose of this file is to make module roles durable, explicit, and migration-aware.
+Its purpose is to make module roles durable, explicit, and migration-aware.
 
 If a module matters and its meaning only exists in memory or chat, the architecture is not yet persistent enough.
 
@@ -11,7 +11,6 @@ If a module matters and its meaning only exists in memory or chat, the architect
 ## Registry Fields
 
 Each module entry should eventually maintain:
-
 - role
 - current status
 - criticality
@@ -22,8 +21,8 @@ Each module entry should eventually maintain:
 - migration target
 - next action
 
-This file is the human-readable version.  
-A structured Supabase `module_registry` table should eventually mirror it.
+This file is the human-readable version.
+A structured `module_registry` table should eventually mirror it.
 
 ---
 
@@ -35,28 +34,28 @@ A structured Supabase `module_registry` table should eventually mirror it.
 **Persistence Status:** Partial  
 
 ### Owns
-- CONFIG access
-- CONFIG changelog
+- config access
+- config changelog
 - credentials
 - kill switch
-- triggers
-- foundational menus/tests
+- triggers / scheduling
+- foundational menus and tests
 
 ### Strengths
-- strong config discipline
-- explicit changelog
-- secure key custody
-- clean kill-switch authority
+- explicit config discipline
+- kill-switch authority
+- secure credential custody
+- constitutional clarity
 
 ### Risks
-- still tied to Apps Script / workbook environment
-- architecture meaning not yet externally documented enough
+- meaning still not externally documented enough everywhere
+- still partly tied to Apps Script control-plane context
 
 ### Migration Target
-Remains constitutional layer even after Python migration
+Remains constitutional layer even after broader migration.
 
 ### Next Action
-Mirror constitutional role into Supabase `module_registry` + GitHub docs
+Keep constitutional role explicit in docs and structured memory.
 
 ---
 
@@ -68,40 +67,39 @@ Mirror constitutional role into Supabase `module_registry` + GitHub docs
 **Persistence Status:** Mixed  
 
 ### Owns
-- `INSTRUMENTS`
-- `UNIVERSE`
-- `DATA_RAW`
-- `DATA_CLEAN`
-- `FUNDING_LOG`
-- bootstrap / resumable bootstrap
+- instrument master
+- universe construction
+- canonical history logic
+- history sufficiency gating
+- funding log updates
+- bootstrap / rebuild workflows
 
 ### Strengths
 - canonical history gate
-- resumable bootstrap
-- hard filters
 - universe building
 - data quality logic
-- history diagnostics
+- hard-filter and survivorship relevance
 
 ### Risks
-- large module surface
-- Apps Script runtime pressure
-- currently workbook-heavy
-- historical storage still too dependent on Sheets
-- symbol freshness inconsistencies can distort research interpretation
+- historically workbook-heavy
+- large surface area
+- Apps Script runtime pressure for heavier ingestion paths
 
 ### Important current note
-M2 is increasingly central not only for data ingestion, but also for:
-- hard-filter pass truth
-- SPS / Top-K universe state
-- cohort construction inputs
-- history sufficiency truth
+M2 is no longer just a fetch layer.
+It is also the substrate for:
+- curated cohort truth
+- historical sufficiency truth
+- instrument survivorship truth
+- dataset governance
+
+Python is now increasingly relevant for M2-heavy ingestion / rebuild workflows.
 
 ### Migration Target
-One of the first major Python / service migration candidates
+One of the first major Python migration candidates.
 
 ### Next Action
-Register dataset versions, bootstrap modes, and historical storage policy more clearly
+Clarify which M2 workloads remain in Apps Script and which are now better handled in Python.
 
 ---
 
@@ -113,25 +111,24 @@ Register dataset versions, bootstrap modes, and historical storage policy more c
 **Persistence Status:** Okay  
 
 ### Owns
-- `INDICATORS`
-- `LEVELS`
-- `REGIME`
+- indicators
+- levels
+- regime state
 
 ### Strengths
-- clean compute separation
-- deterministic analytical outputs
-- schema discipline
-- test coverage
+- clear analytical separation
+- deterministic outputs
+- stable conceptual role
 
 ### Risks
-- analytical outputs still mostly persist in Sheets
-- depends on M2 schema stability
+- output contracts should be documented more explicitly
+- still depends on M2 dataset clarity
 
 ### Migration Target
-Later Python candidate, not immediate
+Possible later Python candidate, not the immediate pressure point.
 
 ### Next Action
-Document output contracts and dependencies
+Document current output contracts and dependencies more explicitly.
 
 ---
 
@@ -143,26 +140,32 @@ Document output contracts and dependencies
 **Persistence Status:** Moderate  
 
 ### Owns
-- `SIGNALS` generation logic
-- confirmation thesis
+- signal generation logic
+- setup confirmation logic
 - DQS scoring
 - signal diagnostics
 
 ### Strengths
-- clear thesis structure
-- DQS logic
-- diagnostics
-- adaptive setup evaluation
+- market hypothesis encoding
+- DQS structure
+- signal diagnostics
+- family-level interpretation relevance
 
 ### Risks
-- research/live interpretation can drift if not documented
-- signal context still workbook-centered
+- thesis drift if strategy docs are not kept current
+- historical signal interpretation can diverge across runtime environments
+
+### Important current note
+The currently selected active lead family is:
+`BREAKOUT_LONG`
+
+This should remain aligned with actual strategy-family documentation.
 
 ### Migration Target
-Later migration candidate after persistence improves
+Likely later migration candidate after research/runtime boundaries are cleaner.
 
 ### Next Action
-Document current active strategy thesis explicitly and align with `STRATEGY_FAMILIES.md`
+Keep `STRATEGY_FAMILIES.md` synchronized with the actual active lead family and selected candidate configs.
 
 ---
 
@@ -174,27 +177,34 @@ Document current active strategy thesis explicitly and align with `STRATEGY_FAMI
 **Persistence Status:** Moderate  
 
 ### Owns
-- `RISK_CALC`
-- risk sizing logic
-- leverage selection
-- liquidation proxy
+- position sizing logic
+- stop-distance logic
+- leverage selection / constraints
+- exposure checks
 - hard rejection rules
 
 ### Strengths
-- clear bridge between M4 and M6
-- structured approval logic
-- explicit rejection reasons
-- test coverage
+- lawful bridge between signals and execution
+- explicit rejection semantics
+- naturally governance-compatible
 
 ### Risks
-- depends on assumptions across M4, M6, M7
-- should be documented as a lawful gate, not just a calculator
+- assumptions can drift if execution modeling is not kept honest across runtimes
+
+### Important current note
+Python-side research and pre-live runtime now explicitly models:
+- fees
+- slippage
+- funding
+- leverage-cap-aware sizing
+
+This makes M5 logic more operationally concrete than before.
 
 ### Migration Target
-Preserve logic; likely service-friendly later
+Preserve logic; likely service-friendly later.
 
 ### Next Action
-Add to registry and snapshot its output contract
+Keep risk-law semantics explicit and consistent across research and live-prep runtime.
 
 ---
 
@@ -203,30 +213,37 @@ Add to registry and snapshot its output contract
 **Role:** Deterministic order and position lifecycle  
 **Status:** Active  
 **Criticality:** Very High  
-**Persistence Status:** Weak externally  
+**Persistence Status:** Weak externally / improving  
 
 ### Owns
-- `ORDERS`
-- `POSITIONS`
-- execution state transitions
-- stop/TP/trailing lifecycle
+- orders
+- positions
+- stop / TP / trail lifecycle
+- deterministic position-state transitions
 
 ### Strengths
-- deterministic
-- rich schemas
-- explicit position lifecycle
-- tests and diagnostics
+- deterministic role
+- rich lifecycle semantics
+- naturally auditable if persistence improves
 
 ### Risks
-- execution truth remains too workbook-dependent
-- should eventually emit durable external logs
-- some experiment-path helpers still have brittle external document dependencies
+- historically too workbook-dependent
+- durable external execution-state logging is still not fully mature
+
+### Important current note
+Python now contains:
+- pre-trade guard scaffolding
+- shadow execution scaffolding
+- live monitoring / runtime protection scaffolding
+
+This does not mean M6 has fully migrated.
+It means the execution-adjacent runtime is now beginning to live partly in Python.
 
 ### Migration Target
-Major Python/live service candidate
+Major Python/live service candidate.
 
 ### Next Action
-Treat as lawful executor; later externalize lifecycle persistence and audit document dependencies
+Preserve deterministic execution semantics while externalizing state durability and telemetry discipline.
 
 ---
 
@@ -238,59 +255,69 @@ Treat as lawful executor; later externalize lifecycle persistence and audit docu
 **Persistence Status:** Okay  
 
 ### Owns
-- `ALERT_LOG`
-- `DASHBOARD`
-- `API_LOG`
-- ops scanning
+- dashboards
+- alerting
+- scanner state
+- ops summaries
+- operator-facing visibility
 
 ### Strengths
-- alert catalog
-- dashboard
-- risk and ops visibility
-- email batching
+- practical visibility layer
+- operator-facing usefulness
+- natural fit for Sheets / dashboard surfaces
 
 ### Risks
-- depends on workbook ecosystem
-- some references may assume exact upstream schemas
-- dead trigger noise / operational clutter can accumulate if not maintained
+- should not be mistaken for the only monitoring layer
+- stale assumptions can accumulate if runtime observability shifts elsewhere
+
+### Important current note
+Python now also has live monitoring / kill-switch scaffolding.
+So monitoring is no longer purely workbook/dashboard-centered.
 
 ### Migration Target
-Likely remains partially in Sheets even later
+Likely remains partially in Sheets, even if Python-side monitoring grows.
 
 ### Next Action
-Keep as ops layer; not core migration blocker
+Keep Apps Script / Sheets ops surfaces and Python-side monitoring conceptually aligned.
 
 ---
 
 ## M8 — Governance
 
-**Role:** Governance state / Go-live gates / AI hard policy pack  
+**Role:** Governance state / go-live gates / hard policy  
 **Status:** Active  
 **Criticality:** High  
 **Persistence Status:** Partial  
 
 ### Owns
 - governance state
-- mood / behavior logic
-- pause / ban logic
+- pause / restriction logic
 - go-live gates
-- council fact packs
+- hard-policy framing
+- governance packet semantics
 
 ### Strengths
-- real governance-state function
-- go-live validation
-- AI hardening packet
-- policy evaluation
+- explicit governance-state logic
+- naturally superior to vague “AI mood” framing
+- constitutional compatibility
 
 ### Risks
-- some state stored in Script Properties
-- governance events not yet fully externally logged
+- governance events are still not durably logged everywhere they should be
+- runtime safety can become fake if telemetry is missing
+
+### Important current note
+The current live runtime state machine now explicitly uses:
+- `ACTIVE`
+- `PAUSED`
+- `HARD_STOP`
+
+Telemetry freshness is now part of the effective governance surface.
 
 ### Migration Target
-Preserve logic; later add stronger persistence of governance events
+Preserve logic; strengthen persistence and event history.
 
 ### Next Action
-Log governance transitions into Supabase eventually
+Ensure telemetry-aware runtime governance remains explicitly documented and durable.
 
 ---
 
@@ -299,39 +326,50 @@ Log governance transitions into Supabase eventually
 **Role:** Empirical truth / backtesting / OOS / audit  
 **Status:** Active  
 **Criticality:** Very High  
-**Persistence Status:** Mixed  
+**Persistence Status:** Mixed but improving  
 
 ### Owns
-- `BACKTEST_RESULTS`
-- `ARCHIVE`
 - walk-forward backtests
-- OOS metrics
-- DQS summaries
-- tax export
+- OOS evaluation
+- experiment truth
+- empirical legitimacy
+- diagnostics and research metrics
 
 ### Strengths
-- serious research engine
-- OOS logic
+- empirical judiciary role
 - strong metric richness
-- compact DQS summary path
-- diagnostics
+- candidate-selection relevance
+- naturally central to strategy legitimacy
 
 ### Risks
-- remnants of property-based diagnostics
 - complexity is high
-- sheet reporting still mixes ALL vs OOS concepts imperfectly
+- dataset / code-version binding must remain explicit
+- historical framing can drift if docs lag runtime
 
 ### Important current note
-M9 was audited and found to contain the real backtest universe resolver path.  
-That resolver has now been upgraded to support curated cohort-aware selection.
+M9-heavy research runtime is now actively happening in Python.
 
-This is a major architecture correction.
+This includes:
+- V7 robustness mapping
+- V8 friction-aware stress
+- V9 candidate selection
+- friction-aware execution realism
+- leverage-cap-aware sizing realism
+
+The current active lead family is:
+`BREAKOUT_LONG`
+
+Current champion:
+`TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
+
+Current backup:
+`TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN`
 
 ### Migration Target
-One of the top Python migration candidates
+One of the top Python migration candidates, and now partially active there already.
 
 ### Next Action
-Keep pushing compact outputs to Supabase; reduce property dependence; preserve curated cohort semantics
+Normalize Python-side M9-heavy runtime into more durable source structure and keep experiment / dataset / code binding explicit.
 
 ---
 
@@ -343,29 +381,30 @@ Keep pushing compact outputs to Supabase; reduce property dependence; preserve c
 **Persistence Status:** Strongest external bridge so far  
 
 ### Owns
-- experiment export
-- Supabase logging
-- diagnostic note writing
+- experiment payload persistence
+- diagnostic note persistence
 - council deliberation creation
-- OpenRouter role voting
-- council finalization
+- bounded role review scaffolding
+- memory / orchestration bridge semantics
 
 ### Strengths
-- bridges Sheets into persistent memory
-- structured experiment payloads
-- governance fact-pack integration
+- durable memory bridge
 - bounded AI workflow
+- cross-session continuity support
 
 ### Risks
-- still latest-row centric in places
-- still depends on workbook as immediate source
-- broader project memory role is still incomplete relative to its likely long-term importance
+- still incomplete relative to likely long-term importance
+- some meaning still exists outside structured memory
+
+### Important current note
+Python-side deploy bundle and live runtime artifacts now exist.
+This means durable artifacts are no longer only flowing through the older Apps Script mental model.
 
 ### Migration Target
-Could later evolve into service/orchestrator layer
+Could later evolve into a broader orchestration / memory service layer if justified.
 
 ### Next Action
-Expand into full project-brain bridge, not only council memory
+Expand durable artifact handling and reduce reliance on chat memory for project truth.
 
 ---
 
@@ -373,14 +412,9 @@ Expand into full project-brain bridge, not only council memory
 
 The system is already architecturally real.
 
-The biggest remaining gap is not “missing modules.”  
-It is lack of a permanent home for:
-
-- code
-- architecture meaning
-- project state
-- decisions
-- dataset history
-- run history
-- cross-session continuity
-- machine-readable worker contracts
+The main gap is no longer missing modules.
+It is:
+- keeping runtime reality aligned with docs
+- keeping empirical truth aligned with current datasets and code paths
+- making governance and telemetry real before live behavior expands
+- making project meaning durable across hybrid runtime layers
