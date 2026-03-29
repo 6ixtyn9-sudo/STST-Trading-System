@@ -1,19 +1,24 @@
 # COUNCIL ROLES
 
-This file defines the role structure of the AI council and its place in the $T$T system.
+This file defines the role structure of the AI council and its place in the system.
 
 ---
 
 ## Purpose
 
-The council exists to provide **bounded, role-specialized advisory judgment** over persisted experiment facts and governance state.
+The council exists to provide **bounded, role-specialized advisory judgment** over:
+- persisted experiment facts
+- governance state
+- candidate deployment readiness
+- strategy maintenance / restriction questions
 
 The council is not:
 - supreme authority
 - execution truth
 - allowed to bypass M1
 - allowed to override hard policy
-- allowed to trade directly
+- allowed to place trades
+- allowed to silently upgrade a candidate into live approval
 
 The council is a structured advisory layer.
 
@@ -31,7 +36,7 @@ The council is a structured advisory layer.
 - **M9** provides research truth and experiment evidence
 
 ### Memory / orchestration
-- **M10** builds fact packs, records deliberations, and coordinates voting
+- **M10** builds fact packs, records deliberations, and coordinates bounded review
 
 ### Human authority
 - **President / operator** resolves ambiguity when needed
@@ -40,7 +45,7 @@ The council is a structured advisory layer.
 
 ## Current Practical Position
 
-The council is still early-stage.
+The council remains an early-to-mid maturity review layer.
 
 It should currently be treated as:
 - a structured advisory layer
@@ -53,6 +58,24 @@ It should **not** currently be treated as:
 - direct execution authority
 - constitutional override
 - empirical override
+- live runtime permission layer
+
+Runtime entry permission belongs to governance + telemetry + pre-trade guard, not to council vibes.
+
+---
+
+## Current Relevance
+
+The council is now most relevant for questions like:
+- does this candidate deserve promotion from research into micro-live validation?
+- should a strategy remain in validation posture or be restricted?
+- what is the strongest bounded interpretation of a candidate’s risk?
+- what minimum further proof is needed?
+
+It is less relevant for:
+- minute-to-minute runtime permissioning
+- direct trade execution decisions
+- replacing telemetry-aware governance
 
 ---
 
@@ -79,15 +102,17 @@ Opportunity-seeking, but bounded by supplied facts.
 
 ### Reads especially
 - DQS structure
-- signal/strategy shape
+- signal / strategy shape
 - pattern quality
 - whether the candidate looks directionally alive
+- whether the edge appears worth further controlled validation
 
 ### Must not do
 - invent facts
 - override hard policy
 - ignore governance state
 - authorize execution by itself
+- treat “interesting” as “approved”
 
 ### Output contract
 Must return JSON only:
@@ -109,19 +134,22 @@ Conservative and veto-oriented.
 - policy packet
 - experiment metrics
 - diagnostics
-- relevant risk-related facts
+- relevant risk facts
 
 ### Reads especially
-- max drawdown
+- drawdown
+- drawdown duration
 - OOS sample size
 - governance restrictions
 - hard reject reasons
 - capital fragility signals
+- whether unresolved operational pain is being underpriced
 
 ### Must not do
 - override hard policy
 - approve if governance says fail-closed
 - invent unobserved risk metrics
+- confuse survivability with comfort
 
 ### Output contract
 Must return JSON only:
@@ -147,16 +175,19 @@ Cold, skeptical, evidence-first.
 
 ### Reads especially
 - OOS pass/fail
-- profit factor
+- PF
 - expectancy
 - drawdown
+- drawdown duration
 - sample size
 - hard reject reasons
+- whether friction-aware evidence still supports the claim
 
 ### Must not do
 - approve on vibes
 - ignore failed empirical criteria
 - reinterpret metrics creatively
+- silently relax gates
 
 ### Output contract
 Must return JSON only:
@@ -185,6 +216,12 @@ The President:
 - respect for M1 / M8 / M9 structure
 - no impulsive “because I feel like it” decisions
 
+### Current best use
+The operator is most useful when:
+- deciding whether micro-live validation is justified
+- deciding whether to pause / restrict / switch candidate strategy path
+- deciding whether a boundary case deserves more proof rather than false certainty
+
 ---
 
 ## Hard Constraints
@@ -192,9 +229,10 @@ The President:
 The council must remain fail-closed.
 
 ### Examples
-- if governance says `PAUSED`, the council cannot produce deployable approval
-- if hard reject reasons exist, the council is advisory only and final decision should remain `REJECTED`
+- if governance says `PAUSED`, the council cannot create live permission
+- if hard reject reasons exist, the council is advisory only and final decision should remain bounded
 - if inputs are missing or malformed, default outcome should be rejection or hold
+- if telemetry/governance runtime is unsafe, the council cannot substitute for operational protection
 
 ---
 
@@ -203,7 +241,7 @@ The council must remain fail-closed.
 ### Current implementation intent
 - M10 creates a pending deliberation
 - M8 builds governance fact pack
-- experiment payload is attached
+- M9 evidence is attached
 - role agents vote in bounded JSON
 - finalizer determines:
   - `APPROVED`
@@ -211,9 +249,16 @@ The council must remain fail-closed.
   - `HOLD`
 
 ### Current practical truth
-The council is still early-stage and should be treated as:
-- structured memory + bounded review layer
-- not autonomous deployment authority
+The council is still a bounded review layer.
+It should be treated as:
+- persistent review
+- structured memory
+- bounded critique
+
+It should not be treated as:
+- live execution authority
+- runtime guard
+- substitute for telemetry-aware governance
 
 ---
 
@@ -241,8 +286,9 @@ Council prompts should:
 - demand JSON-only output
 - forbid unsupported claims
 - forbid policy bypass
+- remain subordinate to constitutional and empirical limits
 
-Future prompts should be stored in:
+Prompts should live in:
 - `prompts/strategy_scout.md`
 - `prompts/risk_officer.md`
 - `prompts/quant_auditor.md`
@@ -251,7 +297,7 @@ Future prompts should be stored in:
 
 ## Machine-Readable Direction
 
-The council should eventually move toward machine-readable role contracts, including:
+The council should eventually move toward machine-readable role contracts including:
 - role ID
 - allowed inputs
 - output schema
@@ -260,7 +306,7 @@ The council should eventually move toward machine-readable role contracts, inclu
 - storage location for votes
 - fail-closed defaults when inputs are incomplete
 
-This is not fully implemented yet, but it is the intended next discipline step.
+This is not fully implemented yet, but it remains the intended discipline step.
 
 ---
 
@@ -270,8 +316,10 @@ The council may later evolve into a stronger review layer, but only if:
 - memory is durable
 - governance is explicit
 - evidence is queryable
+- runtime state is observable
 - constitutional constraints remain intact
-- council IO contracts are machine-readable and auditable
+- council I/O contracts are machine-readable and auditable
 
 Until then, it remains:
-**bounded, advisory, persistent, and subordinate.**
+
+**bounded, advisory, persistent, and subordinate**
