@@ -1,31 +1,33 @@
 # HOME GUIDE
 
-This file explains how the $T$T project home is organized.
+This file explains how the project home is organized.
 
 ---
 
 ## Purpose
 
-The project no longer relies on chat sessions as its primary memory.
+The project should not rely on chat sessions as primary memory.
 
-This repository and its linked Supabase database are the durable home of the system.
+This repository and its linked structured memory layers are the durable home of the system.
 
-The current direction is:
+Current direction:
 - GitHub for code and meaning
 - Supabase for structured/queryable memory
-- Sheets for operational surface
-- Apps Script for current control plane
+- Sheets for dashboard / control surfaces where useful
+- Apps Script as current control-plane layer
+- Python as active research and pre-live runtime layer
 - future machine-readable contracts for bounded bot labor
 
 ---
 
-## What lives where
+## What Lives Where
 
 ### GitHub
 GitHub is the home for:
 - code
 - architecture docs
 - migration docs
+- strategy docs
 - prompts
 - SQL schema files
 - snapshot files
@@ -53,37 +55,60 @@ If something is structured/queryable memory, it should live there.
 ---
 
 ### Google Sheets
-Sheets remain the operational surface for:
+Sheets remain useful for:
 - dashboards
-- experiment visibility
-- current workflow controls
-- current Apps Script runtime integration
+- controls
+- operator visibility
+- lightweight operational surfaces
 
 Sheets are the control room, not the permanent archive.
-
-Sheets are no longer the preferred canonical warehouse for active historical research truth.
 
 ---
 
 ### Apps Script
-Apps Script remains the current control plane:
+Apps Script remains the current control-plane layer for:
 - orchestration
 - wrappers
-- triggers
-- current module runtime
-- active research runner
+- some governance/control workflows
+- dashboard-connected operations where still useful
 
-It is part of the house, but not the entire house.
+It is part of the house, but not the whole house.
 
 ---
 
-### Python / Colab
-Python / Colab is now the active workbench for:
-- historical data rebuild
-- external market data ingestion
-- canonical dataset seeding into Supabase
+### Python
+Python is now an active runtime layer for:
+- heavier backtesting
+- friction-aware execution modeling
+- candidate selection
+- deploy-bundle generation
+- live monitoring / kill-switch scaffolding
+- shadow execution guard work
+- ingestion / rebuild workflows where appropriate
 
-This is a workbench layer, not the canonical memory home.
+Python is not just a future migration idea anymore.
+
+---
+
+## Current House Rooms
+
+### `/apps-script`
+Apps Script-side source and related runtime logic snapshots
+
+### `/docs`
+Human-readable project meaning and governance truth
+
+### `/sql`
+Schema and seed files
+
+### `/snapshots`
+Project state snapshots across major phases
+
+### `/prompts`
+Bounded council role prompts
+
+### `/python`
+Active Python runtime and migration layer
 
 ---
 
@@ -91,61 +116,68 @@ This is a workbench layer, not the canonical memory home.
 
 If something matters and exists only in chat, it is not persistent enough.
 
-Every important thing should be recorded in either:
+Every important thing should be recorded in:
 - GitHub
 - Supabase
 - or both
 
 ---
 
-## Current House Rooms
-
-### `/docs`
-Human-readable project meaning
-
-### `/apps-script`
-Source snapshots of Apps Script modules
-
-### `/sql`
-Database schema and seed files
-
-### `/snapshots`
-Project state snapshots
-
-### `/prompts`
-Council role prompts
-
-### `/python`
-Migration staging and external data rebuild work
-
----
-
 ## Current Workflow
 
 ### For code changes
-- update Apps Script as needed
-- mirror important source changes into GitHub
+- update the actual runtime layer involved
+- mirror durable code/doc meaning into GitHub
+- do not let runtime reality drift away from repo truth
 
 ### For architectural decisions
-- update `docs/DECISIONS.md`
-- optionally insert into `decision_log`
+- update `DECISIONS.md`
+- update other affected docs if the decision changes project truth materially
 
 ### For new project state
-- update `docs/PROJECT_STATE.md`
-- optionally insert into `project_snapshots`
+- update `PROJECT_STATE.md`
+- add/update a snapshot if the phase materially changed
 
 ### For dataset changes
-- update `docs/DATASETS.md`
-- update `dataset_registry`
+- update `DATASETS.md`
+- record dataset context explicitly in interpretation
 
-### For module changes
-- update `docs/MODULE_REGISTRY.md`
-- update `module_registry`
+### For strategy changes
+- update `STRATEGY_LIFECYCLE.md`
+- update `RUN_REGISTRY.md`
+- update `STRATEGY_FAMILIES.md` if the active lead changed
 
-### For AI worker evolution
-- update `docs/AI_WORKER_JOBS.md`
-- eventually define machine-readable worker contract files
-- keep worker scope/authority explicit
+### For runtime / governance changes
+- update `GOVERNANCE_GATES.md`
+- update `RUNBOOKS.md`
+- keep telemetry and runtime guard rules explicit
+
+---
+
+## Current Strategic Note
+
+The machine is already real.
+
+The current home-building priority is:
+- reducing chat dependence
+- reducing drift between docs and runtime
+- making project memory durable
+- making governance operationally real
+- keeping migration phased and explicit
+
+---
+
+## Current Practical Update
+
+The current project is no longer best described as:
+- Apps Script persistence hunting with Python only as a rebuild workbench
+
+It is now better described as:
+- a hybrid Apps Script + Python project
+- with Python actively handling research and pre-live runtime work
+- while Apps Script remains useful as a control/governance/dashboard layer
+
+This is the current real house layout.
 
 ---
 
@@ -157,35 +189,9 @@ The goal is:
 - durable continuity
 - less drift
 - less re-explanation
-- stronger future migration
+- stronger migration discipline
 - clearer runtime discipline
-- cleaner artifact ownership
+- explicit artifact ownership
 
 Perfection can come later.
-Persistence comes first.
-
----
-
-## Current Strategic Note
-
-The machine is already real.
-
-The most important current home-building work is now:
-- reducing chat dependence
-- reducing Sheets dependence for historical storage
-- making project memory durable
-- making worker/bot labor bounded through clearer contracts
-- keeping the fresh Supabase-backed dataset as the active canonical research substrate during V3 execution
-
----
-
-## Current Practical Update
-
-The active research machine now has a real fresh-data bridge:
-
-- Python / Colab performs historical rebuild work
-- Supabase stores canonical market history
-- Apps Script reads canonical history from Supabase for the active fresh-data research path
-- Sheets remain the dashboard/control surface
-
-This is the first materially real reduction in dependence on workbook-only historical storage.
+Truthful persistence comes first.
