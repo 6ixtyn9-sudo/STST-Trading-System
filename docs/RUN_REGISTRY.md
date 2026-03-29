@@ -8,13 +8,17 @@ For each important run, record:
 - run name
 - date
 - status
-- launcher
+- launcher / runtime
 - purpose
 - families
 - universe / cohort logic
 - dataset context
 - result summary
 - important caveats
+
+---
+
+## Historical Persistence-Hunt Era
 
 ---
 
@@ -26,14 +30,8 @@ For each important run, record:
 ### Status
 Completed
 
-### Launcher
-`RUN_experimentMatrix_resumableStart(...)`
-
-### Runner
-`RUN_experimentMatrix_resumableContinue`
-
-### Total Jobs
-416
+### Runtime
+Apps Script / resumable experiment runner
 
 ### Purpose
 Broad edge search / family clarity sweep
@@ -41,17 +39,16 @@ Broad edge search / family clarity sweep
 ### Result
 No OOS-passing strategy found
 
-### Important Read
+### Important read
 - broad search completed
-- strongest surviving family frontier leaned toward:
+- strongest frontier at that time leaned toward:
   - `LOOSE_MOMO_LONG | INVERTED_MIRROR`
   - `FAKEOUT_SHORT`
-- native long continuation families broadly weak
 
 ### Caveats
-- family scope was broader than later persistence work
-- older segmentation logic was cruder than later curated cohort framework
-- older dataset context was weaker than the current fresh-data baseline
+- broader family scope than later runs
+- older segmentation logic
+- older dataset context
 
 ---
 
@@ -63,31 +60,21 @@ No OOS-passing strategy found
 ### Status
 Completed / superseded
 
-### Launcher
-`RUN_experimentMatrix_resumableStart(...)`
-
-### Runner
-`RUN_experimentMatrix_resumableContinue`
+### Runtime
+Apps Script / resumable experiment runner
 
 ### Purpose
-Narrow persistence test using strongest families under segmentation logic available at that time
+Narrow persistence test using strongest families under the framework available at that time
 
 ### Families
 - `LOOSE_MOMO_LONG | INVERTED_MIRROR`
 - `FAKEOUT_SHORT`
 
-### Universe Logic
-Older segmentation:
-- `MAJORS_ONLY`
-- `BTC_ONLY`
-- `ETH_ONLY`
-- `MAJORS_EX_BTC_ETH`
-
-### Main Result
+### Main result
 No OOS passes
 
-### Important caveat
-This run was directionally useful, but later audit showed the underlying M9 resolver was still too crude / name-bucket oriented.
+### Caveats
+Directionally useful, but later architecture review showed the universe resolution logic was still too crude.
 
 ---
 
@@ -97,108 +84,184 @@ This run was directionally useful, but later audit showed the underlying M9 reso
 2026-03-26 era
 
 ### Status
-Completed / superseded as fresh-data baseline by V3
+Completed / superseded
 
-### Launcher
-`START_PERSISTENCE_HUNT_V2()`
-
-### Runner
-`RUN_experimentMatrix_resumableContinue`
-
-### Total Jobs
-240
+### Runtime
+Apps Script / resumable experiment runner
 
 ### Purpose
-Curated persistence hunt using:
-- corrected family shortlist
-- corrected curated cohort universe selection
-- suppression-focused neighborhood
+Curated persistence hunt using corrected family shortlist and improved cohort-aware logic
 
 ### Families
 - `LOOSE_MOMO_LONG | INVERTED_MIRROR`
 - `FAKEOUT_SHORT`
 
-### Cohorts
-- `TOP_SPS_CORE`
-- `TOP_SPS_WITH_DOGE`
-- `HARD_FILTER_ALL`
-- `PERP_CORE`
-- `SPOT_CORE`
-
 ### Current strongest read from that phase
-- best cohort: `TOP_SPS_WITH_DOGE`
-- best family: `LMI`
-- best near-miss rows often failed only on:
-  - `MaxDD_Days`
-  - `Sharpe`
+- strongest cohort: `TOP_SPS_WITH_DOGE`
+- strongest family cluster: `LMI`
+- many near-misses failed on:
+  - drawdown duration
+  - Sharpe
 
-### Important caveats
-- interpreted against the older mixed-freshness dataset context
-- not the cleanest fresh-data baseline anymore
+### Caveats
+Still tied to older dataset context and older project phase.
 
 ---
 
 ## `PERSISTENCE_HUNT_V3`
 
 ### Date
-2026-03-27 active era
+2026-03-27 era
 
 ### Status
-Active
+Historically important fresh-data persistence phase
 
-### Launcher
-`START_PERSISTENCE_HUNT_V3()`
-
-### Runner
-`RUN_experimentMatrix_resumableContinue`
-
-### Total Jobs
-240
+### Runtime
+Apps Script + Supabase-backed canonical dataset path
 
 ### Purpose
-Fresh-data persistence hunt using:
-- Supabase-backed canonical history
-- USDT-only spot/perp universe
-- V3 payoff overlay framework
-- two-phase experiment structure
+Fresh-data persistence hunt using Supabase-backed canonical history and cleaner USDT spot/perp substrate
 
-### Families
-- `LOOSE_MOMO_LONG | INVERTED_MIRROR`
-- `FAKEOUT_SHORT`
-
-### Cohorts
-- `TOP_SPS_WITH_DOGE`
-- `TOP_SPS_CORE`
-- `HARD_FILTER_ALL`
-
-### Dataset Context
+### Dataset context
 `OKX_MAJORSPOTPERP_USDT_2022_2026_SUPABASE_V1`
 
-### Experiment Structure
+### Important historical meaning
+This run marked a major shift away from older workbook-heavy mixed-freshness research interpretation.
 
-#### Phase 1
-- CONTROL
-- TIME_STOP
-- TIME_STOP + TAIL_CLAMP
-- TIME_STOP + FULL_EXIT
-- TIME_STOP + FULL_EXIT + TAIL_CLAMP
+### Caveats
+Historically important, but no longer the best description of the current active project phase.
 
-#### Phase 2
-- center-exit plumbing / bounded proxy modes
-- center-exit + tail-clamp variants
-- center-exit + full-exit variants
+---
 
-### Current early read
-The earliest V3 rows are the most promising experiment posture observed so far.
+## Python-Led Strategy Validation Era
 
-Current notable pattern:
-- some rows fail only on `OOS_Total_Trades < 20`
-- while showing strong PF / expectancy / Sharpe and low drawdown
+---
 
-### Important caveats
-- 4H history depth in the active fresh dataset remains shallower than ideal
-- richer OOS metrics are not yet fully surfaced in the `EXPERIMENTS` sheet
-- this is the cleanest current persistence baseline, but not yet the final “perfect deep-history” dataset
+## `V7_BREAKOUT_LONG_ROBUSTNESS_MAP`
+
+### Date
+2026-03-29 era
+
+### Status
+Completed
+
+### Runtime
+Python / Colab backtest engine
+
+### Purpose
+Robustness mapping of the `BREAKOUT_LONG` family across a finite board of universes, defenses, payoffs, and tunes
+
+### Family
+- `BREAKOUT_LONG`
+
+### Universes
+- `TOP_SPS_WITH_DOGE`
+- `TOP_SPS_CORE`
+
+### Result summary
+V7 confirmed that the strongest operating neighborhood clustered around:
+- `TOP_SPS_WITH_DOGE`
+- `D2_A / D3_A`
+- `P2_FAST / P1_BASE`
+- `T1_OPEN / T2_BAL`
+
+This established a real center-of-mass rather than a one-row fluke.
+
+### Important caveat
+V7 alone did not prove live viability.
+It justified moving to friction-aware stress.
+
+---
+
+## `V8_FRICTION_STRESS_BREAKOUT_LONG`
+
+### Date
+2026-03-29 era
+
+### Status
+Completed
+
+### Runtime
+Python / Colab friction-aware backtest engine
+
+### Purpose
+Stress V7-passed `BREAKOUT_LONG` candidates under:
+- realistic friction scenarios
+- leverage-cap-aware sizing assumptions
+
+### Scope
+Winner-only finite board
+
+### Friction scenarios
+- `F0_NONE`
+- `F1_LIGHT`
+- `F2_MED`
+- `F3_HEAVY`
+
+### Leverage-cap scenarios
+- `LEV3`
+- `LEV5`
+
+### Result summary
+- total rows: `120`
+- strict passes: `30`
+- survival passes: `42`
+- friction-ignored suspects: `0`
+
+### Key conclusion
+The edge survives medium friction in a narrow but credible cluster.
+
+### Important operational read
+Heavy friction destroys viability.
+The dominant unresolved weakness is drawdown duration / underwater time.
+
+### Leverage read
+`LEV3` and `LEV5` were effectively identical in the tested board, implying leverage above 3x adds no practical value here.
+
+---
+
+## `V9_MICRO_LIVE_READINESS`
+
+### Date
+2026-03-29 era
+
+### Status
+Completed
+
+### Runtime
+Python / Colab candidate-selection + live-governance preparation layer
+
+### Purpose
+Select one champion and one backup from the medium-friction survivor pool and build micro-live deployment artifacts
+
+### Champion
+`TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
+
+### Backup
+`TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN`
+
+### Produced artifacts
+- champion config
+- backup config
+- deploy bundle
+- live risk rules
+- live monitoring scaffold
+- kill-switch evaluator
+- runtime state model
+
+### V9 sanity rerun summary
+Champion rerun under micro-live posture remained economically strong but still failed the strict DD-duration threshold.
+
+### Interpretation
+Approved for:
+- shadow-live
+- micro-live validation
+- conservative runtime testing
+
+Not approved for:
+- aggressive capital
+- scale-up
+- leverage expansion
 
 ---
 
@@ -206,4 +269,5 @@ Current notable pattern:
 
 A run is a named research artifact.
 
-It should not be discussed only by memory or by row fragments.
+It should not exist only in memory or in row fragments.
+It should be durably interpretable later.
