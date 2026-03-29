@@ -1,6 +1,8 @@
 # TASK INTAKE TEMPLATE
 
-Use this template before starting any focused task, debugging session, migration task, or future chat.
+Use this template before starting any focused task, debugging session, migration task, runtime task, or future chat.
+
+The purpose is to reduce ambiguity, prevent drift, and keep work bounded.
 
 ---
 
@@ -11,7 +13,6 @@ Short name for the task.
 
 ## Task Type
 Choose one:
-
 - architecture
 - debugging
 - research analysis
@@ -21,18 +22,20 @@ Choose one:
 - execution
 - data
 - runtime integrity
+- monitoring
 - memory / documentation
 
 ---
 
 ## Current Mode
 Choose one:
-
 - experiment mode
 - audit mode
 - repair mode
 - migration mode
 - governance mode
+- shadow-live mode
+- micro-live mode
 - normal operations mode
 
 ---
@@ -41,14 +44,14 @@ Choose one:
 What exactly needs to happen?
 
 Examples:
-- fix a failing Supabase insert
-- interpret a batch of experiment rows
-- decide what moves to Python first
-- understand why a signal family is underperforming
-- clean a dead trigger
-- design machine-readable worker contracts
-- audit a missing document dependency
-- define Supabase historical storage policy
+- fix a runtime guard bug
+- interpret a V8 result cluster
+- update strategy docs
+- verify telemetry freshness behavior
+- design a shadow execution cycle
+- patch a monitoring gap
+- audit a missing dependency
+- define a worker contract
 
 ---
 
@@ -57,7 +60,9 @@ List only the modules involved.
 
 Examples:
 - M2
+- M5
 - M6
+- M8
 - M9
 - M10
 
@@ -67,12 +72,13 @@ Examples:
 List only the docs that matter.
 
 Examples:
-- `docs/PROJECT_STATE.md`
-- `docs/ARCHITECTURE.md`
-- `docs/DATASETS.md`
-- `docs/DECISIONS.md`
-- `docs/AI_WORKER_JOBS.md`
-- `docs/COUNCIL_ROLES.md`
+- `PROJECT_STATE.md`
+- `ARCHITECTURE.md`
+- `DATASETS.md`
+- `DECISIONS.md`
+- `GOVERNANCE_GATES.md`
+- `RUNBOOKS.md`
+- `STRATEGY_LIFECYCLE.md`
 
 ---
 
@@ -80,14 +86,15 @@ Examples:
 What current runtime state matters?
 
 Examples:
-- active experiment idx
-- latest backtest ID
+- active experiment index
 - current dataset ID
 - current governance state
-- current error message
-- active trigger inventory
-- current system mode
-- whether an experiment is currently running
+- current live state (`ACTIVE` / `PAUSED` / `HARD_STOP`)
+- active config (`CHAMPION` / `BACKUP`)
+- equity telemetry freshness
+- governance heartbeat freshness
+- whether a run is active
+- whether shadow cycle is active
 
 ---
 
@@ -96,10 +103,13 @@ What existing artifacts must be read before doing work?
 
 Examples:
 - latest experiment rows
+- latest V8 CSV
+- deploy bundle
+- live risk rules
+- live state JSON
+- latest equity snapshots
+- latest live trades
 - trigger inventory
-- current M9 config override
-- current run state object
-- latest Supabase insert error
 - active project snapshot
 
 ---
@@ -108,12 +118,12 @@ Examples:
 Bullet points of facts already established.
 
 Examples:
-- matrix runner is resumable
-- active run has 240 jobs
-- curated cohort universe selection is now working
-- `TOP_SPS_WITH_DOGE` currently looks stronger than `TOP_SPS_CORE`
-- historical data is still too dependent on Sheets
-- dead `IGN_onOpen` trigger exists
+- champion and backup are selected
+- V8 medium-friction survivors exist
+- DD duration is the main unresolved risk
+- Python is active in research/runtime
+- telemetry is required before entries
+- leverage above 3x is not adding practical value
 
 ---
 
@@ -121,25 +131,25 @@ Examples:
 State it plainly.
 
 Examples:
-- Why is this specific row failing despite decent PF?
-- Why is M9 not emitting diag blobs reliably?
-- What is the minimum persistence implementation needed next?
-- Where does this missing-document dependency come from?
-- What should the worker contract schema be?
-- What should move to Supabase first?
+- why is `can_open_new_trade()` blocking entries?
+- should champion switch to backup?
+- why is the live dashboard showing stale telemetry?
+- what should the next micro-live runbook step be?
+- which dataset is actually active in this runtime path?
 
 ---
 
 ## What Should Not Change
-List any protected constraints.
+List protected constraints.
 
 Examples:
-- do not destabilize active run
+- do not destabilize active runtime
 - do not rewrite robust modules casually
-- do not mix live execution and AI authority
 - keep M1 sovereign
-- do not change governance thresholds silently
-- do not launch experiments from loose snippets
+- do not bypass governance
+- do not allow entries without telemetry
+- do not silently change friction assumptions
+- do not launch from loose snippets
 
 ---
 
@@ -149,10 +159,11 @@ List what types of changes are allowed in this task.
 Examples:
 - docs only
 - audit helpers only
-- code patch limited to one function
-- trigger cleanup only
-- SQL schema proposal only
+- one-function patch only
+- monitoring code only
+- runtime guard only
 - roadmap only
+- no execution changes
 
 ---
 
@@ -160,7 +171,7 @@ Examples:
 List changes that must not happen during this task.
 
 Examples:
-- no run launch
+- no live order placement
 - no trigger deletion
 - no large refactor
 - no migration execution
@@ -174,12 +185,11 @@ What do you want back?
 
 Examples:
 - explanation only
-- SQL only
 - code patch only
+- markdown replacement
 - roadmap
 - module critique
 - decision recommendation
-- contract schema
 - cleanup checklist
 - handoff packet
 
@@ -201,21 +211,24 @@ If yes, specify format:
 ---
 
 ## Success Condition
-What does “done” mean for this task?
+What does “done” mean?
 
 Examples:
 - one root cause identified with exact fix location
 - one patch produced and scoped
-- one migration phase documented
-- one worker contract schema drafted
-- one post-run interpretation completed
+- one runtime guard validated
+- one doc updated completely
+- one deployment decision clarified
+- one shadow loop step made safe
 
 ---
 
 ## Do-Not-Do-Yet Warning
-Optional but recommended.
+Optional but strongly recommended.
 
 Examples:
-- do not touch active experiment runner until current run finishes
-- do not migrate data before storage policy is defined
-- do not add more AI workers before worker contracts are formalized
+- do not enable live entries before equity telemetry is online
+- do not scale up before shadow validation
+- do not patch mid-run unless it is truly fatal
+- do not change dataset assumptions without documenting them
+- do not switch to backup just because of emotion
