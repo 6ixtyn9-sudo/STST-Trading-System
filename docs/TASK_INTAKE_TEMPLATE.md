@@ -1,12 +1,15 @@
 # TASK INTAKE TEMPLATE
 
-Use this template before starting any focused task, debugging session, migration task, runtime task, or future chat.
+Use this template before starting any focused task, debugging session, migration task, runtime task, persistence task, worker-design task, or future chat.
 
-The purpose is to reduce ambiguity, prevent drift, and keep work bounded.
+The purpose is to reduce ambiguity, prevent drift, preserve continuity, and keep work bounded.
+
+This template is intentionally compact.
+It should move work forward, not create paperwork.
 
 ---
 
-## Task Title
+## Push to Start
 Short name for the task.
 
 ---
@@ -24,6 +27,7 @@ Choose one:
 - runtime integrity
 - monitoring
 - memory / documentation
+- worker design
 
 ---
 
@@ -37,6 +41,21 @@ Choose one:
 - shadow-live mode
 - micro-live mode
 - normal operations mode
+- noob mode
+
+---
+
+## Spine Pillar
+Choose the main operating pillar this task strengthens:
+- research
+- persistence
+- observation
+- gating
+- governance
+- documentation
+- orchestration
+
+If more than one applies, list the primary one first.
 
 ---
 
@@ -44,14 +63,13 @@ Choose one:
 What exactly needs to happen?
 
 Examples:
-- fix a runtime guard bug
-- interpret a V8 result cluster
-- update strategy docs
+- persist the current champion rerun properly
+- define the Persistence Clerk worker contract
 - verify telemetry freshness behavior
-- design a shadow execution cycle
-- patch a monitoring gap
-- audit a missing dependency
-- define a worker contract
+- detect whether new entries are lawfully blocked
+- summarize current shadow runtime state
+- identify whether the edge requires rerun after data refresh
+- patch one continuity bug in deliberation resume flow
 
 ---
 
@@ -59,9 +77,6 @@ Examples:
 List only the modules involved.
 
 Examples:
-- M2
-- M5
-- M6
 - M8
 - M9
 - M10
@@ -73,10 +88,7 @@ List only the docs that matter.
 
 Examples:
 - `PROJECT_STATE.md`
-- `ARCHITECTURE.md`
-- `DATASETS.md`
-- `DECISIONS.md`
-- `GOVERNANCE_GATES.md`
+- `WORKER_REGISTRY.md`
 - `RUNBOOKS.md`
 - `STRATEGY_LIFECYCLE.md`
 
@@ -86,15 +98,14 @@ Examples:
 What current runtime state matters?
 
 Examples:
-- active experiment index
 - current dataset ID
 - current governance state
 - current live state (`ACTIVE` / `PAUSED` / `HARD_STOP`)
 - active config (`CHAMPION` / `BACKUP`)
-- equity telemetry freshness
-- governance heartbeat freshness
-- whether a run is active
+- current review target `backtest_id`
 - whether shadow cycle is active
+- whether equity telemetry exists
+- whether governance heartbeat is fresh
 
 ---
 
@@ -102,14 +113,15 @@ Examples:
 What existing artifacts must be read before doing work?
 
 Examples:
-- latest experiment rows
-- latest V8 CSV
+- latest experiment row
+- latest persisted backtest result
 - deploy bundle
 - live risk rules
 - live state JSON
 - latest equity snapshots
-- latest live trades
-- trigger inventory
+- latest live events
+- current deliberation row
+- current deliberation steps
 - active project snapshot
 
 ---
@@ -119,11 +131,11 @@ Bullet points of facts already established.
 
 Examples:
 - champion and backup are selected
-- V8 medium-friction survivors exist
 - DD duration is the main unresolved risk
 - Python is active in research/runtime
 - telemetry is required before entries
-- leverage above 3x is not adding practical value
+- council must target explicit persisted backtests
+- research maintenance is a first-class need
 
 ---
 
@@ -131,11 +143,11 @@ Examples:
 State it plainly.
 
 Examples:
+- what exactly must be persisted for this milestone?
 - why is `can_open_new_trade()` blocking entries?
-- should champion switch to backup?
-- why is the live dashboard showing stale telemetry?
-- what should the next micro-live runbook step be?
-- which dataset is actually active in this runtime path?
+- does the current strategy require rerun after dataset refresh?
+- which worker should own this task?
+- is the council stuck or merely rate-limited?
 
 ---
 
@@ -148,20 +160,21 @@ Examples:
 - keep M1 sovereign
 - do not bypass governance
 - do not allow entries without telemetry
-- do not silently change friction assumptions
-- do not launch from loose snippets
+- do not silently change dataset assumptions
+- do not create new docs unless truly necessary
 
 ---
 
 ## Allowed Changes
-List what types of changes are allowed in this task.
+List what is allowed in this task.
 
 Examples:
-- docs only
-- audit helpers only
-- one-function patch only
-- monitoring code only
-- runtime guard only
+- one doc replacement
+- one worker contract
+- one helper design
+- one-function patch
+- persistence logic only
+- monitoring logic only
 - roadmap only
 - no execution changes
 
@@ -172,10 +185,10 @@ List changes that must not happen during this task.
 
 Examples:
 - no live order placement
-- no trigger deletion
-- no large refactor
-- no migration execution
 - no governance override
+- no large refactor
+- no trigger deletion
+- no migration execution
 - no code edits outside listed modules
 
 ---
@@ -184,14 +197,13 @@ Examples:
 What do you want back?
 
 Examples:
-- explanation only
-- code patch only
-- markdown replacement
-- roadmap
-- module critique
-- decision recommendation
-- cleanup checklist
-- handoff packet
+- full markdown replacement
+- contract JSON
+- compact patch plan
+- root-cause explanation
+- checklist
+- routing table
+- one exact next action
 
 ---
 
@@ -205,7 +217,6 @@ If yes, specify format:
 - YAML
 - SQL
 - Markdown table
-- contract schema
 - patch list
 
 ---
@@ -214,12 +225,11 @@ If yes, specify format:
 What does “done” mean?
 
 Examples:
-- one root cause identified with exact fix location
-- one patch produced and scoped
-- one runtime guard validated
-- one doc updated completely
-- one deployment decision clarified
-- one shadow loop step made safe
+- one worker contract is fully defined
+- one persistence path is clarified
+- one runtime guard is validated
+- one shadow monitor output shape is fixed
+- one continuity problem is identified with exact next action
 
 ---
 
@@ -228,7 +238,7 @@ Optional but strongly recommended.
 
 Examples:
 - do not enable live entries before equity telemetry is online
-- do not scale up before shadow validation
+- do not scale up before research maintenance is formalized
 - do not patch mid-run unless it is truly fatal
-- do not change dataset assumptions without documenting them
-- do not switch to backup just because of emotion
+- do not create a new doc when an existing doc can be updated
+- do not confuse candidate review with activation permission
