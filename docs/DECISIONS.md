@@ -10,7 +10,7 @@ Every major decision should record:
 
 ---
 
-## 2026-03-24 — GitHub becomes canonical code and docs home
+## 2026-03-31 — GitHub becomes canonical code and docs home
 
 **Area:** persistence / source of truth  
 **Status:** active
@@ -223,7 +223,7 @@ Python is now an active runtime layer for:
 - live monitoring scaffolding
 
 ### Why
-The project has now crossed the threshold where Apps Script alone is not the right home for all heavy research/runtime work.
+The project has crossed the threshold where Apps Script alone is not the right home for all heavy research/runtime work.
 
 ### Consequence
 Migration is no longer purely future-planned; it is partially active.
@@ -312,3 +312,127 @@ This is the current primary strategy path.
 `TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
 
 ### Backup
+`TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN`
+
+### Why
+These emerged from the actual `F2_MED + LEV3` survivor pool and became the selected V9 pair.
+
+### Consequence
+Shadow / micro-live validation posture can now target named candidate configs rather than abstract family intent.
+
+---
+
+## 2026-03-29 — Current deployment posture is validation, not scale
+
+**Area:** deployment governance  
+**Status:** active
+
+### Decision
+The current strategy pair is acceptable for:
+- shadow-live
+- micro-live validation
+- conservative runtime testing
+
+It is not acceptable for:
+- aggressive capital deployment
+- autonomous scale-up
+- leverage expansion
+
+### Why
+The selected champion remains economically credible but still fails strict DD-duration threshold.
+
+### Consequence
+The system must treat current deployment as governed validation, not production confidence.
+
+---
+
+## 2026-03-29 — Dominant unresolved risk is drawdown duration
+
+**Area:** risk interpretation  
+**Status:** active
+
+### Decision
+The main unresolved weakness of the current strategy is:
+**drawdown duration / prolonged underwater time**
+
+### Why
+This remained the dominant failure mode after stronger validation and friction-aware testing.
+
+### Consequence
+Scaling confidence remains capped until live/ongoing evidence handles this more convincingly.
+
+---
+
+## 2026-03-31 / 2026-04-01 — Council review must target specific persisted backtests, not latest sheet row
+
+**Area:** memory / council / orchestration  
+**Status:** active
+
+### Decision
+Council review should target an explicit persisted `backtest_id` when reviewing an intended candidate.
+
+### Why
+The older “latest EXPERIMENTS row” pattern caused M10 to review stale Apps Script-era persistence-hunt rows rather than the actual Python-led champion candidate.
+
+### Consequence
+Specific-backtest targeting is now the preferred review path for current candidate deliberation.
+
+---
+
+## 2026-04-01 — M10 deliberation becomes resumable and step-persisted
+
+**Area:** memory / orchestration / council runtime  
+**Status:** active
+
+### Decision
+The deliberative council path now runs as one step per execution with trigger-based resume, and persists each worker/supervisor step durably.
+
+### Why
+A full multi-step council session in one Apps Script execution was too timeout-prone and operationally fragile.
+
+### Consequence
+Council review is now:
+- resumable
+- more durable
+- less vulnerable to timeout
+- inspectable at per-step level
+
+---
+
+## 2026-04-01 — Separate candidate review from activation/go-live review
+
+**Area:** governance architecture  
+**Status:** active
+
+### Decision
+Candidate review and actual go-live activation review must be treated as distinct governance questions.
+
+### Why
+The older council fact-pack logic mixed operator/go-live checklist failures into candidate-legitimacy review, causing semantically wrong rejections even when the reviewed strategy candidate was the correct one.
+
+### Consequence
+The system must distinguish:
+- candidate review:
+  - strategy legitimacy
+  - shadow/micro-live candidacy
+- activation review:
+  - live permission
+  - telemetry
+  - runtime readiness
+  - operational checklist gating
+
+This is now a core architecture doctrine.
+
+---
+
+## Current Summary
+
+The project now treats durable review and governance more explicitly.
+
+Most important current decision truths:
+- Python is an active runtime, not a hypothetical future
+- the selected strategy pair is real and persisted
+- M10 can now review specific persisted backtests
+- deliberation is durable and resumable
+- candidate review and activation permission are not the same question
+- current mission remains validation, not scale
