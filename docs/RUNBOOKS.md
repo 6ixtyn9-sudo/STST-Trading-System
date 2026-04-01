@@ -2,11 +2,11 @@
 
 This file contains practical operating runbooks for common workflows.
 
-The project is now in a hybrid phase:
+The project is in a hybrid phase:
 - Apps Script remains part of the control/governance surface
 - Python is active for research, candidate selection, and pre-live runtime scaffolding
 
-Runbooks must reflect actual runtime reality, not older project memory.
+Runbooks must reflect actual runtime reality, not stale project memory.
 
 ---
 
@@ -48,13 +48,6 @@ Determine whether the run is broken or merely paused / recoverable.
 4. Confirm whether recent rows were still persisted.
 5. If recovery behavior is working, do not panic-patch mid-run.
 
-### Interpretation
-A timeout or interruption is acceptable if:
-- state persists
-- continuation is possible
-- no silent reset happened
-- no corruption is detected
-
 ### Rule
 If the run is recoverable, preserve comparability first and patch later.
 
@@ -78,61 +71,79 @@ A future session can reconstruct project state without relying on memory or chat
 
 ---
 
-## Runbook: Add a new module or major module revision
+## Runbook: Convene candidate-review council on a specific persisted backtest
 
 ### Goal
-Keep module meaning durable.
+Review the intended strategy candidate rather than whatever happens to be the last sheet row.
+
+### Why this runbook exists
+The older “latest row” path can accidentally target stale Apps Script-era rows.
+
+Current review should prefer:
+- specific persisted `backtest_id`
+- specific Python-led candidate row
+- explicit intended experiment target
 
 ### Steps
-1. Update source files in their canonical repo location.
-2. Update `MODULE_REGISTRY.md`
-3. If architecture meaning changed materially, update `ARCHITECTURE.md`
-4. If migration relevance changed, update `MIGRATION_TRACKER.md`
-5. If the change reflects a real project-level decision, update `DECISIONS.md`
+1. Identify the intended `backtest_id` from `experiment_logs`.
+2. Confirm it is the correct candidate row.
+3. Start council review through the specific-backtest path.
+4. Allow the resumable trigger-driven council runner to process one step at a time.
+5. Inspect `council_deliberation_steps` for progress.
+6. Inspect `council_deliberations` for summary decision.
+
+### Current preferred example
+Current champion review target:
+- `bt_8e24c2cd59f9ce9fa6e9128400b8d1c7`
 
 ### Success condition
-Module meaning exists outside your head.
+Council reviews the intended persisted candidate row, not an accidental stale sheet-tail row.
 
 ---
 
-## Runbook: Add a new dataset state
+## Runbook: Run resumable deliberative council safely
 
 ### Goal
-Keep research comparability honest.
+Avoid Apps Script timeout during multi-step council review.
 
-### Steps
-1. Give the dataset a clear ID.
-2. Update `DATASETS.md`
-3. Record:
-   - source
-   - symbol scope
-   - timeframe scope
-   - date range
-   - quality caveats
-4. Mention dataset identity when interpreting major runs.
-5. If a new run depends on it, update `RUN_REGISTRY.md`.
+### Rule
+Do not run the entire council in one execution if the path is already stepwise/resumable.
 
-### Success condition
-Important experiment conclusions can be traced back to explicit data assumptions.
-
----
-
-## Runbook: Convene the council
-
-### Goal
-Create bounded advisory review over a persisted strategy / experiment fact set.
-
-### Steps
-1. Confirm the relevant experiment or candidate facts are persisted.
-2. Build the fact pack.
-3. Build the governance packet.
-4. Run bounded role review.
-5. Record the outcome durably.
-6. Do not allow council output to bypass constitutional or empirical limits.
+### Correct pattern
+1. Create pending deliberation for specific backtest.
+2. Process one step.
+3. Let time-driven resume trigger continue remaining steps.
+4. Inspect status rather than relaunching manually in panic.
 
 ### Important
-Council is advisory and bounded.
-Hard policy remains fail-closed.
+The current canonical resumable path is:
+- start explicit specific-backtest review
+- then allow `RUN_ResumeDeliberativeCouncilNow()` to continue
+
+Do not rely on an old all-in-one runner for large multi-step council work.
+
+### Success condition
+Council review completes without timeout by spreading work across multiple executions.
+
+---
+
+## Runbook: Respond to OpenRouter rate limit during council review
+
+### Trigger
+Resume trigger or manual council step fails with:
+- `429`
+- free-model daily limit exhausted
+- provider quota exceeded
+
+### Steps
+1. Confirm that the failure is quota-related, not code-related.
+2. Do not duplicate deliberations blindly.
+3. Inspect whether partial deliberation steps already exist.
+4. Resume later after quota resets, or switch provider/model policy if approved.
+5. Prefer resuming the same deliberation rather than creating a new duplicate unless there is a reason to abandon it.
+
+### Success condition
+Council review is resumed or deferred cleanly, not restarted chaotically.
 
 ---
 
@@ -140,7 +151,7 @@ Hard policy remains fail-closed.
 
 ### Ask
 1. Will this contaminate comparability?
-2. Will this change active experiment assumptions?
+2. Will this change active assumptions?
 3. Is this a true emergency or just optimization temptation?
 4. Can it wait until after completion or safe pause?
 
@@ -203,126 +214,17 @@ No new trade is opened unless governance and telemetry are alive.
 
 ---
 
-## Runbook: Respond to `PAUSED` state
-
-### Goal
-Handle a pause without improvisation.
-
-### Meaning
-`PAUSED` means:
-- no new entries
-- continue monitoring
-- manage or reconcile open state if needed
-- investigate cause before resuming
-
-### Steps
-1. Read `pause_reason`.
-2. Confirm whether pause came from:
-   - daily loss
-   - rolling metrics
-   - telemetry staleness
-   - consecutive losses
-   - underwater-duration caution
-3. Do not re-activate blindly.
-4. Record operator note if human intervention occurs.
-5. Resume only after:
-   - cause is understood
-   - telemetry is healthy
-   - governance allows it
-
-### Success condition
-Pause is treated as a control action, not an annoyance.
-
----
-
-## Runbook: Respond to `HARD_STOP`
-
-### Goal
-Prevent a hard-stop event from being casually overridden.
-
-### Meaning
-`HARD_STOP` means:
-- no new entries
-- no silent resumption
-- explicit human review required
-
-### Steps
-1. Read `hard_stop_reason`.
-2. Stop any assumption of normal operation.
-3. Confirm whether open positions or orders require reconciliation.
-4. Record incident details.
-5. Do not restore `ACTIVE` without explicit review and note.
-
-### Success condition
-Hard-stop remains constitutionally meaningful.
-
----
-
-## Runbook: Switch champion to backup
-
-### Goal
-Move to backup configuration in a controlled way.
-
-### Important
-Do not auto-switch just because performance feels bad.
-
-### Steps
-1. Confirm the reason for considering a switch.
-2. Confirm current state is not `HARD_STOP`.
-3. Confirm backup config exists and is valid.
-4. Record operator note.
-5. Switch active config explicitly.
-6. Continue with the same telemetry + governance discipline.
-
-### Good reasons to switch
-- champion paused but backup remains a legitimate candidate
-- operator wants controlled fallback testing
-- explicit validation plan calls for backup activation
-
-### Bad reasons to switch
-- emotional frustration
-- trying to outrun governance
-- avoiding documentation of the real issue
-
-### Success condition
-Fallback remains disciplined, explicit, and auditable.
-
----
-
-## Runbook: Telemetry outage handling
-
-### Goal
-Prevent “ACTIVE but blind” operation.
-
-### Trigger examples
-- no equity snapshots
-- stale equity snapshots
-- stale governance heartbeat
-- monitoring loop not updating
-
-### Steps
-1. Stop new entries.
-2. Mark / preserve state appropriately.
-3. Investigate telemetry path.
-4. Do not resume entry logic until telemetry is restored.
-5. Record the event.
-
-### Rule
-No telemetry → no trustworthy risk protection → no new entries.
-
----
-
 ## Runbook: Drift check before major work
 
 ### Goal
-Prevent the repo and runtime from diverging.
+Prevent repo and runtime from diverging.
 
 ### Ask
-1. Does the doc state still match the runtime state?
-2. Has Python become more active than the docs admit?
+1. Does the doc state still match runtime truth?
+2. Has Python become more active than docs admit?
 3. Has the strategy lifecycle advanced?
-4. Has a new champion / backup / deployment posture emerged?
-5. Are migration docs still truthful?
+4. Has the active review target shifted from sheet-tail to persisted backtest?
+5. Are migration and governance docs still truthful?
 
 ### If yes
 Update docs before continuing architecture-heavy work.
