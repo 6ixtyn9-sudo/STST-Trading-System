@@ -22,7 +22,7 @@ Therefore strategies require:
 - continuous maintenance
 - possible quarantine or retirement
 
-This project now treats strategy lifecycle as a living process, not a one-time approval.
+This project treats strategy lifecycle as a living process, not a one-time approval.
 
 ---
 
@@ -110,7 +110,7 @@ The family has survived stronger empirical scrutiny.
 ### Promotion criteria
 Move to **Live Eligible** only if:
 - friction-aware testing remains acceptable
-- governance does not block
+- governance does not block candidate legitimacy
 - operational risk is understood
 - candidate selection is explicit
 
@@ -126,15 +126,15 @@ Live Eligible does **not** mean approved for unrestricted live deployment.
 
 It means:
 - a strategy may be selected for shadow or live use
-- subject to current governance state
-- subject to current runtime protections
+- subject to governance interpretation
+- subject to runtime protections
 - subject to active monitoring
 
-### Requirements
-- empirical support remains acceptable
-- friction-aware testing does not invalidate the edge
-- no major governance block exists
-- explicit candidate state exists in project memory
+### Important distinction
+A strategy may be live-eligible as a candidate
+without the runtime being currently activation-ready.
+
+That distinction matters.
 
 ---
 
@@ -146,7 +146,7 @@ The strategy is approved for:
 - paper-live
 - or tiny-risk micro-live validation
 
-This is the current project posture for the selected champion.
+This remains the current project posture for the selected champion.
 
 ### Current approved champion
 `BREAKOUT_LONG | TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
@@ -159,9 +159,10 @@ Micro-Live Active does **not** imply:
 - scaled capital
 - strategy maturity beyond question
 - immunity from quarantine
+- guaranteed activation permission at this exact moment
 
 It means:
-- the edge is real enough to test in tightly governed live conditions
+- the edge is real enough to test in tightly governed conditions
 - but still has unresolved operational risk
 
 ---
@@ -245,7 +246,7 @@ Promote when:
 ### Validated → Live Eligible
 Promote when:
 - friction-aware testing still leaves a credible candidate set
-- governance does not block
+- governance does not block candidate legitimacy
 - a specific configuration can be selected
 
 ### Live Eligible → Micro-Live Active
@@ -253,21 +254,20 @@ Promote when:
 - champion / backup are selected
 - deploy bundle exists
 - risk rules exist
-- telemetry / governance infrastructure exists
-- operator acknowledges the strategy is only in validation posture
+- validation posture is explicitly acknowledged
 
 ### Micro-Live Active → Active
 Promote only when:
 - live evidence supports broader trust
 - no major governance failures occur
 - DD-duration behavior is acceptable in practice
-- explicit operator review approves escalation
+- explicit review approves escalation
 
 ### Any live state → Restricted / Quarantined
 Demote when:
 - live metrics degrade materially
 - telemetry is stale or missing
-- governance blocks
+- governance blocks activation
 - underwater duration becomes unacceptable
 - strategy no longer justifies continued live risk
 
@@ -291,27 +291,63 @@ This is more specific than “Validated” and more conservative than “Active.
 The current champion:
 - survives medium friction
 - has positive expectancy
-- has healthy PF / Sharpe under micro-live posture
+- has positive PF and positive Sharpe
+- has enough OOS trades
 - but still fails the strict DD-duration threshold
 
 Therefore it is:
-- not merely experimental,
-- not merely validated,
-- not yet fully active in the broad deployment sense,
-- but appropriate for micro-live validation.
+- not merely experimental
+- not merely validated
+- not broadly active
+- but appropriate for micro-live validation posture
+
+---
+
+## Current Review Target
+
+### Main persisted champion review target
+- `backtest_id = bt_8e24c2cd59f9ce9fa6e9128400b8d1c7`
+- `run_name = V9_SANITY_RERUN_CHAMPION`
+
+### Why this matters
+Lifecycle interpretation should now prefer:
+- explicit persisted candidate rows
+over
+- accidental latest-sheet-row inference
 
 ---
 
 ## Known Current Weakness
-The current strategy’s primary unresolved weakness is:
+
+The current strategy’s primary unresolved weakness remains:
 
 **drawdown duration / prolonged underwater time**
 
-This is the dominant caution that prevents broader confidence.
+This is the dominant caution preventing broader confidence.
+
+---
+
+## Important Current Distinction
+
+A strategy may be:
+- candidate-valid
+- micro-live-valid
+- worthy of council review
+
+without the system being currently permitted to:
+- activate live entries immediately
+
+That is the difference between:
+- lifecycle/candidate status
+and
+- activation/runtime permission
+
+This distinction should remain explicit.
 
 ---
 
 ## Maintenance Requirements
+
 A strategy is never “approved forever.”
 
 It must be monitored for:
@@ -358,26 +394,8 @@ Constitutional supremacy over all of the above
 
 ---
 
-## Registry Direction
-Eventually `strategy_registry` should include fields like:
-- strategy_id
-- family
-- lifecycle_state
-- champion_flag
-- backup_flag
-- last_validated_at
-- last_dataset_id
-- last_friction_stage
-- live_eligible
-- micro_live_active
-- restricted_reason
-- retired_reason
-
-This should become machine-readable over time.
-
----
-
 ## Strategic Implication
+
 The system must continue evolving from:
 - one-time backtest judgment
 
@@ -385,7 +403,8 @@ to:
 - continuous discovery
 - continuous validation
 - friction-aware realism
-- telemetry-aware deployment
+- targeted candidate review
+- telemetry-aware activation
 - continuous maintenance
 - controlled promotion and demotion
 
