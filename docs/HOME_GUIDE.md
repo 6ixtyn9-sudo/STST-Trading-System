@@ -16,7 +16,7 @@ Current direction:
 - Sheets for dashboard / control surfaces where useful
 - Apps Script as current control-plane layer
 - Python as active research and pre-live runtime layer
-- future machine-readable contracts for bounded bot labor
+- bounded deliberative council review as durable memory-bearing orchestration
 
 ---
 
@@ -41,6 +41,7 @@ Supabase is the home for:
 - experiment logs
 - diagnostic notes
 - council deliberations
+- deliberation steps
 - module registry
 - decision log
 - dataset registry
@@ -49,6 +50,7 @@ Supabase is the home for:
 - future chunked project knowledge
 - canonical market history
 - dataset coverage summaries
+- deploy/risk artifacts
 
 If something is structured/queryable memory, it should live there.
 
@@ -63,6 +65,9 @@ Sheets remain useful for:
 
 Sheets are the control room, not the permanent archive.
 
+Important current caution:
+the system should not blindly treat the last sheet row as canonical review target when a specific persisted backtest is the intended object of review.
+
 ---
 
 ### Apps Script
@@ -71,6 +76,7 @@ Apps Script remains the current control-plane layer for:
 - wrappers
 - some governance/control workflows
 - dashboard-connected operations where still useful
+- M10 council orchestration
 
 It is part of the house, but not the whole house.
 
@@ -152,6 +158,12 @@ Every important thing should be recorded in:
 - update `RUNBOOKS.md`
 - keep telemetry and runtime guard rules explicit
 
+### For council / review changes
+- update prompt canon in `/prompts`
+- update `COUNCIL_ROLES.md`
+- update `PROJECT_STATE.md` if review architecture changed materially
+- keep M10 behavior aligned with documented review model
+
 ---
 
 ## Current Strategic Note
@@ -164,6 +176,7 @@ The current home-building priority is:
 - making project memory durable
 - making governance operationally real
 - keeping migration phased and explicit
+- keeping candidate review targeted at the intended persisted backtest
 
 ---
 
@@ -175,9 +188,21 @@ The current project is no longer best described as:
 It is now better described as:
 - a hybrid Apps Script + Python project
 - with Python actively handling research and pre-live runtime work
-- while Apps Script remains useful as a control/governance/dashboard layer
+- with Supabase holding durable memory and candidate truth
+- with Apps Script remaining useful as a control/governance/orchestration layer
 
-This is the current real house layout.
+---
+
+## Important Current Reminder
+
+There is now an important difference between:
+- candidate review
+and
+- actual go-live activation review
+
+Those are not the same question and should not silently share the same assumptions.
+
+That distinction should now be treated as part of the real house layout.
 
 ---
 
