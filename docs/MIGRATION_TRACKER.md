@@ -18,7 +18,8 @@ to:
 - Supabase as structured memory and persistence home
 - Apps Script as current control / governance plane where useful
 - Python as the active home for workloads Apps Script is structurally bad at
-- machine-readable contracts for bounded AI/bot work
+- explicit bounded orchestration for AI labor
+- lower dependence on accidental sheet-tail review paths
 
 ---
 
@@ -43,7 +44,7 @@ It is being adopted because some workloads now clearly exceed what Apps Script s
 - GitHub is active as canonical doc/code home
 - Supabase is active for structured persistence
 - Apps Script remains useful as current control-plane surface
-- Python is now active for:
+- Python is active for:
   - research engine evolution
   - V7 / V8 / V9 workflows
   - friction-aware backtest execution
@@ -51,14 +52,17 @@ It is being adopted because some workloads now clearly exceed what Apps Script s
   - live monitoring / governance scaffolding
   - pre-trade runtime guard work
 
+### Newly true enough to document
+- deliberative council step persistence exists conceptually and operationally
+- M10 can target a specific persisted backtest instead of blindly consuming the last Sheets experiment row
+- council review can now run stepwise/resumably via time-driven triggers to avoid Apps Script timeout
+- split-brain between “actual intended candidate” and “last row in EXPERIMENTS” has been materially reduced
+
 ### Not yet true enough
-- code is not fully mirrored and normalized into GitHub
-- module docs are not complete everywhere
-- some architectural memory still lives too much in chats
-- worker contracts are not yet machine-readable
-- Apps Script / Python responsibility boundaries are still emerging rather than fully formalized
-- live execution service layer is not yet fully operationalized
-- Supabase persistence is not yet uniformly integrated across all runtime surfaces
+- provider rate-limit handling is not yet cleanly hardened
+- old and new M10 council paths still coexist and should later be simplified
+- candidate review policy and activation policy are only partially separated and need further refinement
+- machine-readable contracts for broader worker system are not yet operational everywhere
 
 ---
 
@@ -71,13 +75,16 @@ Earlier migration framing treated Python mainly as:
 - future live-service possibility
 
 ### Current framing
-Python is now already active in the project’s research and pre-live path.
+Python is already active in the project’s research and pre-live path.
 
-Therefore migration is no longer purely future-planned.
-It is now **partially active**.
+Supabase is already active as durable memory for:
+- experiment logs
+- notes
+- snapshots
+- artifacts
+- deliberation steps
 
-This does not mean Apps Script has been replaced.
-It means the project is now in a **hybrid migration phase**.
+Apps Script remains active as orchestration/governance bridge rather than as sole source of runtime truth.
 
 ---
 
@@ -91,7 +98,7 @@ It means the project is now in a **hybrid migration phase**.
 6. Treat Apps Script as current control plane, not forever backbone.
 7. Move meaning into docs and structured memory, not chats.
 8. Treat historical data and runtime telemetry as first-class architecture.
-9. Prefer explicit contracts over vague automation.
+9. Prefer explicit targeting over accidental “latest row” review paths.
 
 ---
 
@@ -117,8 +124,7 @@ In progress
 - [x] Add Python migration README
 - [ ] Mirror all relevant module source files into repo structure
 - [ ] Normalize current Python research/runtime code into repo
-- [ ] Add SQL schema files cleanly
-- [ ] Add snapshots / run artifacts as needed
+- [ ] Keep prompt canon aligned with runtime prompt usage
 
 ### Success condition
 All meaningful code and docs have a canonical GitHub home.
@@ -133,21 +139,24 @@ Make Supabase the structured memory home for project state.
 ### Status
 In progress / materially advanced
 
-### Tasks
-- [x] experiment logs
-- [x] diagnostic notes
-- [x] council deliberations
-- [x] module registry table
-- [x] decision log table
-- [x] dataset registry table
-- [x] project snapshots table
-- [x] canonical market candles
-- [x] dataset coverage tables
-- [ ] insert complete current module rows
-- [ ] insert current major decisions structurally
-- [ ] insert regular project snapshots
+### Already achieved
+- experiment logs
+- diagnostic notes
+- council deliberations
+- module registry table
+- decision log table
+- dataset registry table
+- project snapshots table
+- canonical market candles
+- dataset coverage tables
+- deploy/risk artifact persistence
+- deliberation step persistence concept and implementation path
+
+### Remaining tasks
+- [ ] reduce duplicate artifact insertion patterns
+- [ ] make deliberation targeting and review history cleaner
 - [ ] persist current strategy lifecycle state structurally
-- [ ] persist champion / backup selection structurally
+- [ ] persist champion / backup selection structurally in a more canonical way
 
 ### Success condition
 Project continuity can be reconstructed from Supabase without relying on dead chats.
@@ -181,7 +190,37 @@ Python becomes the stable home for heavy research runtime without losing governa
 
 ---
 
-## Workstream D — Live Runtime / Monitoring Migration
+## Workstream D — Deliberative Memory / Council Migration
+
+### Goal
+Upgrade council from thin voting into durable, inspectable, resumable review.
+
+### Status
+Now active
+
+### Already achieved
+- specific-backtest targeting exists
+- council can review intended persisted candidate rows
+- worker step persistence path exists
+- resumable one-step-per-run council flow exists
+- trigger-based resume path exists
+
+### Remaining tasks
+- handle provider 429 / quota exhaustion cleanly
+- simplify coexistence of old and new council runners
+- further separate candidate review policy from activation policy
+- improve deliberation cleanup / resume discipline
+
+### Success condition
+Council review becomes:
+- targeted
+- durable
+- resumable
+- less vulnerable to timeout and split-brain
+
+---
+
+## Workstream E — Live Runtime / Monitoring Migration
 
 ### Goal
 Stage Python as the home for live runtime support where Apps Script is structurally weak.
@@ -201,7 +240,7 @@ Emerging / active preparation
 
 ### Remaining tasks
 - equity snapshot heartbeat integration
-- shadow execution orchestration loop
+- shadow execution orchestration loop hardening
 - safe real execution bridge
 - durable order / fill reconciliation
 - stronger observability and service reliability
@@ -211,7 +250,7 @@ Live runtime protection and execution support no longer depend on fragile script
 
 ---
 
-## Workstream E — Apps Script Preservation / Role Clarification
+## Workstream F — Apps Script Preservation / Role Clarification
 
 ### Goal
 Preserve Apps Script where it still adds value, while reducing structural overload.
@@ -224,19 +263,21 @@ Important and ongoing
 - governance/control surfaces
 - Sheets dashboards
 - lightweight orchestration where runtime limits are acceptable
+- M10 orchestration bridge while hybrid architecture persists
 
 ### Apps Script should stop being the default home for
+- accidental canonical review targeting via latest sheet row
 - heavier compute
 - deep research scaling
 - fragile persistence hacks
-- live execution infrastructure that needs stronger durability
+- long multi-step sessions that timeout when resumable flow is better
 
 ### Success condition
-Apps Script remains valuable, but no longer overburdened.
+Apps Script remains valuable, but no longer overburdened or implicitly canonical where it should not be.
 
 ---
 
-## Workstream F — Dataset / Historical Data Governance
+## Workstream G — Dataset / Historical Data Governance
 
 ### Goal
 Treat datasets as named assets and bind experiments to them explicitly.
@@ -259,26 +300,16 @@ Every important run can be tied to:
 
 ---
 
-## Workstream G — Worker Contract Formalization
+## Strategic Summary
 
-### Goal
-Move from descriptive AI roles toward machine-readable bounded contracts.
+The migration is no longer hypothetical.
 
-### Status
-Emerging priority
+It is already active in:
+- Python research/runtime
+- Supabase durable memory
+- M10 deliberative persistence
+- specific-backtest review targeting
 
-### Tasks
-- [ ] define worker contract schema
-- [ ] define authority fields
-- [ ] define artifact I/O fields
-- [ ] define invocation rules
-- [ ] map current worker roles into structured contract form
+Current mission:
 
-### Success condition
-AI/bot labor is governed by explicit contracts rather than chat interpretation.
-
----
-
-## Effective Migration Order
-
-### 1. M2-heavy ingestion / 
+**continue reducing accidental legacy assumptions, strengthen durable targeted review, harden resumable council execution, and preserve clear separation between candidate review truth and actual activation permission.**
