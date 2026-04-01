@@ -48,14 +48,14 @@ A structured `module_registry` table should eventually mirror it.
 - constitutional clarity
 
 ### Risks
-- meaning still not externally documented enough everywhere
 - still partly tied to Apps Script control-plane context
+- some activation-era assumptions can still contaminate broader review flows if boundaries are not explicit
 
 ### Migration Target
 Remains constitutional layer even after broader migration.
 
 ### Next Action
-Keep constitutional role explicit in docs and structured memory.
+Keep constitutional role explicit and keep M1 authority cleanly above orchestration/council logic.
 
 ---
 
@@ -82,24 +82,13 @@ Keep constitutional role explicit in docs and structured memory.
 
 ### Risks
 - historically workbook-heavy
-- large surface area
 - Apps Script runtime pressure for heavier ingestion paths
-
-### Important current note
-M2 is no longer just a fetch layer.
-It is also the substrate for:
-- curated cohort truth
-- historical sufficiency truth
-- instrument survivorship truth
-- dataset governance
-
-Python is now increasingly relevant for M2-heavy ingestion / rebuild workflows.
 
 ### Migration Target
 One of the first major Python migration candidates.
 
 ### Next Action
-Clarify which M2 workloads remain in Apps Script and which are now better handled in Python.
+Continue keeping active dataset identity explicit across Python/Supabase workflows.
 
 ---
 
@@ -121,14 +110,14 @@ Clarify which M2 workloads remain in Apps Script and which are now better handle
 - stable conceptual role
 
 ### Risks
-- output contracts should be documented more explicitly
-- still depends on M2 dataset clarity
+- output contracts still not explicit enough everywhere
+- depends on clear dataset and timestamp semantics
 
 ### Migration Target
-Possible later Python candidate, not the immediate pressure point.
+Possible later Python candidate.
 
 ### Next Action
-Document current output contracts and dependencies more explicitly.
+Keep analytical outputs deterministic and clearly bound to current dataset/runtime assumptions.
 
 ---
 
@@ -148,24 +137,21 @@ Document current output contracts and dependencies more explicitly.
 ### Strengths
 - market hypothesis encoding
 - DQS structure
-- signal diagnostics
 - family-level interpretation relevance
 
 ### Risks
-- thesis drift if strategy docs are not kept current
-- historical signal interpretation can diverge across runtime environments
+- thesis drift if strategy docs lag actual selected family
+- historical signal interpretation can diverge across runtimes
 
 ### Important current note
 The currently selected active lead family is:
 `BREAKOUT_LONG`
 
-This should remain aligned with actual strategy-family documentation.
-
 ### Migration Target
-Likely later migration candidate after research/runtime boundaries are cleaner.
+Later migration candidate after research/runtime boundaries are cleaner.
 
 ### Next Action
-Keep `STRATEGY_FAMILIES.md` synchronized with the actual active lead family and selected candidate configs.
+Keep strategy docs and selected config reality synchronized.
 
 ---
 
@@ -189,22 +175,21 @@ Keep `STRATEGY_FAMILIES.md` synchronized with the actual active lead family and 
 - naturally governance-compatible
 
 ### Risks
-- assumptions can drift if execution modeling is not kept honest across runtimes
+- assumptions can drift if research/runtime and execution/runtime diverge
+- leverage semantics must remain consistent across all runtimes
 
 ### Important current note
-Python-side research and pre-live runtime now explicitly models:
+Python-side research/runtime now explicitly models:
 - fees
 - slippage
 - funding
 - leverage-cap-aware sizing
 
-This makes M5 logic more operationally concrete than before.
-
 ### Migration Target
 Preserve logic; likely service-friendly later.
 
 ### Next Action
-Keep risk-law semantics explicit and consistent across research and live-prep runtime.
+Keep risk-law semantics explicit and stable across research, council interpretation, and live-prep runtime.
 
 ---
 
@@ -227,8 +212,8 @@ Keep risk-law semantics explicit and consistent across research and live-prep ru
 - naturally auditable if persistence improves
 
 ### Risks
-- historically too workbook-dependent
-- durable external execution-state logging is still not fully mature
+- historically workbook-dependent
+- durable external execution-state logging still not fully mature
 
 ### Important current note
 Python now contains:
@@ -236,14 +221,11 @@ Python now contains:
 - shadow execution scaffolding
 - live monitoring / runtime protection scaffolding
 
-This does not mean M6 has fully migrated.
-It means the execution-adjacent runtime is now beginning to live partly in Python.
-
 ### Migration Target
 Major Python/live service candidate.
 
 ### Next Action
-Preserve deterministic execution semantics while externalizing state durability and telemetry discipline.
+Preserve deterministic execution semantics while continuing to externalize telemetry and state durability.
 
 ---
 
@@ -268,23 +250,19 @@ Preserve deterministic execution semantics while externalizing state durability 
 
 ### Risks
 - should not be mistaken for the only monitoring layer
-- stale assumptions can accumulate if runtime observability shifts elsewhere
-
-### Important current note
-Python now also has live monitoring / kill-switch scaffolding.
-So monitoring is no longer purely workbook/dashboard-centered.
+- stale assumptions can accumulate if observability shifts elsewhere
 
 ### Migration Target
-Likely remains partially in Sheets, even if Python-side monitoring grows.
+Likely remains partially in Sheets.
 
 ### Next Action
-Keep Apps Script / Sheets ops surfaces and Python-side monitoring conceptually aligned.
+Keep Sheets-facing operator visibility and Python-side runtime observability aligned.
 
 ---
 
 ## M8 — Governance
 
-**Role:** Governance state / go-live gates / hard policy  
+**Role:** Governance state / review gates / activation constraints  
 **Status:** Active  
 **Criticality:** High  
 **Persistence Status:** Partial  
@@ -298,26 +276,29 @@ Keep Apps Script / Sheets ops surfaces and Python-side monitoring conceptually a
 
 ### Strengths
 - explicit governance-state logic
-- naturally superior to vague “AI mood” framing
+- superior to vague “AI mood” framing
 - constitutional compatibility
 
 ### Risks
-- governance events are still not durably logged everywhere they should be
-- runtime safety can become fake if telemetry is missing
+- historically mixed candidate review with operator activation gating too tightly
+- runtime safety becomes fake if telemetry is missing
+- overly human-centered gating can contaminate strategy review if not separated cleanly
 
 ### Important current note
-The current live runtime state machine now explicitly uses:
-- `ACTIVE`
-- `PAUSED`
-- `HARD_STOP`
+M8 must now be understood as supporting at least two governance questions:
+- candidate review
+- activation/go-live review
 
-Telemetry freshness is now part of the effective governance surface.
+These should not be silently collapsed.
 
 ### Migration Target
-Preserve logic; strengthen persistence and event history.
+Preserve logic; strengthen separation and persistence.
 
 ### Next Action
-Ensure telemetry-aware runtime governance remains explicitly documented and durable.
+Continue separating:
+- candidate review policy
+from
+- actual activation/live permission policy
 
 ---
 
@@ -339,7 +320,7 @@ Ensure telemetry-aware runtime governance remains explicitly documented and dura
 - empirical judiciary role
 - strong metric richness
 - candidate-selection relevance
-- naturally central to strategy legitimacy
+- central to strategy legitimacy
 
 ### Risks
 - complexity is high
@@ -349,27 +330,15 @@ Ensure telemetry-aware runtime governance remains explicitly documented and dura
 ### Important current note
 M9-heavy research runtime is now actively happening in Python.
 
-This includes:
-- V7 robustness mapping
-- V8 friction-aware stress
-- V9 candidate selection
-- friction-aware execution realism
-- leverage-cap-aware sizing realism
-
-The current active lead family is:
-`BREAKOUT_LONG`
-
-Current champion:
-`TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
-
-Current backup:
-`TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN`
+Current active strategy pair:
+- champion: `TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
+- backup: `TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN`
 
 ### Migration Target
 One of the top Python migration candidates, and now partially active there already.
 
 ### Next Action
-Normalize Python-side M9-heavy runtime into more durable source structure and keep experiment / dataset / code binding explicit.
+Keep experiment / dataset / code binding explicit and durable.
 
 ---
 
@@ -378,7 +347,7 @@ Normalize Python-side M9-heavy runtime into more durable source structure and ke
 **Role:** Persistent memory bridge + council orchestration  
 **Status:** Active  
 **Criticality:** Very High  
-**Persistence Status:** Strongest external bridge so far  
+**Persistence Status:** Strong external bridge / expanding  
 
 ### Owns
 - experiment payload persistence
@@ -391,20 +360,29 @@ Normalize Python-side M9-heavy runtime into more durable source structure and ke
 - durable memory bridge
 - bounded AI workflow
 - cross-session continuity support
+- now supports resumable stepwise deliberation
 
 ### Risks
-- still incomplete relative to likely long-term importance
-- some meaning still exists outside structured memory
+- old sheet-tail review assumptions can still leak in if not explicitly avoided
+- provider quota / rate-limit handling is now an operational constraint
+- coexistence of old and new council paths can create confusion until simplified
 
 ### Important current note
-Python-side deploy bundle and live runtime artifacts now exist.
-This means durable artifacts are no longer only flowing through the older Apps Script mental model.
+M10 now supports:
+- specific persisted backtest targeting
+- stepwise deliberation persistence
+- resumable trigger-driven council execution
+
+This is a material evolution from a thinner isolated-vote pattern.
 
 ### Migration Target
 Could later evolve into a broader orchestration / memory service layer if justified.
 
 ### Next Action
-Expand durable artifact handling and reduce reliance on chat memory for project truth.
+Harden:
+- rate-limit handling
+- trigger hygiene
+- path clarity between old and new council flows
 
 ---
 
@@ -412,9 +390,10 @@ Expand durable artifact handling and reduce reliance on chat memory for project 
 
 The system is already architecturally real.
 
-The main gap is no longer missing modules.
-It is:
+The main gaps are no longer missing modules.
+They are:
 - keeping runtime reality aligned with docs
 - keeping empirical truth aligned with current datasets and code paths
-- making governance and telemetry real before live behavior expands
-- making project meaning durable across hybrid runtime layers
+- separating candidate review from activation review cleanly
+- making deliberation durable without unnecessary bloat
+- continuing to reduce split-brain between Python/Supabase truth and legacy sheet-tail assumptions
