@@ -15,7 +15,7 @@ The system is a modular trading architecture built around distinct layers of res
 - empirical audit
 - persistent memory and orchestration
 
-The system is intentionally modular so that each layer can evolve without collapsing the machine.
+The system remains intentionally modular so that each layer can evolve without collapsing the machine.
 
 It is now best understood as:
 - a research machine
@@ -39,7 +39,7 @@ Responsibilities:
 - trigger scheduling
 - foundational menus and tests
 
-M1 is sovereign over:
+M1 remains sovereign over:
 - security
 - kill switch authority
 - config legitimacy
@@ -65,14 +65,10 @@ Responsibilities:
 M2 is the source of canonical market-history truth.
 
 ### Important current note
-M2 is not just a fetch layer.
-It is also the substrate for:
-- curated cohort construction
-- readiness truth
-- historical sufficiency truth
-- dataset governance
-
-Python is increasingly relevant for M2-heavy ingestion and rebuild work.
+Python remains increasingly relevant for:
+- deeper ingestion
+- rebuilds
+- direct dataset use in research/runtime
 
 ---
 
@@ -85,7 +81,7 @@ Responsibilities:
 - regime state
 - deterministic analytical transformations
 
-M3 is an analysis layer, not a decision layer.
+M3 remains an analysis layer, not a decision layer.
 
 ---
 
@@ -100,14 +96,10 @@ Responsibilities:
 - DQS scoring
 - signal diagnostics
 
-M4 says:
-“this setup exists and is worth consideration.”
-
-### Important current note
-The currently selected active lead family is:
+Current active lead family:
 `BREAKOUT_LONG`
 
-Strategy-family docs must remain aligned with this reality.
+Strategy-family docs should remain aligned with this reality.
 
 ---
 
@@ -122,16 +114,13 @@ Responsibilities:
 - exposure checks
 - hard rejection rules
 
-M5 is the lawful bridge between signals and execution.
-
-### Important current note
-Python-side runtime now explicitly models:
+Python-side research/runtime now models:
 - fees
 - slippage
 - funding
 - leverage-cap-aware sizing
 
-This makes risk-law semantics more operationally concrete than before.
+This makes M5 semantics more operationally concrete than before.
 
 ---
 
@@ -144,16 +133,14 @@ Responsibilities:
 - stops / TP / trailing logic
 - deterministic execution state transitions
 
-M6 should remain deterministic and obedient.
-
-### Important current note
-Execution-adjacent runtime is now partly forming in Python via:
+Important current note:
+Execution-adjacent runtime now exists partly in Python via:
 - pre-trade guard logic
 - shadow execution scaffolding
 - live monitoring / kill-switch scaffolding
 
-This does not mean M6 has fully migrated.
-It means the pre-live runtime has become hybrid.
+M6 has not fully migrated.
+The execution-adjacent runtime is hybrid.
 
 ---
 
@@ -169,11 +156,8 @@ Responsibilities:
 - operator visibility
 - ops scanning
 
-M7 is the visibility layer, not the empirical truth layer.
-
-### Important current note
-Monitoring is no longer only workbook/dashboard-based.
-Python-side monitoring and kill-switch evaluation now exist too.
+Monitoring is no longer purely workbook/dashboard-centered.
+Python-side monitoring also exists.
 
 ---
 
@@ -191,16 +175,36 @@ Outputs:
 - governance packets
 - system restrictions
 
-### Important current note
-The live runtime now explicitly uses:
-- `ACTIVE`
-- `PAUSED`
-- `HARD_STOP`
+### Important current architecture update
+M8 should now be understood as containing at least two distinct governance questions:
 
-Telemetry freshness is now part of the effective governance surface.
+#### A. Candidate Review Governance
+Used to evaluate whether a strategy deserves:
+- shadow-live
+- micro-live validation posture
+- bounded promotion from research
 
-M8 is not “AI mood.”
-It is governance-state logic.
+This should primarily reflect:
+- empirical candidate legitimacy
+- bounded governance context
+- strategy maintenance posture
+
+#### B. Activation / Go-Live Governance
+Used to determine whether the runtime may actually:
+- activate
+- open entries
+- operate live right now
+
+This should reflect:
+- runtime state
+- telemetry health
+- kill switch
+- activation controls
+
+### Architecture caution
+These two layers should not be silently collapsed into one question.
+
+That collapse caused review contamination when council deliberation consumed operator activation constraints as if they were candidate-legitimacy failures.
 
 ---
 
@@ -216,24 +220,16 @@ Responsibilities:
 - diagnostic metrics
 - strategy legitimacy
 
-M9 decides whether strategy claims have empirical support.
-
-### Important current note
-M9-heavy research logic is now actively happening in Python.
-
-This includes:
+Current active Python-led M9 work includes:
 - V7 robustness mapping
-- V8 friction stress
+- V8 friction-aware stress
 - V9 candidate selection
 
-The current active lead family is:
-`BREAKOUT_LONG`
-
-Current selected candidate pair:
+Current selected pair:
 - champion: `TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
 - backup: `TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN`
 
-This is now the actual center of gravity of the project.
+This remains the current center of gravity of the project.
 
 ---
 
@@ -248,17 +244,26 @@ Responsibilities:
 - council deliberation scaffolding
 - memory/orchestration support
 
-M10 is not supreme authority and not empirical truth.
-It is a memory / orchestration bridge.
+### Important architecture update
+M10 now supports a **deliberative council path** with:
+- specific-backtest targeting
+- three initial worker judgments
+- three cross-reviews
+- one supervisor synthesis
+- durable deliberation-step persistence
+- resumable trigger-driven execution to avoid Apps Script timeout
 
-### Important current note
-Durable artifacts now also exist in Python-side runtime:
-- deploy bundle
-- live risk rules
-- champion/backup artifacts
-- monitoring state artifacts
+This is a material upgrade from:
+- three isolated votes
+- one thin finalizer
 
-This means project memory is no longer solely flowing through the older Apps Script mental model.
+### Important operational caution
+The main current operational weakness in M10 is no longer timeout alone.
+
+It is now:
+- provider quota / rate-limit handling
+- trigger hygiene
+- clean review-mode separation
 
 ---
 
@@ -275,6 +280,15 @@ This means project memory is no longer solely flowing through the older Apps Scr
 8. **M9** backtests and judges empirical validity
 9. **M10** persists and orchestrates durable review/memory
 
+### Current council review flow
+1. specific persisted experiment is selected
+2. M10 creates pending deliberation
+3. worker initial round runs
+4. worker cross-review round runs
+5. supervisor finalization runs
+6. deliberation steps are persisted durably
+7. summary decision is written back
+
 ---
 
 ## Persistence Architecture
@@ -286,15 +300,18 @@ Canonical home for:
 - strategy docs
 - decisions
 - snapshots
-- migration truth
+- prompt canon
 
 ### Supabase
 Structured persistence layer for:
 - experiment logs
 - diagnostics
 - deliberations
+- deliberation steps
 - dataset metadata
 - project memory
+- snapshots
+- deploy/risk artifacts
 
 ### Apps Script
 Current control-plane / governance / dashboard layer where useful.
@@ -304,9 +321,8 @@ Active runtime for:
 - heavier research
 - friction-aware testing
 - candidate selection
-- pre-live runtime scaffolding
-- shadow execution scaffolding
-- monitoring / kill-switch logic
+- live/runtime scaffolding
+- deploy artifact generation
 
 ---
 
@@ -334,25 +350,22 @@ The architecture problem is no longer “missing modules.”
 The main current architecture challenges are:
 - keeping docs aligned with runtime truth
 - reducing split-brain between Apps Script and Python reality
-- making telemetry a real precondition for live behavior
-- preserving governance clarity during migration
-- avoiding notebook drift becoming invisible architecture
+- separating candidate review from activation permission cleanly
+- making deliberation durable without making it bloated
+- handling provider quota/rate-limit constraints in resumable council flow
 
 ---
 
 ## Migration Direction
 
-The architecture is now explicitly evolutionary and hybrid.
+The architecture remains explicitly evolutionary and hybrid.
 
 Likely path:
 1. preserve Apps Script where it remains good enough
 2. continue using Python for heavy research/runtime workloads
 3. strengthen Supabase as durable memory/state layer
-4. formalize service boundaries where needed
-5. only migrate live execution more deeply once telemetry/governance loop is solid
-
-This is not rewrite-first.
-It is phased migration from a position of actual system capability.
+4. keep M10 as orchestration bridge while reducing sheet-tail dependence
+5. only deepen execution migration after telemetry/governance loop is solid
 
 ---
 
@@ -360,8 +373,8 @@ It is phased migration from a position of actual system capability.
 
 The current architectural priority is:
 
-- preserve current truth in docs
-- finish telemetry-safe shadow/live-prep loop
-- prevent runtime drift
-- validate selected strategy under disciplined micro-live posture
-- deepen durability before broadening live ambition
+- preserve truthful runtime docs
+- keep council targeting specific persisted backtests
+- separate candidate review from actual activation review
+- harden resumable deliberation
+- continue validation under disciplined micro-live posture
