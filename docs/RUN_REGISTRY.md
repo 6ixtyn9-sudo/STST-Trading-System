@@ -213,7 +213,7 @@ The edge survives medium friction in a narrow but credible cluster.
 
 ### Important operational read
 Heavy friction destroys viability.
-The dominant unresolved weakness is drawdown duration / underwater time.
+The dominant unresolved weakness remains drawdown duration / underwater time.
 
 ### Leverage read
 `LEV3` and `LEV5` were effectively identical in the tested board, implying leverage above 3x adds no practical value here.
@@ -249,9 +249,6 @@ Select one champion and one backup from the medium-friction survivor pool and bu
 - kill-switch evaluator
 - runtime state model
 
-### V9 sanity rerun summary
-Champion rerun under micro-live posture remained economically strong but still failed the strict DD-duration threshold.
-
 ### Interpretation
 Approved for:
 - shadow-live
@@ -265,9 +262,98 @@ Not approved for:
 
 ---
 
+## `V9_SANITY_RERUN_CHAMPION`
+
+### Date
+2026-03-29 era
+
+### Status
+Completed / persisted / current main council review target
+
+### Runtime
+Python / Supabase persistence path
+
+### Purpose
+Persist and verify the actual selected champion under micro-live validation posture
+
+### Backtest ID
+`bt_8e24c2cd59f9ce9fa6e9128400b8d1c7`
+
+### Strategy ID
+`breakout_long_validation_v1`
+
+### Dataset context
+`CC_MAJORSPOTPERP_USDT_MAXDEPTH_2026_SUPABASE_V1`
+
+### Result summary
+- OOS trades: `866`
+- PF: `1.6007207495283173`
+- ExpR: `0.23946111614681695`
+- Sharpe: `1.124384528563206`
+- strict pass: `false`
+- fail reason:
+  - `OOS_MaxDD_Days(174)>120`
+
+### Interpretation
+This is the current best persisted single review target for:
+- council candidate review
+- current champion evidence
+- micro-live validation posture
+
+### Important caveat
+This row is economically credible but still not a strict fully-clean scale-up pass.
+
+---
+
+## Deliberative Council Review Era
+
+---
+
+## `COUNCIL_REVIEW_V1 | CURRENT_CHAMPION`
+
+### Date
+2026-04-01 era
+
+### Status
+Operationally real / resumable / persistence-backed
+
+### Runtime
+Apps Script M10 + Supabase + OpenRouter
+
+### Purpose
+Review the current champion through:
+- targeted persisted backtest selection
+- three initial worker judgments
+- three cross-reviews
+- one supervisor synthesis
+- durable step persistence
+
+### Review target
+`bt_8e24c2cd59f9ce9fa6e9128400b8d1c7`
+
+### Important architectural meaning
+This marks a shift away from:
+- reviewing whatever happens to be the last EXPERIMENTS sheet row
+
+toward:
+- reviewing the intended persisted candidate explicitly
+
+### Important caveat
+Current council runtime is still subject to:
+- OpenRouter quota / rate-limit constraints
+- coexistence of old and new M10 review paths
+- continued policy refinement between candidate review and activation review
+
+---
+
 ## Rule
 
-A run is a named research artifact.
+A run is a named research or review artifact.
 
-It should not exist only in memory or in row fragments.
+It should not exist only in memory or row fragments.
 It should be durably interpretable later.
+
+When the intended review target matters, prefer:
+- explicit `backtest_id`
+over
+- sheet-tail inference.
