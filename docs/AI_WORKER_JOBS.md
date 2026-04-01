@@ -2,7 +2,7 @@
 
 This document defines the intended AI labor force for the $T$T system.
 
-The goal is not to use AI as one vague oracle.  
+The goal is not to use AI as one vague oracle.
 The goal is to assign bounded, specialized work.
 
 ---
@@ -10,7 +10,6 @@ The goal is to assign bounded, specialized work.
 ## Core Principle
 
 AI workers should have:
-
 - clear scope
 - bounded inputs
 - fixed output contracts
@@ -18,7 +17,6 @@ AI workers should have:
 - no hidden authority over constitutional rules
 
 AI should support:
-
 - research interpretation
 - memory
 - planning
@@ -28,7 +26,6 @@ AI should support:
 - runtime integrity
 
 AI should not become:
-
 - unbounded execution
 - truth authority
 - config authority
@@ -37,42 +34,49 @@ AI should not become:
 
 AI should also reduce process ambiguity.
 
-AI workers should help prevent:
+---
 
-- running the wrong function
-- reading the wrong log
-- mixing audit mode with production mode
-- launching experiments with unintended defaults
-- accumulating duplicate / obsolete helper functions
-- relying on chat memory when durable state should exist elsewhere
+## Current Strategic Direction
 
-AI must improve:
+The project now has a clearer distinction between:
 
-- execution clarity
-- launch discipline
-- debugging discipline
-- code hygiene
-- project continuity
+### A. Single-Worker Utility Tasks
+These are bounded tasks where one worker is enough:
+- summarization
+- context pack creation
+- module registration
+- artifact explanation
+- migration note drafting
+
+### B. Deliberative Multi-Worker Tasks
+These are judgment-heavy tasks where a structured council pattern is useful:
+- candidate review
+- deployment readiness interpretation
+- bounded governance critique
+- strategy maintenance review
+
+This distinction matters because not every AI task should become a 3+1 deliberation.
 
 ---
 
-## Strategic Direction
+## Current Deliberative Pattern
 
-The next maturity step is:
+The current active deliberative pattern is:
 
-**worker contracts should become machine-readable.**
+1. three initial worker judgments
+2. three cross-reviews
+3. one supervisor synthesis
 
-That means each worker should eventually have a formal contract including:
-- worker ID
-- mission
-- trigger conditions
-- allowed inputs
-- output artifacts
-- machine-readable output schema
-- authority limits
-- forbidden actions
+Current operational role set:
+- Risk Officer
+- Strategy Scout
+- Quant Auditor
+- Council Supervisor
 
-Until that system is fully formalized, the role definitions below describe intended labor boundaries.
+This pattern is currently used for:
+- candidate review of persisted backtests
+
+It is not yet generalized across all worker types.
 
 ---
 
@@ -110,14 +114,8 @@ Summarize and persist important project state.
   - `DATASETS`
 - “what changed since last snapshot”
 
-### Good use cases
-- end-of-day summaries
-- post-run state capture
-- pre-new-chat briefing packs
-- recovering from context-window loss
-
-### Future contract note
-This worker should eventually write durable summary artifacts, not just conversational summaries.
+### Current status
+Defined, not yet part of the active deliberative council pattern.
 
 ---
 
@@ -140,13 +138,8 @@ Maintain the module registry.
 - dependency updates
 - “module impact if patched” notes
 
-### Good use cases
-- tracking module responsibilities
-- understanding patch blast radius
-- deciding what should move first in migration
-
-### Future contract note
-This worker should eventually update a canonical `MODULE_REGISTRY.md` or equivalent machine-readable registry.
+### Current status
+Defined, not yet part of the active deliberative council pattern.
 
 ---
 
@@ -161,20 +154,15 @@ Build a compact task-specific context pack before a new work session.
 - docs list
 - recent project snapshot
 - relevant experiment data
-- current mode (research / audit / migration / incident)
+- current mode
 
 ### Outputs
 - “load this into the next chat” briefing packet
 - task-scoped references only
 - minimal required memory pack
 
-### Good use cases
-- starting a new chat
-- switching from research to debugging
-- reducing context loss
-
-### Future contract note
-This worker should eventually produce explicit task packs with fixed schema and source references.
+### Current status
+Defined, not yet part of the active deliberative council pattern.
 
 ---
 
@@ -185,121 +173,28 @@ This worker should eventually produce explicit task packs with fixed schema and 
 ### Mission
 Define and maintain strategy family meanings.
 
-### Inputs
-- strategy names
-- family docs
-- inversion interpretations
-- experiment observations
-
-### Outputs
-- strategy family taxonomy
-- family definitions
-- what each family needs to see
-- category assignment
-- future family proposals
-
-### Good use cases
-- fakeout vs breakout interpretation
-- inversion meaning
-- family ontology
-
----
-
 ## Worker: Mirror Interpreter
 
 ### Mission
 Explain what inverted families are becoming conceptually.
-
-### Inputs
-- native family definition
-- inverted family results
-- experiment behavior
-
-### Outputs
-- interpretation of whether inversion reveals:
-  - fakeout
-  - fade
-  - exhaustion
-  - trap
-  - continuation failure
-
-### Good use cases
-- “Is inverted breakout really fakeout short?”
-- “What is loose momo inverted actually doing?”
-
----
 
 ## Worker: Family Comparator
 
 ### Mission
 Compare strategy families empirically.
 
-### Inputs
-- experiment logs
-- family labels
-- mirrored labels
-- metrics
-- fail reasons
-
-### Outputs
-- family rankings
-- least-dead shortlist
-- repeated failure modes
-- native vs inverted comparison
-
-### Good use cases
-- family leaderboard
-- near-miss concentration
-- deciding what to deprioritize
-
----
-
 ## Worker: Experiment Designer
 
 ### Mission
 Design the next experiment wave.
-
-### Inputs
-- completed experiment results
-- family shortlist
-- current dataset state
-- runtime constraints
-- current persistence bottleneck
-
-### Outputs
-- next experiment plan
-- narrowed parameter scope
-- family-specific rerun structure
-- symbol segmentation / cohort plan
-- chosen persistence lever
-
-### Good use cases
-- avoid another giant broad brute-force wave
-- design sharper follow-up runs
-- move from “search” to “persistence hunt”
-
-### Important boundary
-This worker may design the next run, but should not launch it by itself.
-
----
 
 ## Worker: Edge Curator
 
 ### Mission
 Track promising candidate edges without declaring victory too early.
 
-### Inputs
-- family rankings
-- repeated patterns
-- OOS behavior
-- degradation notes
-- regime concentration observations
-
-### Outputs
-- candidate watchlist
-- “less bad” list
-- “requires deeper validation” list
-- “not worth further search” list
+### Current note
+These workers remain important, but are not yet the current active M10 deliberative implementation focus.
 
 ---
 
@@ -312,15 +207,18 @@ Conservative review of candidate deployment eligibility.
 
 ### Inputs
 - governance packet
-- evaluation packet
-- metrics
+- policy packet
+- experiment metrics
 - diagnostics
-- current governance state
+- relevant risk facts
 
 ### Outputs
 - bounded approve/reject rationale
 - explicit risk objections
 - “not yet safe” reasons
+
+### Current status
+Active in current deliberative council pattern.
 
 ---
 
@@ -331,14 +229,17 @@ Opportunity-oriented review of candidate strategic attractiveness.
 
 ### Inputs
 - experiment facts
-- DQS summary
 - diagnostics
 - governance packet
+- policy packet
 
 ### Outputs
 - bounded approve/reject rationale
 - upside case
 - where further validation is justified
+
+### Current status
+Active in current deliberative council pattern.
 
 ---
 
@@ -359,6 +260,39 @@ Empirical legitimacy review.
 - empirical weaknesses
 - minimum further proof required
 
+### Current status
+Active in current deliberative council pattern.
+
+---
+
+## Worker: Council Supervisor
+
+### Mission
+Synthesize worker outputs into one final bounded decision.
+
+### Inputs
+- fact pack
+- governance packet
+- policy packet
+- initial worker outputs
+- cross-review worker outputs
+
+### Outputs
+- final bounded decision
+- summary of strongest arguments
+- summary of rejected arguments
+- explicit acknowledgment of policy constraints
+
+### Important boundary
+The supervisor is still subordinate to:
+- M1
+- M8
+- M9
+- fail-closed policy
+
+### Current status
+Active in current deliberative council pattern.
+
 ---
 
 ## Worker: Gate Maintenance Auditor
@@ -366,17 +300,8 @@ Empirical legitimacy review.
 ### Mission
 Continuously review whether approved/live-eligible strategies still deserve approval.
 
-### Inputs
-- strategy lifecycle state
-- rolling validation results
-- recent maintenance metrics
-- governance state
-
-### Outputs
-- keep active / reduce confidence / quarantine / retire recommendation
-
-### Why this matters
-This worker is critical for perpetual gate maintenance.
+### Current status
+Conceptually important, not yet part of the active implemented deliberative pattern.
 
 ---
 
@@ -387,64 +312,18 @@ This worker is critical for perpetual gate maintenance.
 ### Mission
 Observe long experiment runs and summarize runner health.
 
-### Inputs
-- execution logs
-- timeout events
-- progress state
-- latest experiment index
-- trigger state
-
-### Outputs
-- runner health summary
-- whether the system is progressing or truly stalled
-- whether a problem is:
-  - true runner failure
-  - trigger failure
-  - wrong execution path
-  - stale state confusion
-- post-run improvement notes
-
-### Good use cases
-- monitoring long resumable runs
-- distinguishing timeout from true failure
-- confirming whether rescue continuation is working
-
----
-
 ## Worker: Dashboard Narrator
 
 ### Mission
 Translate dashboard and scanner state into plain-English ops summaries.
-
-### Inputs
-- M7 dashboard state
-- alerts
-- margin fraction
-- position state
-
-### Outputs
-- concise operator summary
-- risk posture summary
-- watchpoints
-
----
 
 ## Worker: Alert Triage Assistant
 
 ### Mission
 Sort alerts by urgency and likely root cause.
 
-### Inputs
-- alert logs
-- current system state
-- recent execution context
-- current mode
-
-### Outputs
-- what matters now
-- what can wait
-- likely cluster causes
-- whether alert is operational, research, or infrastructure-related
+### Current note
+These remain useful worker definitions, but are not yet the active M10 implementation priority.
 
 ---
 
@@ -455,60 +334,18 @@ Sort alerts by urgency and likely root cause.
 ### Mission
 Design better historical data acquisition and canonical rebuild strategy.
 
-### Inputs
-- current dataset state
-- gaps in history
-- source limitations
-- future experiment requirements
-
-### Outputs
-- source options
-- target date range
-- canonical rebuild plan
-- dataset versioning suggestions
-
-### Why this matters
-Data quality outranks clever prompting.
-
----
-
 ## Worker: Python Migration Planner
 
 ### Mission
 Plan staged migration away from slow Apps Script heavy lifting.
-
-### Inputs
-- module registry
-- runtime pain points
-- experiment latency
-- persistence goals
-
-### Outputs
-- migration order
-- service candidates
-- what stays in Sheets
-- what moves first
-
----
 
 ## Worker: Storage Architect
 
 ### Mission
 Decide what should be warehoused, what should be rebuildable, and what should be cached.
 
-### Inputs
-- dataset strategy
-- Supabase limits
-- experiment scale
-- reproducibility requirements
-
-### Outputs
-- storage policy
-- canonical vs raw retention policy
-- warehouse recommendations
-
-### Present strategic relevance
-This worker is becoming more important because Sheets is no longer adequate as the primary historical warehouse.
+### Current note
+These workers are still strategically relevant, especially as persistence grows, but are not yet in the active deliberative runtime path.
 
 ---
 
@@ -519,178 +356,46 @@ This worker is becoming more important because Sheets is no longer adequate as t
 ### Mission
 Verify that the runtime environment actually matches the intended code and execution context.
 
-### Inputs
-- execution logs
-- symbol existence checks
-- trigger inventory
-- property inventory
-- runtime audit functions
-- selected function name
-- current mode
-
-### Outputs
-- runtime health summary
-- missing/visible symbol report
-- duplicate/obsolete execution path warnings
-- “safe to proceed / unsafe to proceed” decision
-
-### Good use cases
-- function exists but constants appear missing
-- top-level code autostarts unexpectedly
-- selected function does not match executed function
-- trigger contamination vs manual execution confusion
-
----
-
 ## Worker: Execution Path Auditor
 
 ### Mission
 Determine whether the system executed the intended path.
-
-### Inputs
-- stack trace
-- execution log
-- active triggers
-- selected function
-- recent code patches
-
-### Outputs
-- actual entry path used
-- intended entry path mismatch explanation
-- next isolation step
-
-### Good use cases
-- “I ran ping but start function executed”
-- “Why did this log come from a different path?”
-- “Was this trigger-driven or manual?”
-- “Is top-level code hijacking execution?”
-
----
 
 ## Worker: Launch Discipline Enforcer
 
 ### Mission
 Ensure experiments, audits, and maintenance are launched through safe and unambiguous entry points.
 
-### Inputs
-- requested task
-- launcher functions
-- experiment builder state
-- runtime constraints
-- current system mode
-
-### Outputs
-- approved launch command
-- preview step requirement
-- “do not run loose expressions” warning
-- exact function to execute next
-
-### Good use cases
-- experiment launch
-- persistence hunts
-- maintenance cycles
-- runtime audits
-
-### Key rule
-This worker should strongly prefer:
-- named launch functions
-- preview-before-start
-- one-entry-point-per-task
-
----
-
 ## Worker: Patch Hygiene Auditor
 
 ### Mission
 Keep patches minimal, explicit, and non-duplicative.
 
-### Inputs
-- existing source file
-- proposed patch
-- duplicate function candidates
-- temporary debug helpers
-- obsolete launchers
-
-### Outputs
-- replace list
-- delete list
-- keep list
-- temporary-vs-permanent code classification
-
-### Good use cases
-- “don’t bloat the codebase”
-- “which old function should be removed now?”
-- “what debug helpers should be deleted after use?”
-- “is this patch operationally necessary or just convenient?”
-
----
-
 ## Worker: Mode Switch Coordinator
 
 ### Mission
-Move the system cleanly between:
-- normal operations mode
-- experiment mode
-- audit mode
-- migration mode
-- incident/debug mode
+Move the system cleanly between modes.
 
-### Inputs
-- current issue
-- current governance state
-- active triggers
-- active run state
-- recent failures
-
-### Outputs
-- declared current mode
-- next allowed actions
-- prohibited actions until mode is cleared
-- exit criteria for returning to normal mode
-
-### Good use cases
-- after confusing runtime failures
-- before launch of a major experiment
-- before maintenance / migration
-- after autostart / trigger contamination incidents
-
-### Why this matters
-A lot of wasted time happens when the system is half in:
-- experiment mode
-- debug mode
-
-This worker exists to prevent that ambiguity.
+### Current note
+These are valuable bounded worker definitions, but they remain future candidates for stronger formalization rather than current broad implementation scope.
 
 ---
 
 # Output Discipline
 
 Every worker should prefer:
-
 - short structured outputs
-- tables when useful
-- JSON / YAML when needed
-- references to named docs / modules / datasets
 - explicit next actions
-- explicit do-not-do-yet warnings when relevant
+- clear refusal on missing facts
+- references to named docs / modules / datasets
+- explicit do-not-do-yet warnings where relevant
 
 Avoid:
-
 - vibes
 - grand speeches
 - invented facts
 - hidden assumptions
 - unbounded recommendations
-
-For debugging / runtime workers, prefer outputs in this shape:
-
-1. What actually happened
-2. What should have happened
-3. Why they differed
-4. What exact function to run next
-5. What not to run yet
-
-Ambiguity compounds fast in execution debugging.
 
 ---
 
@@ -699,36 +404,37 @@ Ambiguity compounds fast in execution debugging.
 Workers should not silently overstep into each other’s domain.
 
 Examples:
-
-- the Experiment Designer may propose a next run, but the Launch Discipline Enforcer decides the safe launch path
-- the Project Archivist may summarize runtime issues, but the Runtime Integrity Auditor determines whether runtime is healthy
-- the Patch Hygiene Auditor may recommend deleting wrappers or helpers, but the Mode Switch Coordinator may require them temporarily during audit mode
-- the Quant Auditor may reject a candidate edge, but cannot rewrite governance thresholds silently
+- the Experiment Designer may propose a run, but does not launch it
+- the Project Archivist may summarize state, but does not declare empirical truth
+- the Risk Officer may reject a candidate, but does not override constitutional authority
+- the Council Supervisor may synthesize worker reasoning, but does not override hard policy
 
 ---
 
-# Machine-Readable Contract Direction
+# Current V1 Implementation Rule
 
-The intended next step is to convert worker roles into explicit machine-readable contracts.
+The current active worker implementation scope is intentionally narrow.
 
-A future minimal contract shape might look like:
+Current focus:
+- candidate review council
+- durable step persistence
+- resumable orchestration
 
-```yaml
-worker_id: runner_monitor
-mission: observe long experiment runs and summarize runner health
-inputs:
-  - execution_logs
-  - trigger_inventory
-  - run_state
-outputs:
-  - docs/RUN_HEALTH.md
-output_format: markdown
-authority:
-  may_edit_code: false
-  may_launch_runs: false
-  may_delete_triggers: false
-  may_recommend: true
-trigger_conditions:
-  - long_run_active
-  - timeout_detected
-  - rescue_trigger_fired
+Why:
+- this delivers a real persistence win without expanding into uncontrolled worker sprawl
+
+This is deliberate scope discipline.
+
+---
+
+# Future Direction
+
+The next maturity steps may include:
+- broader machine-readable contracts
+- more worker-specific persistence artifacts
+- cleaner prompt/runtime loading
+- stronger non-council worker operationalization
+
+But current priority remains:
+
+**make the bounded deliberative council technically real, durable, targeted, and resumable before expanding worker complexity elsewhere.**
