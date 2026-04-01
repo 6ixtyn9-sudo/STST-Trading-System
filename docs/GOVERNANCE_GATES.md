@@ -52,6 +52,45 @@ A strategy is not governable if:
 
 ---
 
+## Important Current Distinction
+
+The project now needs two distinct governance interpretations.
+
+### 1. Candidate Review Governance
+Question:
+- does this strategy/candidate deserve promotion into shadow-live or micro-live validation posture?
+
+This layer should focus on:
+- empirical candidate quality
+- friction realism
+- bounded strategy governance context
+- maintenance caution
+
+This layer should **not** be hard-blocked merely because:
+- operator mood journal is incomplete
+- starting capital acknowledgment is missing
+- leverage acknowledgment is missing
+
+Those are activation-layer concerns, not candidate-legitimacy concerns.
+
+---
+
+### 2. Activation / Go-Live Governance
+Question:
+- may the runtime actually activate live behavior right now?
+
+This layer should focus on:
+- current governance state
+- kill switch
+- telemetry freshness
+- live state machine
+- operator/runtime readiness constraints
+- actual go-live checklist requirements where still retained
+
+This distinction is now critical.
+
+---
+
 ## Classes of Gates
 
 The system now effectively uses three distinct classes of gates:
@@ -83,10 +122,10 @@ A strategy may fail strict gates but still survive survival gates.
 
 ---
 
-### 3. Micro-Live Operational Gates
+### 3. Activation / Runtime Permission Gates
 Used to determine whether the runtime may open new trades.
 
-These gates are now critical because the project has moved into V9 micro-live readiness.
+These are now critical because the project has moved into micro-live readiness.
 
 ---
 
@@ -98,8 +137,9 @@ These gates are now critical because the project has moved into V9 micro-live re
 - `HARD_STOP`
 
 ### Interpretation
+
 #### ACTIVE
-Entries may be considered, but only after passing runtime pre-trade guard.
+Entries may be considered, but only after runtime pre-trade guard passes.
 
 #### PAUSED
 No new entries.
@@ -107,13 +147,13 @@ Open positions may still be managed or reconciled.
 Pause usually reflects:
 - temporary risk concern
 - telemetry concern
-- rolling metric concern
-- operator review need
+- runtime caution
+- review need
 
 #### HARD_STOP
 No new entries.
 No implicit resumption.
-Requires explicit human intervention and review.
+Requires explicit review.
 
 ---
 
@@ -127,7 +167,7 @@ Requires explicit human intervention and review.
 - governance heartbeat is fresh
 - no live kill-switch is active
 
-This is now a first-class governance requirement.
+This remains a first-class governance requirement.
 
 ### Important
 An `ACTIVE` state without telemetry is not operationally trustworthy.
@@ -170,7 +210,7 @@ The main operational weakness is:
 
 **drawdown duration / prolonged underwater time**
 
-This is now the dominant caution.
+This remains the dominant caution.
 
 ---
 
@@ -189,18 +229,18 @@ without being:
 - operationally comfortable
 - free of governance caution
 
-This distinction is now critical.
+This distinction must remain explicit.
 
 ---
 
-## Current Deployment Rule
+## Current Candidate Rule
 
-The current strategy pair is approved for:
+The current strategy pair is acceptable for:
 - shadow-live
 - micro-live validation
 - conservative runtime testing
 
-It is not approved for:
+It is not acceptable for:
 - aggressive capital
 - automatic scaling
 - leverage increase
@@ -208,34 +248,16 @@ It is not approved for:
 
 ---
 
-## Current Gate Reality
+## Current Activation Rule
 
-### Strict gate result
-The selected champion still fails the strict gate due to:
-- DD-duration > 120 days
+Even a candidate that is acceptable for micro-live validation may still be blocked from actual live activation if:
+- runtime state is `PAUSED`
+- runtime state is `HARD_STOP`
+- telemetry is stale
+- activation gating is not satisfied
 
-### Survival / micro-live result
-The selected champion remains economically credible under medium friction and micro-live posture.
-
-### Governance interpretation
-This means:
-- proceed only in validation posture
-- use low heat
-- maintain explicit runtime guardrails
-- do not confuse “survives” with “comfortable”
-
----
-
-## Practical Governance Sequence
-
-Before allowing any new trade:
-1. write equity snapshot
-2. apply governance evaluation
-3. update live state if needed
-4. run pre-trade guard
-5. only if allowed, evaluate entries
-
-If any step fails, block entry.
+This is not contradiction.
+It is layered governance.
 
 ---
 
@@ -250,7 +272,7 @@ AI may:
 
 AI may not:
 - override M1
-- override M8 governance state
+- override M8 activation state
 - override M9 empirical truth
 - silently downgrade runtime safety concerns
 
@@ -258,15 +280,17 @@ AI may not:
 
 ## Strategic Summary
 
-Governance gates now apply at three layers:
+Governance gates now operate at multiple distinct layers:
 - research legitimacy
 - candidate survival legitimacy
-- runtime permission to act
+- activation/runtime permission
 
 The current strategy is good enough for:
-- micro-live validation
+- micro-live candidate posture
 
 It is not yet good enough for:
 - carefree deployment
+- automatic activation
+- unbounded trust
 
 That distinction must remain explicit.
