@@ -1,265 +1,237 @@
 # PROJECT STATE
 
 ## Date
-2026-03-29
+2026-04-01
 
 ## Current Phase
-**Python-Based Strategy Validation + V9 Micro-Live Readiness**
+**Python-Based Strategy Validation + Deliberative Council Persistence + Micro-Live Readiness**
 
-The project is no longer primarily centered on Apps Script persistence-hunt experiments over the older V3 structure.
+The project is in a hybrid state where:
+- Python is the active research and candidate-selection runtime
+- Supabase is the durable structured memory layer
+- Apps Script remains active as a control/governance/orchestration surface
+- M10 has now been upgraded into a resumable deliberative council path
 
-It has now advanced into a Python-driven research and pre-live phase that includes:
-- expanded backtest engine work
-- friction-aware execution modeling
-- leverage-cap-aware sizing
-- candidate strategy selection
-- micro-live deployment preparation
-- live governance / kill-switch scaffolding
-
-This is not yet scaled live deployment.
-It is the transition from validated research into controlled micro-live readiness.
+This is still not broad live deployment.
+It is a governed transition phase:
+- validated strategy candidate exists
+- persistence has materially improved
+- deliberation is now durable and resumable
+- activation permission is still more restrictive than candidate review
 
 ---
 
 ## Current Reality
 
 ### System status
-- Core modules M1–M10 still exist conceptually and remain valid as the project architecture.
-- Python is now active for research-critical and pre-live-critical workflows.
-- The backtest engine is no longer friction-blind:
-  - fees are modeled
-  - slippage is modeled
-  - stop/TP adverse slippage is modeled
-  - funding cost is modeled
-  - leverage is treated as a sizing/notional cap
-- V7 robustness mapping completed.
-- V8 friction stress completed.
-- V9 champion / backup selection completed.
-- Live governance scaffolding is now real:
-  - deploy bundle exists
-  - champion / backup configs exist
-  - live risk rules exist
-  - monitoring dashboard exists
-  - kill-switch evaluator exists
-  - active / paused / hard-stop state handling exists
-- Shadow / micro-live runtime guard work is now the next active implementation layer.
-
-### Main bottleneck
-The bottleneck is no longer:
-- basic machine viability
-- or whether the project can run research at all
-
-The main bottlenecks are now:
-- safe and disciplined transition into shadow / micro-live
-- real telemetry and runtime protection
-- operational handling of prolonged underwater periods
-- preserving architectural clarity while Python becomes more active
-- avoiding drift away from the phased migration plan
-
----
-
-## Current Stack
-
-### Active
-- Google Sheets
-- Apps Script
-- Supabase
-- GitHub
-- OpenRouter
-- Google Colab / Python
-
-### Current role split
-- **Python**: active research runtime, friction-aware backtesting, V7/V8/V9, live monitoring scaffolding
-- **Supabase**: structured persistence and canonical memory / data layer
-- **Apps Script**: still relevant as current control-plane / governance / dashboard layer where useful
-- **GitHub**: canonical code + documentation home
+- Core modules M1–M10 still exist and remain the architecture frame.
+- Python remains active for:
+  - V7 / V8 / V9 strategy validation
+  - friction-aware testing
+  - leverage-cap-aware testing
+  - deploy-bundle generation
+  - live monitoring scaffolding
+- Supabase remains active for:
+  - experiment logs
+  - diagnostic notes
+  - project snapshots
+  - deploy/risk artifacts
+  - council deliberations
+  - deliberation step history
+- Apps Script remains active for:
+  - constitutional control
+  - governance surfaces
+  - M10 orchestration
+  - Sheets-connected operational surfaces
 
 ---
 
 ## Current Strategy Status
 
-### Current lead family
+### Lead family
 `BREAKOUT_LONG`
 
-### Current champion
-`TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL`
+### Champion
+`TOP_SPS_WITH_DOGE | D2_A | P2_FAST | T2_BAL | F2_MED | LEV3`
 
-### Current backup
-`TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN`
+### Backup
+`TOP_SPS_WITH_DOGE | D2_A | P1_BASE | T1_OPEN | F2_MED | LEV3`
 
-These were selected from the actual `F2_MED + LEV3` survivor pool in V8 / V9.
+### Current V9 sanity rerun reference
+- backtest_id: `bt_8e24c2cd59f9ce9fa6e9128400b8d1c7`
+- run_name: `V9_SANITY_RERUN_CHAMPION`
 
----
+### Persisted V9 sanity rerun metrics
+- OOS trades: `866`
+- PF: `1.6007207495283173`
+- ExpR: `0.23946111614681695`
+- Sharpe: `1.124384528563206`
+- strict gate result: failed
+- strict fail reason:
+  - `OOS_MaxDD_Days(174)>120`
 
-## Current Research Status
+### Current interpretation
+The selected champion remains:
+- economically credible
+- appropriate for shadow / micro-live validation posture
+- not a strict research-grade scale-up pass
 
-### V7
-V7 established the strongest operating neighborhood around:
-- `BREAKOUT_LONG`
-- `TOP_SPS_WITH_DOGE`
-- `D2_A / D3_A`
-- `P2_FAST / P1_BASE`
-- `T1_OPEN / T2_BAL`
-
-This confirmed a real center-of-mass rather than a one-row fluke.
-
-### V8
-V8 introduced real friction-aware and leverage-cap-aware testing.
-
-#### V8 results
-- total rows: `120`
-- strict passes: `30`
-- survival passes: `42`
-- friction-ignored suspects: `0`
-
-#### Key V8 conclusion
-The edge survives medium friction in a narrow but credible cluster.
-
-#### Important V8 constraint
-Heavy friction (`F3_HEAVY`) effectively destroys viability.
-
-#### Leverage conclusion
-`LEV3` and `LEV5` behaved identically in the tested board.
-This implies leverage above 3x is not adding practical value in the current candidate zone.
-
-### V9
-V9 selected:
-- one champion
-- one backup
-- micro-live posture
-- deploy bundle
-- live risk rules
-
-#### V9 sanity rerun on champion
-- trades: `866`
-- PF: `~1.60`
-- ExpR: `~0.239`
-- Sharpe: `~1.12`
-- DD days: `174`
-
-It failed the strict research gate only on:
-- `OOS_MaxDD_Days(174)>120`
-
-This is interpreted as:
-- **good enough for micro-live validation**
-- **not good enough for scaled deployment confidence**
+The dominant unresolved weakness remains:
+- prolonged underwater duration / drawdown duration
 
 ---
 
-## Current Risk Understanding
+## Current M10 / Council Reality
 
-### Primary unresolved risk
-The main unresolved live-operational weakness is:
+### New reality
+M10 is no longer only:
+- a pending deliberation creator
+- a three isolated votes launcher
+- a thin finalizer
 
-**drawdown duration / prolonged underwater time**
+It now has a **deliberative council path** that supports:
+- targeted review of a specific persisted backtest
+- three initial worker judgments
+- three cross-reviews
+- one supervisor synthesis
+- durable step persistence in Supabase
+- resumable trigger-driven execution to avoid Apps Script timeout
 
-This is now the dominant caution, more than leverage stress.
+### Current implemented review target
+The council can now review a specific persisted backtest rather than blindly consuming the last Sheets experiment row.
 
-### Why this matters
-The edge remains economically alive under medium friction, but recovery periods remain long enough to create:
-- operational drag
-- psychological drag
-- governance pressure
-- possible live deployment discomfort
+This was a critical fix because the older “latest sheet row” behavior pointed council review at stale Apps Script-era persistence-hunt rows rather than the actual Python-led champion candidate.
 
-This must be treated explicitly in live governance and scaling decisions.
+### Important current operational truth
+The deliberative council pipeline is working technically.
 
----
-
-## Current Deployment Posture
-
-### Approved for
-- shadow-live
-- micro-live validation
-- conservative runtime hardening
-- telemetry / governance integration
-
-### Not approved for
-- aggressive capital deployment
-- leverage expansion
-- autonomous scale-up
-- treating the strategy as fully production-proven
+The current main blocker is no longer architecture plumbing.
+It is now:
+- provider quota / rate-limit handling on OpenRouter free tier
 
 ---
 
-## Current Governance Status
+## Current Governance Understanding
 
-### Built
-- live state machine:
-  - `ACTIVE`
-  - `PAUSED`
-  - `HARD_STOP`
-- deploy bundle
-- champion / backup artifacts
-- live risk rules
-- monitoring dashboard
-- kill-switch evaluator
-- pre-trade runtime guard design
-- telemetry-aware entry constraints
+### Important distinction now made explicit
+The project currently has two different governance questions:
 
-### Current principle
-No new entries should be allowed without:
-- equity telemetry
-- fresh governance evaluation
-- active config
-- ACTIVE state
+#### 1. Candidate Review
+Question:
+- does this strategy deserve promotion into shadow / micro-live validation posture?
+
+This should be governed by:
+- empirical quality
+- strategy legitimacy
+- friction realism
+- bounded governance context
+
+It should **not** be hard-rejected just because:
+- mood journal entries are incomplete
+- capital acknowledgment was not checked
+- leverage acknowledgment was not checked
+
+Those are activation-layer concerns, not candidate-legitimacy concerns.
+
+#### 2. Go-Live Activation Review
+Question:
+- is the machine/operator/runtime actually permitted to activate live behavior right now?
+
+This should be governed by:
+- runtime state
+- telemetry
+- kill switch
+- activation checklist
+- human/operator readiness constraints where they still exist
+
+### Current status
+This distinction is now partially implemented conceptually and should continue to be enforced more clearly.
 
 ---
 
-## Current Data Status
+## Current Data / Persistence Reality
 
-### Important note
-The project’s center of gravity has shifted away from the earlier Apps Script persistence-hunt framing.
+### Current active candidate review substrate
+- dataset_id: `CC_MAJORSPOTPERP_USDT_MAXDEPTH_2026_SUPABASE_V1`
 
-The Python research stack is currently working from a different active dataset path than the earlier 2026-03-27 V3 framing.
+### Persistence improvements now real
+Durable memory now includes:
+- experiment log persistence
+- diagnostic note persistence
+- snapshot persistence
+- deploy bundle persistence
+- live risk rules persistence
+- deliberation step persistence
 
-### Operational truth
-The project is now best understood as being in:
-- Python-led strategy validation and pre-live governance buildout
+### New persistence truth
+If a council step matters, it should now be reconstructable later.
 
-rather than in:
-- Apps Script-led fresh-data persistence-hunt as the dominant active frame
+That means durable review is no longer only:
+- final decision columns
 
-That older context remains historically important, but is no longer the best description of present reality.
+It now also includes:
+- per-worker step history
+
+---
+
+## Current Bottlenecks
+
+The bottlenecks are now:
+
+1. clean separation between:
+   - candidate review policy
+   - activation/go-live policy
+
+2. OpenRouter rate-limit handling for resumable deliberation
+
+3. trigger hygiene / resumable orchestration discipline
+
+4. continued doc/runtime alignment while hybrid architecture remains active
+
+5. avoidance of split-brain between:
+   - Python/Supabase truth
+   - older Sheets-last-row assumptions
 
 ---
 
 ## Immediate Priorities
 
-1. Update docs so project reality matches current state.
-2. Finalize runtime-safe shadow execution loop.
-3. Ensure equity telemetry is present before any entries are allowed.
-4. Run shadow execution using champion config.
-5. Validate monitoring / governance under real runtime flow.
-6. Only then consider actual micro-live activation.
+1. Clean up M8 policy semantics:
+   - candidate review vs activation review
+2. Harden M10 resumable council flow:
+   - trigger cleanup
+   - 429/backoff handling
+3. Keep council targeting specific persisted backtests, not latest sheet row
+4. Continue improving durable artifact persistence
+5. Only after that, continue shadow / micro-live operational validation
 
 ---
 
 ## Not Priorities Right Now
+
 - broad new family search
-- panic rewrite of Apps Script
-- cosmetic cleanup that changes active operational truth
+- cosmetic prompt expansion for every worker role
+- broad YAML contract rollout everywhere
+- broad live activation
 - leverage expansion
-- pretending V9 is fully live-proven
-- scaled deployment
+- pretending the champion is fully production-proven
+- returning to sheet-tail as the canonical review source
 
 ---
 
 ## Strategic Summary
 
-The project has moved beyond broad persistence hunting and into a more operational phase.
+The machine has advanced again.
 
-The machine is now:
-- strategy-selective
-- friction-aware
-- governance-aware
-- pre-live capable
+Current reality is now best described as:
 
-Most important current strategic truth:
-- the edge appears real enough to survive medium friction,
-- but the main unresolved risk is prolonged underwater duration,
-- so the correct next move is disciplined shadow/micro-live validation rather than scale.
+- Python-led strategy validation
+- Supabase-backed durable memory
+- Apps Script governance/orchestration still active
+- M10 deliberative council pipeline now technically working
+- candidate review and actual activation review now recognized as separate governance layers
+- main unresolved strategic risk remains drawdown duration / prolonged underwater time
 
 Current mission:
 
-**preserve architectural clarity, enforce telemetry-aware governance, validate the selected champion in shadow/micro-live posture, and only escalate from a position of real operational evidence rather than research enthusiasm.**
+**stabilize the candidate-review governance path, harden resumable deliberation, preserve persistence gains, and continue treating micro-live readiness as a governed validation posture rather than full deployment proof.**
