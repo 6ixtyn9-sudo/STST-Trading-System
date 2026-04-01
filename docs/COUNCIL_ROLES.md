@@ -30,7 +30,7 @@ The council is a structured advisory layer.
 - **M1** remains sovereign
 
 ### Governance authority
-- **M8** provides governance state and policy packet
+- **M8** provides governance interpretation
 
 ### Empirical authority
 - **M9** provides research truth and experiment evidence
@@ -45,9 +45,7 @@ The council is a structured advisory layer.
 
 ## Current Practical Position
 
-The council remains an early-to-mid maturity review layer.
-
-It should currently be treated as:
+The council should currently be treated as:
 - a structured advisory layer
 - a persistent review layer
 - a bounded critique mechanism
@@ -58,24 +56,55 @@ It should **not** currently be treated as:
 - direct execution authority
 - constitutional override
 - empirical override
-- live runtime permission layer
-
-Runtime entry permission belongs to governance + telemetry + pre-trade guard, not to council vibes.
+- substitute for runtime permissioning
 
 ---
 
-## Current Relevance
+## Important Current Role Distinction
 
-The council is now most relevant for questions like:
-- does this candidate deserve promotion from research into micro-live validation?
-- should a strategy remain in validation posture or be restricted?
-- what is the strongest bounded interpretation of a candidate’s risk?
+The council is most appropriate for:
+
+### Candidate Review Questions
+Examples:
+- does this candidate deserve promotion into micro-live validation posture?
+- what is the strongest bounded interpretation of this candidate’s risk?
 - what minimum further proof is needed?
+- should this strategy remain in validation posture or be restricted?
 
-It is less relevant for:
-- minute-to-minute runtime permissioning
-- direct trade execution decisions
-- replacing telemetry-aware governance
+The council is less appropriate for:
+
+### Activation Permission Questions
+Examples:
+- may the runtime open a new trade this minute?
+- is telemetry fresh enough right now?
+- should the system ignore a live hard-stop?
+
+Those belong to:
+- governance state
+- telemetry
+- runtime guard
+- pre-trade guard
+not to council vibes.
+
+---
+
+## Current Deliberative Pattern
+
+The council now supports a deliberative review pattern with:
+
+1. three initial worker judgments
+2. three cross-reviews
+3. one supervisor synthesis
+
+This is an upgrade from:
+- isolated single votes
+- a thin finalizer
+
+The purpose is:
+- visible critique
+- self-correction
+- bounded disagreement
+- durable review history
 
 ---
 
@@ -91,33 +120,12 @@ Identify whether a candidate appears strategically attractive.
 ### Bias
 Opportunity-seeking, but bounded by supplied facts.
 
-### Inputs
-- experiment payload
-- config snapshot
-- diagnostics
-- DQS summary
-- governance packet
-- policy packet
-- evaluation packet
-
-### Reads especially
-- DQS structure
-- signal / strategy shape
-- pattern quality
-- whether the candidate looks directionally alive
-- whether the edge appears worth further controlled validation
-
 ### Must not do
 - invent facts
 - override hard policy
 - ignore governance state
 - authorize execution by itself
 - treat “interesting” as “approved”
-
-### Output contract
-Must return JSON only:
-- `vote`: `APPROVED` or `REJECTED`
-- `rationale`: concise bounded explanation
 
 ---
 
@@ -129,32 +137,11 @@ Reject candidates that are unsafe, fragile, or governance-incompatible.
 ### Bias
 Conservative and veto-oriented.
 
-### Inputs
-- governance packet
-- policy packet
-- experiment metrics
-- diagnostics
-- relevant risk facts
-
-### Reads especially
-- drawdown
-- drawdown duration
-- OOS sample size
-- governance restrictions
-- hard reject reasons
-- capital fragility signals
-- whether unresolved operational pain is being underpriced
-
 ### Must not do
 - override hard policy
-- approve if governance says fail-closed
 - invent unobserved risk metrics
 - confuse survivability with comfort
-
-### Output contract
-Must return JSON only:
-- `vote`: `APPROVED` or `REJECTED`
-- `rationale`: concise bounded explanation
+- manufacture approval
 
 ---
 
@@ -166,33 +153,35 @@ Judge empirical legitimacy.
 ### Bias
 Cold, skeptical, evidence-first.
 
-### Inputs
-- experiment metrics
-- OOS outcome
-- DQS summary
-- evaluation packet
-- governance packet
-
-### Reads especially
-- OOS pass/fail
-- PF
-- expectancy
-- drawdown
-- drawdown duration
-- sample size
-- hard reject reasons
-- whether friction-aware evidence still supports the claim
-
 ### Must not do
 - approve on vibes
 - ignore failed empirical criteria
 - reinterpret metrics creatively
 - silently relax gates
 
-### Output contract
-Must return JSON only:
-- `vote`: `APPROVED` or `REJECTED`
-- `rationale`: concise bounded explanation
+---
+
+## 4. Council Supervisor
+
+### Objective
+Review all worker outputs and produce the final bounded synthesis.
+
+### Role
+The supervisor is:
+- not constitutional authority
+- not empirical authority
+- not runtime permission authority
+
+The supervisor is:
+- the final deliberation synthesizer
+- the bounded decision writer
+- the summarizer of agreement and disagreement
+
+### Must not do
+- invent evidence
+- override hard policy
+- convert weak evidence into approval
+- ignore worker disagreement
 
 ---
 
@@ -201,26 +190,11 @@ Must return JSON only:
 ### Objective
 Provide final human authority when ambiguity or exceptional judgment is required.
 
-### Role
-The President is not just another vote.
-
-The President:
-- resolves edge cases
-- reviews ambiguous situations
-- can inspect deliberation history
-- should not casually override constitutional or empirical hard failures
-
-### Good presidential behavior
+### Good behavior
 - rare overrides
 - explicit rationale
 - respect for M1 / M8 / M9 structure
 - no impulsive “because I feel like it” decisions
-
-### Current best use
-The operator is most useful when:
-- deciding whether micro-live validation is justified
-- deciding whether to pause / restrict / switch candidate strategy path
-- deciding whether a boundary case deserves more proof rather than false certainty
 
 ---
 
@@ -229,10 +203,10 @@ The operator is most useful when:
 The council must remain fail-closed.
 
 ### Examples
-- if governance says `PAUSED`, the council cannot create live permission
-- if hard reject reasons exist, the council is advisory only and final decision should remain bounded
-- if inputs are missing or malformed, default outcome should be rejection or hold
-- if telemetry/governance runtime is unsafe, the council cannot substitute for operational protection
+- if governance says `PAUSED` in an activation context, council cannot create live permission
+- if hard reject reasons exist, the council cannot pretend they do not exist
+- if inputs are missing or malformed, default should be rejection or hold
+- if telemetry/governance runtime is unsafe, the council cannot substitute for runtime protection
 
 ---
 
@@ -240,25 +214,23 @@ The council must remain fail-closed.
 
 ### Current implementation intent
 - M10 creates a pending deliberation
-- M8 builds governance fact pack
-- M9 evidence is attached
-- role agents vote in bounded JSON
-- finalizer determines:
-  - `APPROVED`
-  - `REJECTED`
-  - `HOLD`
+- a fact pack is built
+- initial role agents vote
+- cross-review phase runs
+- supervisor finalizes
+- deliberation history is persisted
 
 ### Current practical truth
-The council is still a bounded review layer.
-It should be treated as:
-- persistent review
-- structured memory
-- bounded critique
+The council is still:
+- bounded
+- advisory
+- persistent
+- subordinate
 
-It should not be treated as:
+It is not:
 - live execution authority
 - runtime guard
-- substitute for telemetry-aware governance
+- substitute for activation permission
 
 ---
 
@@ -269,11 +241,13 @@ The purpose of multiple council members is **not fake plurality**.
 It is:
 - role separation
 - objective separation
-- bounded specialized critique
+- visible critique
+- self-correction
+- bounded synthesis
 
-Three agents saying the same vague thing in different tones is not governance.
+Three agents saying the same vague thing is not governance.
 
-Distinct jobs matter more than theatrical disagreement.
+Distinct jobs matter more than theater.
 
 ---
 
@@ -288,37 +262,25 @@ Council prompts should:
 - forbid policy bypass
 - remain subordinate to constitutional and empirical limits
 
-Prompts should live in:
+Current prompt files:
 - `prompts/strategy_scout.md`
 - `prompts/risk_officer.md`
 - `prompts/quant_auditor.md`
-
----
-
-## Machine-Readable Direction
-
-The council should eventually move toward machine-readable role contracts including:
-- role ID
-- allowed inputs
-- output schema
-- invocation trigger
-- authority limits
-- storage location for votes
-- fail-closed defaults when inputs are incomplete
-
-This is not fully implemented yet, but it remains the intended discipline step.
+- `prompts/strategy_scout_cross_review.md`
+- `prompts/risk_officer_cross_review.md`
+- `prompts/quant_auditor_cross_review.md`
+- `prompts/council_supervisor.md`
 
 ---
 
 ## Future Direction
 
-The council may later evolve into a stronger review layer, but only if:
-- memory is durable
-- governance is explicit
-- evidence is queryable
-- runtime state is observable
+The council may evolve into a stronger review layer only if:
+- memory remains durable
+- governance remains explicit
+- evidence remains queryable
+- runtime state remains observable
 - constitutional constraints remain intact
-- council I/O contracts are machine-readable and auditable
 
 Until then, it remains:
 
