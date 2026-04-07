@@ -376,13 +376,6 @@ function M10_createPendingCouncilDeliberationNow() {
       ? pack.governance.governance_state
       : 'NORMAL',
 
-    governance_packet: pack.governance || {},
-    policy_packet: pack.policy || {},
-    evaluation: pack.evaluation || {},
-    metrics: payload.metrics || {},
-    diagnostics: payload.diagnostics || {},
-    dqs_summary: payload.dqs_summary || {},
-
     risk_officer_vote: 'PENDING',
     risk_officer_rationale: null,
     strategy_scout_vote: 'PENDING',
@@ -1399,8 +1392,22 @@ function M10__experimentLogRowToCouncilPayload_(row) {
 }
 
 
-
 function M10_createPendingCouncilDeliberationForBacktestIdNow(backtestId) {
+  var existing = M10__sbFetchJson_(
+    'get',
+    '/rest/v1/council_deliberations'
+      + '?backtest_id=eq.' + encodeURIComponent(backtestId)
+      + '&consensus_reached=eq.false'
+      + '&select=*'
+      + '&order=created_at.desc'
+      + '&limit=1'
+  ) || [];
+
+  if (existing.length) {
+    Logger.log('[M10] Reusing existing open deliberation id=' + existing[0].id + ' backtest_id=' + backtestId);
+    return existing;
+  }
+
   var expRow = M10__getExperimentLogByBacktestId_(backtestId);
   if (!expRow) {
     throw new Error('[M10] No experiment_logs row found for backtest_id=' + backtestId);
@@ -1419,13 +1426,6 @@ function M10_createPendingCouncilDeliberationForBacktestIdNow(backtestId) {
       ? pack.governance.governance_state
       : 'NORMAL',
 
-    governance_packet: pack.governance || {},
-    policy_packet: pack.policy || {},
-    evaluation: pack.evaluation || {},
-    metrics: payload.metrics || {},
-    diagnostics: payload.diagnostics || {},
-    dqs_summary: payload.dqs_summary || {},
-
     risk_officer_vote: 'PENDING',
     risk_officer_rationale: null,
     strategy_scout_vote: 'PENDING',
@@ -1443,17 +1443,17 @@ function M10_createPendingCouncilDeliberationForBacktestIdNow(backtestId) {
 }
 
 
-function RUN_CouncilAnalyzeSpecificBacktestNow(backtestId) {
-  if (!backtestId) throw new Error('[M10] backtestId required.');
+function RUN_CouncilAnalyzeSpecificBacktestNow(targetBacktestId) {
+  if (!targetBacktestId) throw new Error('[M10] targetBacktestId required.');
 
   M10__setCouncilStopRequested_(false);
 
   Logger.log('[M10] =======================================');
   Logger.log('[M10] Specific Backtest Council Review Start');
-  Logger.log('[M10] backtest_id=' + backtestId);
+  Logger.log('[M10] backtest_id=' + targetBacktestId);
   Logger.log('[M10] =======================================');
 
-  var insertedCouncil = M10_createPendingCouncilDeliberationForBacktestIdNow(backtestId);
+  var insertedCouncil = M10_createPendingCouncilDeliberationForBacktestIdNow(targetBacktestId);
 
   Logger.log('[M10] Pending deliberation created. Processing first step only...');
   RUN_ProcessOneDeliberativeCouncilStepNow();
@@ -1504,10 +1504,11 @@ function M10__deliberativeStepExists_(deliberationId, workerId, phase) {
   return !!row;
 }
 
+
 function M10__findNextDeliberativeTask_() {
   var rows = M10__sbFetchJson_(
     'get',
-    '/rest/v1/council_deliberations?consensus_reached=eq.false&select=*&order=created_at.asc&limit=20'
+    '/rest/v1/council_deliberations?consensus_reached=eq.false&select=*&order=created_at.desc&limit=20'
   ) || [];
 
   var maxSteps = M10__getMaxStepsPerDeliberation_();
@@ -1515,20 +1516,25 @@ function M10__findNextDeliberativeTask_() {
   for (var i = 0; i < rows.length; i++) {
     var d = rows[i];
 
-    // Guard 1: stale deliberation
+    // ignore stale legacy backtest ids immediately
+    if (String(d.backtest_id || '').indexOf('BT-') === 0) {
+      M10__markDeliberationStopped_(d, 'legacy_backtest_id_ignored');
+      continue;
+    }
+
+    // stale deliberation
     if (M10__isDeliberationTooOld_(d)) {
       M10__markDeliberationStopped_(d, 'deliberation_too_old');
       continue;
     }
 
-    // Guard 2: runaway step count
+    // runaway
     var stepCount = M10__getDeliberationStepCount_(d.id);
     if (stepCount >= maxSteps) {
       M10__markDeliberationStopped_(d, 'step_count_exceeded max=' + maxSteps);
       continue;
     }
 
-    // Initial phase
     if (!M10__deliberativeStepExists_(d.id, 'risk_officer', 'initial')) {
       return { deliberation: d, fnName: 'RUN_RiskOfficerInitialNow', label: 'risk_officer_initial' };
     }
@@ -1539,7 +1545,6 @@ function M10__findNextDeliberativeTask_() {
       return { deliberation: d, fnName: 'RUN_QuantAuditorInitialNow', label: 'quant_auditor_initial' };
     }
 
-    // Cross review phase
     if (!M10__deliberativeStepExists_(d.id, 'risk_officer', 'cross_review')) {
       return { deliberation: d, fnName: 'RUN_RiskOfficerCrossReviewNow', label: 'risk_officer_cross_review' };
     }
@@ -1550,7 +1555,6 @@ function M10__findNextDeliberativeTask_() {
       return { deliberation: d, fnName: 'RUN_QuantAuditorCrossReviewNow', label: 'quant_auditor_cross_review' };
     }
 
-    // Supervisor
     if (!M10__deliberativeStepExists_(d.id, 'council_supervisor', 'supervisor_finalize')) {
       return { deliberation: d, fnName: 'RUN_CouncilSupervisorNow', label: 'council_supervisor_finalize' };
     }
@@ -1558,6 +1562,42 @@ function M10__findNextDeliberativeTask_() {
 
   return null;
 }
+
+
+function RUN_DeleteLegacyCouncilDeliberationsNow() {
+  var rows = M10__sbFetchJson_(
+    'get',
+    '/rest/v1/council_deliberations?select=*&order=created_at.asc&limit=100'
+  ) || [];
+
+  var deleted = [];
+  for (var i = 0; i < rows.length; i++) {
+    var d = rows[i];
+    if (String(d.backtest_id || '').indexOf('BT-') === 0) {
+      try {
+        M10__sbFetchJson_(
+          'delete',
+          '/rest/v1/council_deliberation_steps?deliberation_id=eq.' + encodeURIComponent(d.id)
+        );
+      } catch (e1) {}
+
+      try {
+        M10__sbFetchJson_(
+          'delete',
+          '/rest/v1/council_deliberations?id=eq.' + encodeURIComponent(d.id)
+        );
+        deleted.push({ id: d.id, backtest_id: d.backtest_id });
+      } catch (e2) {
+        Logger.log('[M10] Failed deleting deliberation id=' + d.id + ' msg=' + e2.message);
+      }
+    }
+  }
+
+  Logger.log(JSON.stringify(deleted, null, 2));
+  return deleted;
+}
+
+
 
 
 function M10__deleteTriggersByFunctionName_(functionName) {
@@ -1938,6 +1978,13 @@ function M10__callLLMJson_(systemPrompt, userPrompt) {
   }
 
   throw new Error('[M10] No LLM provider succeeded.');
+}
+
+
+
+
+function RUN_CouncilAnalyzeSpecificBacktest_ChampionNow() {
+  return RUN_CouncilAnalyzeSpecificBacktestNow('bt_8e24c2cd59f9ce9fa6e9128400b8d1c7');
 }
 
 
