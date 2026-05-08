@@ -1,0 +1,62 @@
+name: Refresh OKX Candles
+
+on:
+  schedule:
+    # 4H candles — fire 5 min after each 4H UTC candle close
+    - cron: "5 0,4,8,12,16,20 * * *"
+    # 1D candles — fire at 00:10 UTC daily (already covered above, belt+braces)
+    - cron: "10 0 * * *"
+  workflow_dispatch:
+    inputs:
+      timeframe:
+        description: "Which timeframes to ingest"
+        required: false
+        default: "all"
+        type: choice
+        options: [all, 4h, 1d]
+
+jobs:
+  ingest:
+    name: OKX → Supabase candle ingest
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: python/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r python/requirements.txt
+
+      - name: Determine timeframes
+        id: tfs
+        run: |
+          INPUT="${{ github.event.inputs.timeframe }}"
+          HOUR=$(date -u +"%H")
+          if [ "$INPUT" = "4h" ]; then
+            echo "args=--timeframes 4h" >> $GITHUB_OUTPUT
+          elif [ "$INPUT" = "1d" ]; then
+            echo "args=--timeframes 1d" >> $GITHUB_OUTPUT
+          else
+            # On midnight run also refresh 1d; otherwise only 4h
+            if [ "$HOUR" = "00" ]; then
+              echo "args=--timeframes 4h 1d" >> $GITHUB_OUTPUT
+            else
+              echo "args=--timeframes 4h" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Run ingestor
+        working-directory: python
+        env:
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          STST_MODE: PAPER
+        run: python ingest_okx_to_supabase.py ${{ steps.tfs.outputs.args }}
