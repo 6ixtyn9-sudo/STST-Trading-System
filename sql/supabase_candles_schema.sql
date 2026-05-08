@@ -199,3 +199,33 @@ create index if not exists idx_pp_symbol_status
 
 create index if not exists idx_pp_strategy
   on public.paper_positions (strategy_id, opened_at desc);
+
+
+-- ── paper_signal_queue ────────────────────────────────────────
+-- Contract table between M4 signal output and paper_trade_runner.py.
+-- Insert a row here (from Python, Apps Script M4, or manually) to queue a signal.
+-- paper_trade_runner reads 'pending' rows, applies M8 gate, then places the order.
+
+create table if not exists public.paper_signal_queue (
+  id              bigserial primary key,
+  created_at      timestamptz default now() not null,
+  processed_at    timestamptz,
+  strategy_id     text        not null,
+  symbol          text        not null,
+  side            text        not null default 'buy',  -- buy | sell
+  signal_score    numeric,                              -- DQS 0–1
+  suggested_qty   numeric,                              -- pre-sized from M5
+  stop_loss       numeric,
+  take_profit     numeric,
+  dataset_id      text,                                 -- which dataset generated this
+  timeframe       text,                                 -- signal timeframe
+  status          text        not null default 'pending', -- pending | executed | rejected | failed | skipped
+  process_note    text,
+  metadata        jsonb
+);
+
+create index if not exists idx_psq_status
+  on public.paper_signal_queue (status, created_at desc);
+
+create index if not exists idx_psq_strategy
+  on public.paper_signal_queue (strategy_id, created_at desc);
