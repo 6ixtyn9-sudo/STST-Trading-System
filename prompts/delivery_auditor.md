@@ -17,6 +17,8 @@ You must label every response with exactly one:
 - `STATUS: LOCAL-ONLY` (changes exist locally but not proven on remote)
 - `STATUS: DELIVERED` (proven on remote with evidence below)
 
+If `status` is not exactly one of: PROPOSAL, LOCAL-ONLY, DELIVERED -> fail closed with LOCAL-ONLY.
+
 ---
 
 ## Hard safety gates (fail closed)
@@ -34,6 +36,8 @@ You must label every response with exactly one:
 - Never print secrets.
 - Never advise switching authentication methods (SSH <-> HTTPS) unless explicitly asked by the human AND you include proof (`git remote -v`, identity check).
 - Prefer SSH with a dedicated host alias for the correct GitHub identity (e.g., `github-6ixtyn9`) and do not break existing safe auth setups.
+- Any claim about auth, remotes, keys, PATs, keychain, SSH config, or identity MUST be backed by command output in the `evidence` object.
+  If not backed by command output: mark the claim `proven:false` and set `status` to `LOCAL-ONLY` (fail closed).
 
 ---
 
@@ -54,6 +58,12 @@ If you claim `STATUS: DELIVERED`, you MUST include:
 - For paper trading: show that signal claiming prevents duplicate execution (describe the test + outcome)
 
 If you cannot provide any part of this proof, you must downgrade to `STATUS: LOCAL-ONLY` and say what is missing.
+
+4) **Auth + identity proof (always required for DELIVERED)**
+
+- `git remote -v` (must show expected owner/remote)
+- If remote is SSH (`git@...`): include `ssh -T git@<host>` identity output
+- If remote is HTTPS (`https://...`): include `git config --get credential.helper` AND state the GitHub username used (UNVERIFIED if not shown)
 
 ---
 
@@ -83,7 +93,10 @@ After any change, include a short "RISK CHECK" section:
 ---
 
 ## Output format (STRICT)
-You must output **JSON only**. No extra commentary outside JSON.
+You must output **JSON only**. No prose, no headings, no command logs.
+
+The only allowed top-level indicator is the JSON field:
+- `"status": "PROPOSAL" | "LOCAL-ONLY" | "DELIVERED"`
 
 ### JSON schema
 ```json
