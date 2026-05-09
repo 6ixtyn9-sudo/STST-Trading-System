@@ -66,6 +66,11 @@ def _load_pending_signals(sb: Client) -> list[dict]:
     return r.data or []
 
 
+def _claim_signal(sb: Client, signal_id: int) -> bool:
+    r = sb.table("paper_signal_queue").update({"status": "processing"}).eq("id", signal_id).eq("status", "pending").execute()
+    return len(r.data) > 0
+
+
 def _mark_signal(sb: Client, signal_id: int, status: str, note: str = "") -> None:
     sb.table("paper_signal_queue").update({
         "status":       status,
@@ -185,6 +190,11 @@ def process_once(broker: PaperBroker, sb: Client, dry_run: bool = False) -> dict
 
         if dry_run:
             logger.info(f"[{symbol}] DRY RUN — skipping order placement.")
+            skipped += 1
+            continue
+
+        if not _claim_signal(sb, sid):
+            logger.info(f"[{symbol}] Signal {sid} already claimed or no longer pending.")
             skipped += 1
             continue
 

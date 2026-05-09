@@ -176,6 +176,8 @@ class PaperBroker:
             "side":          "long",
             "entry_price":   entry_price,
             "quantity":      qty,
+            "stop_loss":     order_row.get("stop_loss"),
+            "take_profit":   order_row.get("take_profit"),
             "status":        "open",
             "open_order_id": order_row["id"],
         }).execute()

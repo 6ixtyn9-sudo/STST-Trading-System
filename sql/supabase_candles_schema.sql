@@ -183,6 +183,8 @@ create table if not exists public.paper_positions (
   entry_price     numeric     not null,
   exit_price      numeric,
   quantity        numeric     not null,
+  stop_loss       numeric,
+  take_profit     numeric,
   pnl_gross       numeric,
   pnl_net         numeric,
   pnl_r           numeric,                   -- profit/loss in R-multiples

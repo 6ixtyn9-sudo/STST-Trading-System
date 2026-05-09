@@ -102,7 +102,8 @@ def _fetch(symbol: str, tf_ccxt: str, since: Optional[datetime]) -> pd.DataFrame
 
     if not rows:
         return pd.DataFrame(columns=["open_time","open","high","low","close","volume","quote_volume"])
-    df = pd.DataFrame(rows, columns=["ts_ms","open","high","low","close","volume","quote_volume"])
+    df = pd.DataFrame(rows, columns=["ts_ms","open","high","low","close","volume"])
+    df["quote_volume"] = None
     df["open_time"] = pd.to_datetime(df["ts_ms"], unit="ms", utc=True)
     return df.drop(columns=["ts_ms"]).sort_values("open_time").drop_duplicates("open_time")
 
@@ -170,7 +171,7 @@ def ingest_symbol(sb: Client, dataset_id: str, symbol: str, tf: str, dry_run: bo
         err = str(exc)
         logger.error(f"[{symbol}|{tf_db}] FAILED: {err}")
         if not dry_run and run_id != -1:
-            _close_run(sb, run_id, "failed", 0, 0, None, None, error=err)
+            _close_run(sb, run_id, "failed", 0, 0, None, None, err=err)
         return {"symbol": symbol, "timeframe": tf_db, "status": "failed", "error": err}
 
 
