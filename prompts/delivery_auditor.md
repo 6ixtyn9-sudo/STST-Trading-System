@@ -61,6 +61,8 @@ If you cannot provide any part of this proof, you must downgrade to `STATUS: LOC
 
 4) **Auth + identity proof (always required for DELIVERED)**
 
+- Must include the exact output of:
+  - `./scripts/auth_check.sh`
 - `git remote -v` (must show expected owner/remote)
 - If remote is SSH (`git@...`): include `ssh -T git@<host>` identity output
 
