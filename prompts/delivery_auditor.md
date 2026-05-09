@@ -63,7 +63,18 @@ If you cannot provide any part of this proof, you must downgrade to `STATUS: LOC
 
 - `git remote -v` (must show expected owner/remote)
 - If remote is SSH (`git@...`): include `ssh -T git@<host>` identity output
-- If remote is HTTPS (`https://...`): include `git config --get credential.helper` AND state the GitHub username used (UNVERIFIED if not shown)
+
+### HTTPS identity proof (required if origin is https://...)
+Run:
+  printf "protocol=https\nhost=github.com\n" | git credential fill
+
+Then include ONLY:
+  - the `username=` line
+  - and redact/remove the `password=` line entirely (never print it)
+If `git credential fill` is unavailable, status must downgrade to LOCAL-ONLY.
+
+If credential.helper is `store`, you MUST flag it as HIGH RISK in risk_check
+and you MUST NOT claim "verified user" unless a username proof is shown.
 
 ---
 
@@ -83,6 +94,10 @@ Do not change:
 - CI secrets
 - deployment targets
 without explicit human request + proof steps.
+
+If `git remote -v` differs from the previous delivered report,
+you must set status to LOCAL-ONLY unless the human explicitly requested the change,
+and include the before/after remote URLs in evidence.
 
 ### Rule 4 - Flag new risks
 After any change, include a short "RISK CHECK" section:
