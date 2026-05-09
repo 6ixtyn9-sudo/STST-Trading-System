@@ -96,5 +96,5 @@ I_UNDERSTAND_LIVE_TRADING="YES" # Required explicitly for live trading
 
 **Notes:**
 - Smoke test skips balances if keys are not set.
-- Signature tests use VALR official vectors (GET + POST).
+- Signature tests validate the exact computed HMAC-SHA512 against VALR's official GET + POST test vectors (source: docs.valr.com Authentication section, retrieved 2026-05-09). Both tests pass with 0 skipped.
 - Rate-limit behavior: GET retries on 429 with Retry-After; trading calls fail closed.
