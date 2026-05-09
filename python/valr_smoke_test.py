@@ -20,6 +20,10 @@ def main():
         sys.exit(1)
         
     # 2. Balances
+    if not client.api_key or not client.api_secret:
+        logger.info("SKIPPED balances: missing credentials")
+        sys.exit(0)
+
     try:
         res_bal = client._request("GET", "/v1/account/balances")
         logger.info(f"Balances HTTP code: {res_bal.status_code}")
@@ -28,7 +32,7 @@ def main():
         
         logger.info(f"Number of balance entries: {len(balances)}")
         if balances:
-            sample_currencies = [b.get("currency") for b in balances[:2]]
+            sample_currencies = [b.get("currency") for b in balances[:3]]
             logger.info(f"Sample currencies: {sample_currencies}")
             
     except requests.exceptions.RequestException as e:

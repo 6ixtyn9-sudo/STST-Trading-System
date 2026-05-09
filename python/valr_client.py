@@ -27,28 +27,48 @@ class ValrClient:
             hashlib.sha512
         ).hexdigest()
 
-    def _request(self, verb: str, path: str, body: str = "") -> requests.Response:
+    def _request(self, verb: str, path: str, body: str = "", max_retries: int = 3) -> requests.Response:
         url = f"{self.base_url}{path}"
-        timestamp = str(int(time.time() * 1000))
         
-        headers = {
-            "Content-Type": "application/json"
-        }
-        
-        if self.api_key and self.api_secret:
-            signature = self._generate_signature(timestamp, verb, path, body)
-            headers["X-VALR-API-KEY"] = self.api_key
-            headers["X-VALR-SIGNATURE"] = signature
-            headers["X-VALR-TIMESTAMP"] = timestamp
+        for attempt in range(max_retries):
+            timestamp = str(int(time.time() * 1000))
+            
+            headers = {
+                "Content-Type": "application/json"
+            }
+            
+            if self.api_key and self.api_secret:
+                signature = self._generate_signature(timestamp, verb, path, body)
+                headers["X-VALR-API-KEY"] = self.api_key
+                headers["X-VALR-SIGNATURE"] = signature
+                headers["X-VALR-TIMESTAMP"] = timestamp
 
-        if verb.upper() == "GET":
-            response = requests.get(url, headers=headers)
-        elif verb.upper() == "POST":
-            response = requests.post(url, headers=headers, data=body)
-        elif verb.upper() == "DELETE":
-            response = requests.delete(url, headers=headers, data=body)
-        else:
-            raise ValueError(f"Unsupported HTTP verb: {verb}")
+            if verb.upper() == "GET":
+                response = requests.get(url, headers=headers)
+            elif verb.upper() == "POST":
+                response = requests.post(url, headers=headers, data=body)
+            elif verb.upper() == "DELETE":
+                response = requests.delete(url, headers=headers, data=body)
+            else:
+                raise ValueError(f"Unsupported HTTP verb: {verb}")
+                
+            logger.info(f"VALR {verb.upper()} {path} -> {response.status_code}")
+            
+            if response.status_code == 429:
+                if verb.upper() == "GET" and attempt < max_retries - 1:
+                    retry_after = response.headers.get("Retry-After")
+                    sleep_time = 1
+                    if retry_after and retry_after.isdigit():
+                        sleep_time = min(int(retry_after), 10)
+                    
+                    logger.warning(f"Rate limited (429) on {path}. Retrying in {sleep_time}s... (Attempt {attempt+1}/{max_retries})")
+                    time.sleep(sleep_time)
+                    continue
+                else:
+                    logger.error(f"Rate limited (429) on {verb.upper()} {path}. Failing closed.")
+                    response.raise_for_status()
+                    
+            return response
             
         return response
 

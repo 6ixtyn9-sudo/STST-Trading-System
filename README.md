@@ -93,3 +93,8 @@ VALR_API_SECRET="your_api_secret_here"
 STST_MODE="PAPER" # Must be "LIVE" to allow trading
 I_UNDERSTAND_LIVE_TRADING="YES" # Required explicitly for live trading
 ```
+
+**Notes:**
+- Smoke test skips balances if keys are not set.
+- Signature tests use VALR official vectors (GET + POST).
+- Rate-limit behavior: GET retries on 429 with Retry-After; trading calls fail closed.
