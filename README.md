@@ -76,3 +76,20 @@ If it exists only in chat, it does not truly exist.
 
 This repo is the permanent home of the project.  
 Chats are temporary working sessions, not canonical memory.
+
+## VALR Setup (Python Option B)
+
+To use the Python VALR client (`VALR_READONLY` or `VALR_LIVE`), you must configure credentials via `.env` variables.
+
+**Requirements:**
+1. Enable **2FA** on your VALR account.
+2. Create an API key with **View-only** permissions (recommended for MVP).
+3. If intending to trade in the future (once enabled), ensure the key has **Trade** permissions.
+
+**Configuration (`.env` file):**
+```ini
+VALR_API_KEY="your_api_key_here"
+VALR_API_SECRET="your_api_secret_here"
+STST_MODE="PAPER" # Must be "LIVE" to allow trading
+I_UNDERSTAND_LIVE_TRADING="YES" # Required explicitly for live trading
+```

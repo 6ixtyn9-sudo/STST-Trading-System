@@ -102,8 +102,15 @@ def _fetch(symbol: str, tf_ccxt: str, since: Optional[datetime]) -> pd.DataFrame
 
     if not rows:
         return pd.DataFrame(columns=["open_time","open","high","low","close","volume","quote_volume"])
-    df = pd.DataFrame(rows, columns=["ts_ms","open","high","low","close","volume"])
-    df["quote_volume"] = None
+    
+    norm = []
+    for r in rows:
+        if len(r) == 6:
+            norm.append(r + [None])
+        else:
+            norm.append(r[:7])
+            
+    df = pd.DataFrame(norm, columns=["ts_ms","open","high","low","close","volume","quote_volume"])
     df["open_time"] = pd.to_datetime(df["ts_ms"], unit="ms", utc=True)
     return df.drop(columns=["ts_ms"]).sort_values("open_time").drop_duplicates("open_time")
 

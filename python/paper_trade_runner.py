@@ -38,7 +38,27 @@ from loguru import logger
 from supabase import create_client, Client
 
 from config import cfg
-from broker_okx_demo import PaperBroker
+import os
+
+def get_broker():
+    broker_type = os.getenv("BROKER", "OKX_DEMO").upper()
+    if broker_type == "OKX_DEMO":
+        from broker_okx_demo import PaperBroker
+        return PaperBroker()
+    elif broker_type == "VALR_READONLY":
+        # Placeholder for read-only broker
+        class DummyValrReadonly:
+            def list_open_positions(self): return []
+            def get_mid_price(self, symbol): return 0
+            def close_position(self, pos_id): return {}
+            def place_market_order(self, *args, **kwargs):
+                raise NotImplementedError("VALR is in read-only mode")
+        return DummyValrReadonly()
+    elif broker_type == "VALR_LIVE":
+        from broker_valr import BrokerValr
+        return BrokerValr()
+    else:
+        raise ValueError(f"Unknown BROKER type: {broker_type}")
 
 logger.remove()
 logger.add(sys.stderr, format="<green>{time:HH:mm:ss}</green> | <level>{level:<8}</level> | {message}")
@@ -94,7 +114,7 @@ def _count_open_positions(sb: Client) -> int:
     return r.count or 0
 
 
-def _check_exits(sb: Client, broker: PaperBroker) -> int:
+def _check_exits(sb: Client, broker) -> int:
     """
     Check all open positions for stop-loss / take-profit breach.
     Returns number of positions closed.
@@ -156,7 +176,7 @@ def _m8_approve(signal: dict, open_count: int) -> tuple[bool, str]:
 # Core loop
 # ─────────────────────────────────────────────────────────────
 
-def process_once(broker: PaperBroker, sb: Client, dry_run: bool = False) -> dict:
+def process_once(broker, sb: Client, dry_run: bool = False) -> dict:
     now = datetime.now(timezone.utc).isoformat()
     logger.info(f"=== Paper runner cycle @ {now} ===")
 
@@ -226,7 +246,7 @@ def process_once(broker: PaperBroker, sb: Client, dry_run: bool = False) -> dict
 
 
 def run_loop(interval_seconds: int, dry_run: bool = False) -> None:
-    broker = PaperBroker()
+    broker = get_broker()
     sb     = _sb()
     while True:
         try:
@@ -248,7 +268,7 @@ if __name__ == "__main__":
     if a.loop > 0:
         run_loop(a.loop, dry_run=a.dry_run)
     else:
-        broker = PaperBroker()
+        broker = get_broker()
         sb     = _sb()
         result = process_once(broker, sb, dry_run=a.dry_run)
         sys.exit(0)
