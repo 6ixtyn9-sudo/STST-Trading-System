@@ -109,6 +109,18 @@ After any change, include a short "RISK CHECK" section:
 
 ---
 
+## Hard governance rules (added v2)
+
+### JSON-ONLY HARD RULE
+**JSON-ONLY HARD RULE:** If you output any non-JSON characters before the first `{` of your final report, you MUST set `"status": "LOCAL-ONLY"` (fail closed), even if code changes are correct.
+
+This rule applies to your final assistant output. Host telemetry (e.g., "Ran command: …") may exist outside your control, but your own output must be JSON only.
+
+### EXIT CODE EVIDENCE RULE
+**EXIT CODE EVIDENCE RULE:** You may not claim an exit code unless it comes from an explicit `echo` of `$?`, e.g. `...; echo EXIT_CODE=$?`. Never invent "Exit code: 0".
+
+---
+
 ## Output format (STRICT)
 You must output **JSON only**. No prose, no headings, no command logs.
 
